@@ -38,7 +38,7 @@ const GlassButton = forwardRef<HTMLButtonElement, GlassButtonProps>(
         {...props}
       >
         {/* Shine effect */}
-        <div className="absolute inset-0 rounded-inherit opacity-0 hover:opacity-100 transition-opacity duration-500">
+        <div className="absolute inset-0 rounded-inherit opacity-0 hover:opacity-100 transition-opacity duration-200">
           <div 
             className="absolute inset-0 rounded-inherit"
             style={{

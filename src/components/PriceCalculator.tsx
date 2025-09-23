@@ -21,6 +21,8 @@ const PriceCalculator = () => {
   
   const [totalPrice, setTotalPrice] = useState(0);
   const [showResult, setShowResult] = useState(false);
+  const [isCalculating, setIsCalculating] = useState(false);
+  const [animationKey, setAnimationKey] = useState(0);
 
   const options = {
     websiteType: [
@@ -60,45 +62,51 @@ const PriceCalculator = () => {
   }, [calculator]);
 
   const calculatePrice = () => {
-    let basePrice = 0;
-    let multiplier = 1;
-    let additionalFeatures = 0;
+    setIsCalculating(true);
+    
+    setTimeout(() => {
+      let basePrice = 0;
+      let multiplier = 1;
+      let additionalFeatures = 0;
 
-    // Base price from website type
-    const websiteTypeOption = options.websiteType.find(opt => opt.id === calculator.websiteType);
-    if (websiteTypeOption) {
-      basePrice = websiteTypeOption.price;
-    }
-
-    // Complexity multiplier
-    const complexityOption = options.complexity.find(opt => opt.id === calculator.complexity);
-    if (complexityOption) {
-      multiplier *= complexityOption.multiplier;
-    }
-
-    // Timeline multiplier
-    const timelineOption = options.timeline.find(opt => opt.id === calculator.timeline);
-    if (timelineOption) {
-      multiplier *= timelineOption.multiplier;
-    }
-
-    // Design multiplier
-    const designOption = options.design.find(opt => opt.id === calculator.design);
-    if (designOption) {
-      multiplier *= designOption.multiplier;
-    }
-
-    // Additional features
-    calculator.features.forEach(featureId => {
-      const feature = options.features.find(opt => opt.id === featureId);
-      if (feature) {
-        additionalFeatures += feature.price;
+      // Base price from website type
+      const websiteTypeOption = options.websiteType.find(opt => opt.id === calculator.websiteType);
+      if (websiteTypeOption) {
+        basePrice = websiteTypeOption.price;
       }
-    });
 
-    const total = Math.round((basePrice * multiplier) + additionalFeatures);
-    setTotalPrice(total);
-    setShowResult(total > 0);
+      // Complexity multiplier
+      const complexityOption = options.complexity.find(opt => opt.id === calculator.complexity);
+      if (complexityOption) {
+        multiplier *= complexityOption.multiplier;
+      }
+
+      // Timeline multiplier
+      const timelineOption = options.timeline.find(opt => opt.id === calculator.timeline);
+      if (timelineOption) {
+        multiplier *= timelineOption.multiplier;
+      }
+
+      // Design multiplier
+      const designOption = options.design.find(opt => opt.id === calculator.design);
+      if (designOption) {
+        multiplier *= designOption.multiplier;
+      }
+
+      // Additional features
+      calculator.features.forEach(featureId => {
+        const feature = options.features.find(opt => opt.id === featureId);
+        if (feature) {
+          additionalFeatures += feature.price;
+        }
+      });
+
+      const total = Math.round((basePrice * multiplier) + additionalFeatures);
+      setTotalPrice(total);
+      setShowResult(total > 0);
+      setIsCalculating(false);
+      setAnimationKey(prev => prev + 1);
+    }, 300);
   };
 
   const handleOptionSelect = (category: keyof CalculatorState, value: string) => {
@@ -263,20 +271,86 @@ const PriceCalculator = () => {
           <AnimatePresence>
             {showResult && (
               <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -20 }}
-                transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
-                className="mt-12 pt-8 border-t border-white/10"
+                initial={{ opacity: 0, y: 20, height: 0, paddingTop: 0, paddingBottom: 0 }}
+                animate={{ 
+                  opacity: 1, 
+                  y: 0, 
+                  height: "auto",
+                  paddingTop: "2rem",
+                  paddingBottom: "2rem"
+                }}
+                exit={{ 
+                  opacity: 0, 
+                  y: -20, 
+                  height: 0, 
+                  paddingTop: 0, 
+                  paddingBottom: 0,
+                  transition: { duration: 0.3 }
+                }}
+                transition={{ 
+                  duration: 0.6, 
+                  ease: [0.16, 1, 0.3, 1],
+                  height: { duration: 0.5, ease: [0.16, 1, 0.3, 1] },
+                  paddingTop: { duration: 0.4, delay: 0.1 },
+                  paddingBottom: { duration: 0.4, delay: 0.1 }
+                }}
+                className="mt-12 overflow-hidden relative"
               >
+                {/* Animated border */}
+                <motion.div
+                  initial={{ scaleX: 0 }}
+                  animate={{ scaleX: 1 }}
+                  exit={{ scaleX: 0 }}
+                  transition={{ duration: 0.4, delay: 0.2 }}
+                  className="absolute top-0 left-0 right-0 h-px bg-white/10 origin-left"
+                />
                 <div className="text-center">
-                  <div className="text-2xl text-foreground/70 mb-2">Примерная стоимость</div>
-                  <div className="text-6xl font-bold text-gradient mb-6">
-                    ${totalPrice.toLocaleString()}
-                  </div>
-                  <GlassButton size="lg" glow>
-                    Получить консультацию
-                  </GlassButton>
+                  <motion.div 
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.5, delay: 0.1 }}
+                    className="text-2xl text-foreground/70 mb-2"
+                  >
+                    Примерная стоимость
+                  </motion.div>
+                  <motion.div 
+                    key={`${totalPrice}-${animationKey}`}
+                    initial={{ opacity: 0, scale: 0.8, y: 30 }}
+                    animate={{ 
+                      opacity: isCalculating ? 0.7 : 1, 
+                      scale: isCalculating ? 0.95 : 1, 
+                      y: 0 
+                    }}
+                    transition={{ 
+                      duration: 0.8, 
+                      delay: 0.3,
+                      type: "spring",
+                      stiffness: 100,
+                      damping: 15
+                    }}
+                    className="text-6xl font-bold text-gradient mb-8"
+                  >
+                    {isCalculating ? (
+                      <motion.span
+                        animate={{ opacity: [0.5, 1, 0.5] }}
+                        transition={{ duration: 1, repeat: Infinity }}
+                      >
+                        Рассчитываем...
+                      </motion.span>
+                    ) : (
+                      `$${totalPrice.toLocaleString()}`
+                    )}
+                  </motion.div>
+                  <motion.div 
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.5, delay: 0.6 }}
+                    className="flex justify-center"
+                  >
+                    <GlassButton size="lg" glow>
+                      Получить консультацию
+                    </GlassButton>
+                  </motion.div>
                 </div>
               </motion.div>
             )}

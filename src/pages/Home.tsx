@@ -4,6 +4,7 @@ import Navigation from "@/components/Navigation";
 import LiquidBackground from "@/components/LiquidBackground";
 import GlassButton from "@/components/GlassButton";
 import PriceCalculator from "@/components/PriceCalculator";
+import OptimizedMotion from "@/components/OptimizedMotion";
 
 const Home = () => {
   const services = [
@@ -104,7 +105,7 @@ const Home = () => {
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
             {services.map((service, index) => (
-              <motion.div
+              <OptimizedMotion
                 key={service.title}
                 initial={{ opacity: 0, y: 50 }}
                 whileInView={{ opacity: 1, y: 0 }}
@@ -115,7 +116,9 @@ const Home = () => {
                 }}
                 viewport={{ once: true }}
                 whileHover={{ scale: 1.02, y: -5 }}
-                className="glass-card p-8 group cursor-pointer"
+                transition={{ duration: 0.2, ease: "easeOut" }}
+                className="glass-card p-8 group cursor-pointer flex flex-col"
+                mobileOptimized={true}
               >
                 <h3 className="text-2xl font-bold text-foreground mb-4">
                   {service.title}
@@ -133,15 +136,17 @@ const Home = () => {
                   ))}
                 </ul>
                 
-                <div className="flex justify-between items-center">
+                <div className="flex justify-between items-end mt-auto">
                   <span className="text-2xl font-bold text-gradient">
                     {service.price}
                   </span>
-                  <GlassButton variant="ghost" size="sm">
-                    Подробнее
-                  </GlassButton>
+                  <Link to="/portfolio">
+                    <GlassButton variant="ghost" size="sm">
+                      Подробнее
+                    </GlassButton>
+                  </Link>
                 </div>
-              </motion.div>
+              </OptimizedMotion>
             ))}
           </div>
         </div>
@@ -164,7 +169,7 @@ const Home = () => {
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
             {advantages.map((advantage, index) => (
-              <motion.div
+              <OptimizedMotion
                 key={advantage.title}
                 initial={{ opacity: 0, y: 30 }}
                 whileInView={{ opacity: 1, y: 0 }}
@@ -174,7 +179,8 @@ const Home = () => {
                   delay: index * 0.1 
                 }}
                 viewport={{ once: true }}
-                className="glass-card p-6 text-center group hover:scale-105 transition-transform duration-300"
+                className="glass-card p-6 text-center group hover:scale-105 transition-transform duration-200"
+                mobileOptimized={true}
               >
                 <h3 className="text-xl font-semibold text-foreground mb-3">
                   {advantage.title}
@@ -182,7 +188,7 @@ const Home = () => {
                 <p className="text-foreground/60 text-sm leading-relaxed">
                   {advantage.description}
                 </p>
-              </motion.div>
+              </OptimizedMotion>
             ))}
           </div>
         </div>

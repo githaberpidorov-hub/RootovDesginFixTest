@@ -3,6 +3,8 @@ import { motion, AnimatePresence } from "framer-motion";
 import Navigation from "@/components/Navigation";
 import LiquidBackground from "@/components/LiquidBackground";
 import GlassButton from "@/components/GlassButton";
+import OptimizedMotion from "@/components/OptimizedMotion";
+import LazyImage from "@/components/LazyImage";
 
 interface Template {
   id: string;
@@ -173,7 +175,7 @@ const Portfolio = () => {
               className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8"
             >
               {filteredTemplates.map((template, index) => (
-                <motion.div
+                <OptimizedMotion
                   key={template.id}
                   initial={{ opacity: 0, y: 50 }}
                   animate={{ opacity: 1, y: 0 }}
@@ -183,7 +185,9 @@ const Portfolio = () => {
                     delay: index * 0.1 
                   }}
                   whileHover={{ scale: 1.02, y: -10 }}
+                  transition={{ duration: 0.2, ease: "easeOut" }}
                   className="glass-card overflow-hidden group cursor-pointer"
+                  mobileOptimized={true}
                 >
                   {/* Template Image */}
                   <div className="relative h-48 bg-gradient-to-br from-white/10 to-white/5 overflow-hidden">
@@ -238,7 +242,7 @@ const Portfolio = () => {
                       </div>
                     </div>
                   </div>
-                </motion.div>
+                </OptimizedMotion>
               ))}
             </motion.div>
           </AnimatePresence>

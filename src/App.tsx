@@ -1,3 +1,4 @@
+import { useState, useEffect } from "react";
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -8,26 +9,42 @@ import Portfolio from "./pages/Portfolio";
 import Admin from "./pages/Admin";
 import NotFound from "./pages/NotFound";
 import ThemeIsland from "./components/ThemeIsland";
+import PageLoader from "./components/PageLoader";
 
 const queryClient = new QueryClient();
 
-const App = () => (
-  <QueryClientProvider client={queryClient}>
-    <TooltipProvider>
-      <Toaster />
-      <Sonner />
-      <BrowserRouter>
-        <Routes>
-          <Route path="/" element={<Home />} />
-          <Route path="/portfolio" element={<Portfolio />} />
-          <Route path="/admin" element={<Admin />} />
-          {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
-          <Route path="*" element={<NotFound />} />
-        </Routes>
-      </BrowserRouter>
-      <ThemeIsland />
-    </TooltipProvider>
-  </QueryClientProvider>
-);
+const App = () => {
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    // Simulate initial loading
+    const timer = setTimeout(() => {
+      setIsLoading(false);
+    }, 1000);
+
+    return () => clearTimeout(timer);
+  }, []);
+
+  return (
+    <QueryClientProvider client={queryClient}>
+      <TooltipProvider>
+        <Toaster />
+        <Sonner />
+        <PageLoader isLoading={isLoading}>
+          <BrowserRouter>
+            <Routes>
+              <Route path="/" element={<Home />} />
+              <Route path="/portfolio" element={<Portfolio />} />
+              <Route path="/admin" element={<Admin />} />
+              {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
+              <Route path="*" element={<NotFound />} />
+            </Routes>
+          </BrowserRouter>
+          <ThemeIsland />
+        </PageLoader>
+      </TooltipProvider>
+    </QueryClientProvider>
+  );
+};
 
 export default App;

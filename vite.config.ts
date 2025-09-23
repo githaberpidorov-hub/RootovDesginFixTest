@@ -16,4 +16,36 @@ export default defineConfig(({ mode }) => ({
       "@": path.resolve(__dirname, "./src"),
     },
   },
+  build: {
+    // Optimize for mobile performance
+    target: "esnext",
+    minify: "terser",
+    terserOptions: {
+      compress: {
+        drop_console: mode === "production",
+        drop_debugger: mode === "production",
+      },
+    },
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          vendor: ["react", "react-dom"],
+          router: ["react-router-dom"],
+          animations: ["framer-motion"],
+          ui: ["@radix-ui/react-toast", "@radix-ui/react-tooltip"],
+        },
+      },
+    },
+    // Optimize chunk size
+    chunkSizeWarningLimit: 1000,
+  },
+  optimizeDeps: {
+    include: [
+      "react",
+      "react-dom",
+      "react-router-dom",
+      "framer-motion",
+      "@tanstack/react-query",
+    ],
+  },
 }));

@@ -6,42 +6,42 @@
 
 @layer base {
   :root {
-    /* Core Background & Foreground - Darker Theme */
-    --background: 220 20% 3%;
-    --background-secondary: 220 18% 5%;
-    --foreground: 0 0% 96%;
-    --foreground-muted: 220 12% 70%;
+    /* Core Background & Foreground - TRUE DARK THEME */
+    --background: 220 8% 1%;
+    --background-secondary: 220 6% 2%;
+    --foreground: 0 0% 98%;
+    --foreground-muted: 220 5% 65%;
 
     /* Glass Effects - Darker */
-    --glass-primary: 0 0% 95%;
-    --glass-secondary: 220 8% 8%;
-    --glass-border: 220 15% 15%;
+    --glass-primary: 0 0% 98%;
+    --glass-secondary: 220 8% 5%;
+    --glass-border: 220 10% 12%;
     --glass-shadow: 220 50% 1%;
 
     /* Accent Colors - Darker */
-    --accent-primary: 0 0% 95%;
-    --accent-secondary: 220 8% 55%;
-    --accent-glow: 220 25% 75%;
+    --accent-primary: 0 0% 100%;
+    --accent-secondary: 220 12% 55%;
+    --accent-glow: 220 20% 70%;
 
     /* Interactive States - Darker */
-    --hover-glass: 0 0% 85%;
-    --active-glass: 220 12% 12%;
+    --hover-glass: 0 0% 88%;
+    --active-glass: 220 8% 6%;
 
     /* Gradients - Darker */
     --gradient-glass: linear-gradient(135deg, 
-      hsla(0, 0%, 100%, 0.06) 0%, 
-      hsla(220, 20%, 12%, 0.08) 100%);
+      hsla(0, 0%, 100%, 0.04) 0%, 
+      hsla(220, 8%, 6%, 0.06) 100%);
     --gradient-glow: linear-gradient(135deg,
-      hsla(0, 0%, 100%, 0.08) 0%,
-      hsla(220, 35%, 70%, 0.06) 50%,
-      hsla(220, 20%, 6%, 0.08) 100%);
+      hsla(0, 0%, 100%, 0.06) 0%,
+      hsla(220, 15%, 65%, 0.04) 50%,
+      hsla(220, 8%, 4%, 0.06) 100%);
     --gradient-mesh: radial-gradient(ellipse at top,
-      hsla(220, 35%, 8%, 0.4) 0%,
-      hsla(220, 20%, 2%, 0.9) 70%);
+      hsla(220, 15%, 4%, 0.4) 0%,
+      hsla(220, 8%, 1%, 0.9) 70%);
 
     /* Shadows & Blur - Darker */
-    --shadow-glass: 0 8px 32px hsla(220, 60%, 1%, 0.5);
-    --shadow-glow: 0 0 40px hsla(0, 0%, 100%, 0.05);
+    --shadow-glass: 0 8px 32px hsla(220, 60%, 1%, 0.6);
+    --shadow-glow: 0 0 40px hsla(0, 0%, 100%, 0.04);
     --shadow-deep: 0 20px 60px hsla(220, 60%, 1%, 0.7);
     --blur-amount: 20px;
 
@@ -72,77 +72,79 @@
 @layer base {
   /* Toggle with <html class="theme-black"> — applied by ThemeIsland */
   .theme-black {
-    /* Base — true black feeling */
-    --background: 220 10% 0.8%;
-    --background-secondary: 220 10% 1.8%;
-    --foreground: 0 0% 95%;
-    --foreground-muted: 220 7% 62%;
+    /* Base — ULTRA DARK */
+    --background: 220 5% 0.5%;
+    --background-secondary: 220 4% 1%;
+    --foreground: 0 0% 98%;
+    --foreground-muted: 220 3% 60%;
 
-    /* Glass system — darker and thinner */
-    --glass-primary: 0 0% 97%;
-    --glass-secondary: 220 12% 3.5%;
-    --glass-border: 220 8% 9%;
-    --glass-shadow: 220 75% 1%;
+    /* Glass system — ultra dark */
+    --glass-primary: 0 0% 98%;
+    --glass-secondary: 220 6% 3%;
+    --glass-border: 220 8% 8%;
+    --glass-shadow: 220 40% 0.5%;
 
-    /* Accents — colder and subtle */
-    --accent-primary: 210 10% 88%;
-    --accent-secondary: 220 12% 55%;
-    --accent-glow: 220 20% 66%;
+    /* Accents — subtle */
+    --accent-primary: 0 0% 100%;
+    --accent-secondary: 220 10% 50%;
+    --accent-glow: 220 15% 65%;
 
     /* Interactions */
-    --hover-glass: 0 0% 84%;
-    --active-glass: 220 8% 9%;
+    --hover-glass: 0 0% 85%;
+    --active-glass: 220 6% 4%;
 
-    /* Background gradients — deeper night */
+    /* Background gradients — ultra dark night */
     --gradient-glass: linear-gradient(135deg,
       hsla(0, 0%, 100%, 0.03) 0%,
-      hsla(220, 16%, 7%, 0.055) 100%);
+      hsla(220, 8%, 4%, 0.05) 100%);
     --gradient-glow: linear-gradient(135deg,
-      hsla(0, 0%, 100%, 0.045) 0%,
-      hsla(220, 24%, 62%, 0.04) 40%,
-      hsla(220, 14%, 5%, 0.08) 100%);
+      hsla(0, 0%, 100%, 0.04) 0%,
+      hsla(220, 12%, 60%, 0.03) 40%,
+      hsla(220, 6%, 3%, 0.06) 100%);
     --gradient-mesh: radial-gradient(ellipse at 20% -10%,
-      hsla(220, 30%, 5%, 0.50) 0%,
-      hsla(220, 18%, 2%, 0.96) 55%,
-      hsla(220, 14%, 1.5%, 1) 85%);
+      hsla(220, 12%, 3%, 0.4) 0%,
+      hsla(220, 6%, 0.8%, 0.95) 55%,
+      hsla(220, 4%, 0.5%, 1) 85%);
 
     /* Legacy */
     --primary: 0 0% 100%;
-    --primary-foreground: 220 10% 5%;
-    --secondary: 220 6% 10%;
+    --primary-foreground: 220 8% 3%;
+    --secondary: 220 4% 8%;
     --secondary-foreground: 0 0% 98%;
-    --card: 220 10% 5%;
+    --card: 220 8% 3%;
     --card-foreground: 0 0% 98%;
-    --border: 220 10% 14%;
-    --input: 220 10% 14%;
+    --border: 220 8% 10%;
+    --input: 220 8% 10%;
     --ring: 0 0% 100%;
   }
 }
 
 @layer components {
-  /* Darker cards */
+  /* Ultra Dark cards */
   .theme-black .glass-card {
-    @apply border border-white/[0.06] backdrop-blur-lg rounded-3xl;
+    @apply border border-white/[0.04] backdrop-blur-lg rounded-3xl;
     background: linear-gradient(135deg,
       hsla(0, 0%, 100%, 0.02) 0%,
-      hsla(220, 14%, 6%, 0.05) 100%);
-    box-shadow: 0 10px 38px hsla(220, 85%, 1%, 0.6), inset 0 1px 0 hsla(0, 0%, 100%, 0.04);
+      hsla(220, 6%, 4%, 0.03) 100%);
+    box-shadow: 0 8px 32px hsla(220, 60%, 1%, 0.8), inset 0 1px 0 hsla(0, 0%, 100%, 0.02);
+    transition: all 0.2s ease-out;
   }
 
-  /* Darker buttons */
+  /* Ultra Dark buttons */
   .theme-black .glass-button {
-    @apply border border-white/[0.10] backdrop-blur-lg;
+    @apply border border-white/[0.06] backdrop-blur-lg;
     background: linear-gradient(135deg,
-      hsla(0, 0%, 100%, 0.04) 0%,
-      hsla(220, 16%, 8%, 0.09) 100%);
-    box-shadow: 0 8px 24px hsla(220, 85%, 1%, 0.55);
+      hsla(0, 0%, 100%, 0.03) 0%,
+      hsla(220, 6%, 5%, 0.04) 100%);
+    box-shadow: 0 6px 20px hsla(220, 60%, 1%, 0.6);
+    transition: all 0.2s ease-out;
   }
   .theme-black .glass-button:hover {
-    @apply border-white/[0.18];
+    @apply border-white/[0.10];
     background: linear-gradient(135deg,
-      hsla(0, 0%, 100%, 0.06) 0%,
-      hsla(220, 14%, 10%, 0.12) 100%);
-    box-shadow: 0 0 28px hsla(0, 0%, 100%, 0.04), 0 16px 44px hsla(220, 85%, 1%, 0.6);
+      hsla(0, 0%, 100%, 0.04) 0%,
+      hsla(220, 6%, 6%, 0.05) 100%);
+    box-shadow: 0 0 24px hsla(0, 0%, 100%, 0.03), 0 12px 36px hsla(220, 60%, 1%, 0.7);
   }
 
   /* Softer text gradient in black theme */
@@ -153,10 +155,57 @@
     -webkit-text-fill-color: transparent;
   }
 
-  /* Dim floating shapes */
+  /* Ultra Dark floating shapes with color transitions */
   .theme-black .shape-3d {
-    background: linear-gradient(135deg, hsla(0,0%,100%,0.02) 0%, hsla(220,15%,20%,0.02) 100%);
-    filter: blur(2px) brightness(0.7);
+    background: linear-gradient(135deg, 
+      hsla(0,0%,100%,0.04) 0%, 
+      hsla(220,15%,85%,0.03) 35%,
+      hsla(220,8%,8%,0.02) 100%);
+    filter: blur(0.3px);
+    animation: color-shift 15s ease-in-out infinite;
+  }
+
+  .theme-black .shape-morphing {
+    background: linear-gradient(45deg, 
+      hsla(0,0%,100%,0.06) 0%,
+      hsla(220,18%,80%,0.04) 35%,
+      hsla(220,8%,12%,0.03) 100%);
+    filter: blur(0.2px);
+    animation: color-shift 20s ease-in-out infinite, float 25s ease-in-out infinite;
+  }
+
+  .theme-black .liquid-glow {
+    background: radial-gradient(circle, 
+      hsla(0,0%,100%,0.08) 0%,
+      hsla(220,18%,85%,0.04) 40%,
+      transparent 70%);
+    animation: color-pulse 10s ease-in-out infinite;
+  }
+
+  @keyframes color-shift {
+    0%, 100% { 
+      filter: blur(0.5px) hue-rotate(0deg) saturate(1);
+    }
+    25% { 
+      filter: blur(0.3px) hue-rotate(15deg) saturate(1.2);
+    }
+    50% { 
+      filter: blur(0.4px) hue-rotate(-10deg) saturate(1.1);
+    }
+    75% { 
+      filter: blur(0.2px) hue-rotate(20deg) saturate(1.3);
+    }
+  }
+
+  @keyframes color-pulse {
+    0%, 100% { 
+      opacity: 0.4; 
+      filter: hue-rotate(0deg) saturate(1);
+    }
+    50% { 
+      opacity: 0.8; 
+      filter: hue-rotate(10deg) saturate(1.2);
+    }
   }
 }
 /* Black theme overrides */
@@ -186,10 +235,17 @@
   body {
     @apply bg-background text-foreground overflow-x-hidden;
     background: var(--gradient-mesh);
+    /* Optimize for mobile performance */
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
   }
 
   html {
     scroll-behavior: smooth;
+    /* Optimize for mobile performance */
+    -webkit-text-size-adjust: 100%;
+    -ms-text-size-adjust: 100%;
   }
 
   /* Smooth cross-theme transitions for colors/borders/backgrounds */
@@ -200,60 +256,170 @@
                 box-shadow 0.8s cubic-bezier(0.2, 0.8, 0.2, 1),
                 backdrop-filter 0.8s cubic-bezier(0.2, 0.8, 0.2, 1);
   }
+
+  /* Mobile performance optimizations */
+  @media (max-width: 768px) {
+    /* Reduce motion for better performance on mobile */
+    @media (prefers-reduced-motion: reduce) {
+      *,
+      *::before,
+      *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+        scroll-behavior: auto !important;
+      }
+    }
+
+    /* Optimize touch interactions */
+    * {
+      -webkit-tap-highlight-color: transparent;
+      -webkit-touch-callout: none;
+      -webkit-user-select: none;
+      -moz-user-select: none;
+      -ms-user-select: none;
+      user-select: none;
+    }
+
+    /* Allow text selection where needed */
+    p, h1, h2, h3, h4, h5, h6, span, div[contenteditable] {
+      -webkit-user-select: text;
+      -moz-user-select: text;
+      -ms-user-select: text;
+      user-select: text;
+    }
+
+    /* Improve scrolling performance */
+    body {
+      -webkit-overflow-scrolling: touch;
+      overscroll-behavior: none;
+    }
+
+    /* Reduce visual effects on mobile for better performance */
+    .glass-card,
+    .glass-button {
+      transition: all 0.15s ease-out;
+    }
+  }
 }
 
 @layer components {
-  /* Glass Components - Darker */
+  /* Glass Components - Ultra Dark */
   .glass-card {
-    @apply rounded-3xl border border-white/[0.08] backdrop-blur-xl;
+    @apply rounded-3xl border border-white/[0.05] backdrop-blur-xl;
     background: linear-gradient(135deg, 
-      hsla(0, 0%, 100%, 0.04) 0%, 
-      hsla(220, 20%, 12%, 0.06) 100%);
-    box-shadow: var(--shadow-glass), inset 0 1px 0 hsla(0, 0%, 100%, 0.05);
+      hsla(0, 0%, 100%, 0.03) 0%, 
+      hsla(220, 8%, 5%, 0.04) 100%);
+    box-shadow: var(--shadow-glass), inset 0 1px 0 hsla(0, 0%, 100%, 0.03);
+    /* Optimize for mobile performance */
+    will-change: transform;
+    transform: translateZ(0);
   }
 
   .glass-button {
-    @apply relative overflow-hidden rounded-2xl border border-white/15 backdrop-blur-md;
-    @apply transition-all duration-500 ease-out;
+    @apply relative overflow-hidden rounded-2xl border border-white/10 backdrop-blur-md;
+    @apply transition-all duration-200 ease-out;
     background: linear-gradient(135deg, 
-      hsla(0, 0%, 100%, 0.06) 0%, 
-      hsla(220, 20%, 12%, 0.08) 100%);
+      hsla(0, 0%, 100%, 0.04) 0%, 
+      hsla(220, 8%, 5%, 0.05) 100%);
     box-shadow: var(--shadow-glass);
+    /* Optimize for mobile performance */
+    will-change: transform;
+    transform: translateZ(0);
   }
 
   .glass-button:hover {
-    @apply scale-105 border-white/25;
+    @apply scale-105 border-white/15;
     box-shadow: var(--shadow-glow), var(--shadow-deep);
     background: linear-gradient(135deg, 
-      hsla(0, 0%, 100%, 0.1) 0%, 
-      hsla(220, 20%, 12%, 0.12) 100%);
+      hsla(0, 0%, 100%, 0.06) 0%, 
+      hsla(220, 8%, 6%, 0.07) 100%);
   }
 
-  /* 3D Shapes */
+  /* Mobile optimizations */
+  @media (max-width: 768px) {
+    .glass-card {
+      /* Reduce blur on mobile for better performance */
+      backdrop-filter: blur(16px);
+      /* Simplify shadows on mobile */
+      box-shadow: 0 4px 16px hsla(220, 60%, 1%, 0.3), inset 0 1px 0 hsla(0, 0%, 100%, 0.03);
+      /* Faster transitions on mobile */
+      transition: all 0.15s ease-out;
+    }
+
+    .glass-button {
+      /* Reduce blur on mobile */
+      backdrop-filter: blur(12px);
+      /* Simplify shadows on mobile */
+      box-shadow: 0 4px 16px hsla(220, 60%, 1%, 0.3);
+      /* Faster transitions on mobile */
+      transition: all 0.15s ease-out;
+    }
+
+    .glass-button:hover {
+      /* Disable hover effects on touch devices */
+      transform: none;
+    }
+  }
+
+  /* 3D Shapes - Ultra Dark */
   .shape-3d {
     @apply absolute pointer-events-none;
-    background: var(--gradient-glow);
+    background: linear-gradient(135deg, 
+      hsla(0, 0%, 100%, 0.04) 0%,
+      hsla(220, 15%, 85%, 0.03) 35%,
+      hsla(220, 8%, 8%, 0.02) 100%);
     border-radius: 50%;
-    filter: blur(1px);
-    animation: float 20s ease-in-out infinite;
+    filter: blur(0.3px);
+    animation: float 20s ease-in-out infinite, color-shift 15s ease-in-out infinite;
+    /* Optimize for mobile performance */
+    will-change: transform;
+    transform: translateZ(0);
   }
 
   .shape-morphing {
     background: linear-gradient(45deg, 
-      hsla(0, 0%, 100%, 0.1) 0%,
-      hsla(220, 30%, 80%, 0.08) 35%,
-      hsla(220, 15%, 10%, 0.05) 100%);
+      hsla(0, 0%, 100%, 0.06) 0%,
+      hsla(220, 18%, 85%, 0.04) 35%,
+      hsla(220, 8%, 12%, 0.03) 100%);
     border-radius: 30% 70% 70% 30% / 30% 30% 70% 70%;
-    animation: morph 15s ease-in-out infinite, float 25s ease-in-out infinite;
+    animation: morph 15s ease-in-out infinite, float 25s ease-in-out infinite, color-shift 20s ease-in-out infinite;
+    /* Optimize for mobile performance */
+    will-change: transform;
+    transform: translateZ(0);
   }
 
   .liquid-glow {
     @apply absolute inset-0 rounded-full;
     background: radial-gradient(circle, 
-      hsla(0, 0%, 100%, 0.15) 0%,
-      hsla(220, 50%, 85%, 0.05) 40%,
+      hsla(0, 0%, 100%, 0.08) 0%,
+      hsla(220, 18%, 85%, 0.04) 40%,
       transparent 70%);
-    animation: pulse-glow 8s ease-in-out infinite;
+    animation: pulse-glow 8s ease-in-out infinite, color-pulse 10s ease-in-out infinite;
+    /* Optimize for mobile performance */
+    will-change: transform;
+    transform: translateZ(0);
+  }
+
+  /* Mobile shape optimizations */
+  @media (max-width: 768px) {
+    .shape-3d {
+      /* Reduce blur on mobile */
+      filter: blur(0.5px);
+    }
+
+    .shape-morphing {
+      /* Simplify morphing animation on mobile */
+      animation: float 25s ease-in-out infinite;
+    }
+
+    .liquid-glow {
+      /* Reduce glow intensity on mobile */
+      background: radial-gradient(circle, 
+        hsla(0, 0%, 100%, 0.08) 0%,
+        hsla(220, 50%, 85%, 0.03) 40%,
+        transparent 70%);
+    }
   }
 
   /* Animations */
@@ -273,6 +439,32 @@
   @keyframes pulse-glow {
     0%, 100% { opacity: 0.3; transform: scale(1); }
     50% { opacity: 0.8; transform: scale(1.1); }
+  }
+
+  @keyframes color-shift {
+    0%, 100% { 
+      filter: blur(0.5px) hue-rotate(0deg) saturate(1);
+    }
+    25% { 
+      filter: blur(0.3px) hue-rotate(15deg) saturate(1.2);
+    }
+    50% { 
+      filter: blur(0.4px) hue-rotate(-10deg) saturate(1.1);
+    }
+    75% { 
+      filter: blur(0.2px) hue-rotate(20deg) saturate(1.3);
+    }
+  }
+
+  @keyframes color-pulse {
+    0%, 100% { 
+      opacity: 0.4; 
+      filter: hue-rotate(0deg) saturate(1);
+    }
+    50% { 
+      opacity: 0.8; 
+      filter: hue-rotate(10deg) saturate(1.2);
+    }
   }
 
   /* Scroll Animations */

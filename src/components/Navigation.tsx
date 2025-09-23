@@ -1,32 +1,52 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 const Navigation = () => {
   const [isVisible, setIsVisible] = useState(true);
   const [lastScrollY, setLastScrollY] = useState(0);
   const location = useLocation();
   const [hoveredPath, setHoveredPath] = useState<string | null>(null);
+  const isMobile = useIsMobile();
+
+  const controlNavbar = useCallback(() => {
+    if (typeof window !== 'undefined') {
+      // Disable auto-hide on mobile for better UX
+      if (isMobile) {
+        setIsVisible(true);
+        return;
+      }
+      
+      if (window.scrollY > lastScrollY && window.scrollY > 100) {
+        setIsVisible(false);
+      } else {
+        setIsVisible(true);
+      }
+      setLastScrollY(window.scrollY);
+    }
+  }, [lastScrollY, isMobile]);
 
   useEffect(() => {
-    const controlNavbar = () => {
-      if (typeof window !== 'undefined') {
-        if (window.scrollY > lastScrollY && window.scrollY > 100) {
-          setIsVisible(false);
-        } else {
-          setIsVisible(true);
-        }
-        setLastScrollY(window.scrollY);
-      }
-    };
-
     if (typeof window !== 'undefined') {
-      window.addEventListener('scroll', controlNavbar);
+      // Throttle scroll events for better performance
+      let ticking = false;
+      const handleScroll = () => {
+        if (!ticking) {
+          requestAnimationFrame(() => {
+            controlNavbar();
+            ticking = false;
+          });
+          ticking = true;
+        }
+      };
+
+      window.addEventListener('scroll', handleScroll, { passive: true });
       return () => {
-        window.removeEventListener('scroll', controlNavbar);
+        window.removeEventListener('scroll', handleScroll);
       };
     }
-  }, [lastScrollY]);
+  }, [controlNavbar]);
 
   const navItems = [
     { name: "Главная", path: "/" },
@@ -122,13 +142,13 @@ const Navigation = () => {
                     idle: {
                       x: "-100%",
                       opacity: 0,
-                      transition: { x: { duration: 0 }, opacity: { duration: 0.15, ease: [0.4, 0, 0.2, 1] } }
+                      transition: { x: { duration: 0 }, opacity: { duration: 0.1, ease: [0.4, 0, 0.2, 1] } }
                     },
                     hover: {
                       x: ["-100%", "100%"],
                       opacity: 1,
                       transition: {
-                        x: { duration: 1.8, ease: [0.22, 1, 0.36, 1], repeat: Infinity },
+                        x: { duration: 1.2, ease: [0.22, 1, 0.36, 1], repeat: Infinity },
                         opacity: { duration: 0.001 }
                       }
                     }
@@ -154,8 +174,8 @@ const Navigation = () => {
         ))}
       </div>
 
-      {/* Floating particles effect */}
-      {[...Array(3)].map((_, i) => (
+      {/* Floating particles effect - disabled on mobile for performance */}
+      {!isMobile && [...Array(3)].map((_, i) => (
         <motion.div
           key={i}
           className="absolute w-1 h-1 bg-white/20 rounded-full"
