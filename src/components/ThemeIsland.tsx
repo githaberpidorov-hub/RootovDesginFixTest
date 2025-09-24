@@ -14,12 +14,14 @@ const ThemeIsland = () => {
   const [justToggled, setJustToggled] = useState<boolean>(false);
   const timeoutRef = useRef<number | null>(null);
 
-  // Load persisted theme
+  // Load persisted theme (default to dark for all users)
   useEffect(() => {
     const saved = localStorage.getItem(STORAGE_KEY);
-    if (saved === "1") {
+    if (saved === "1" || saved === null) {
+      // Default theme: dark
       setEnabled(true);
       document.documentElement.classList.add("theme-black");
+      if (saved === null) localStorage.setItem(STORAGE_KEY, "1");
     }
   }, []);
 
@@ -93,7 +95,7 @@ const ThemeIsland = () => {
       >
         <div className="flex items-center gap-3">
           <AnimatePresence mode="wait">{icon}</AnimatePresence>
-          <span className="hidden sm:inline text-sm font-medium">{enabled ? "Чёрная тема" : "Стандартная тема"}</span>
+          <span className="hidden sm:inline text-sm font-medium">{enabled ? "Чёрная тема" : "Белая тема"}</span>
         </div>
       </motion.button>
 

@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useMemo } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { useIsMobile } from "@/hooks/use-mobile";
@@ -7,6 +7,12 @@ const Navigation = () => {
   const [isVisible, setIsVisible] = useState(true);
   const [lastScrollY, setLastScrollY] = useState(0);
   const location = useLocation();
+  const activePath = useMemo(() => {
+    const path = location.pathname || "/";
+    if (path.startsWith("/portfolio")) return "/portfolio";
+    // Treat all other routes (e.g., /request, /admin) as Home for active highlight
+    return "/";
+  }, [location.pathname]);
   const [hoveredPath, setHoveredPath] = useState<string | null>(null);
   const isMobile = useIsMobile();
 
@@ -68,7 +74,7 @@ const Navigation = () => {
         damping: 25,
         stiffness: 300
       }}
-      className="fixed top-4 md:top-8 left-0 right-0 mx-auto w-fit z-50 rounded-2xl border-[0.5px] md:border border-white/10 backdrop-blur-3xl px-3 sm:px-4 md:px-6 py-3 md:py-5 max-w-[92vw]"
+      className="fixed top-4 md:top-8 left-0 right-0 mx-auto w-fit z-50 rounded-2xl border-[0.5px] md:border border-white/10 backdrop-blur-3xl px-3 sm:px-4 md:px-6 py-3 md:py-5 max-w-[92vw] overflow-visible"
       style={{
         background: "linear-gradient(135deg, hsla(0, 0%, 100%, 0.03) 0%, hsla(220, 15%, 15%, 0.05) 100%)",
         boxShadow: "0 20px 40px hsla(220, 50%, 2%, 0.4), inset 0 1px 0 hsla(0, 0%, 100%, 0.05)",
@@ -96,7 +102,7 @@ const Navigation = () => {
             >
               <Link
                 to={item.path}
-                className="relative px-4 py-2.5 sm:px-5 sm:py-3 md:px-8 md:py-4 rounded-2xl text-foreground/85 hover:text-foreground transition-all duration-500 group overflow-hidden isolate"
+                className="relative px-4 py-2.5 sm:px-5 sm:py-3 md:px-8 md:py-4 rounded-2xl text-foreground/85 hover:text-foreground transition-all duration-500 group overflow-visible isolate"
                 onMouseEnter={() => setHoveredPath(item.path)}
                 onMouseLeave={() => setHoveredPath(null)}
               >
@@ -106,7 +112,7 @@ const Navigation = () => {
               
               {/* Background highlight moves together with the shared border */}
               <AnimatePresence>
-                {(hoveredPath ? hoveredPath === item.path : location.pathname === item.path) && (
+                {(hoveredPath ? hoveredPath === item.path : activePath === item.path) && (
                   <motion.div
                     layoutId="activeTab"
                     initial={{ opacity: 0, scale: 0.98 }}
@@ -157,7 +163,7 @@ const Navigation = () => {
               </div>
 
               {/* Shared moving border: appears on hovered item, otherwise on active route */}
-              {((hoveredPath && hoveredPath === item.path) || (!hoveredPath && location.pathname === item.path)) && (
+              {((hoveredPath && hoveredPath === item.path) || (!hoveredPath && activePath === item.path)) && (
                 <motion.div
                   layoutId="navSharedBorder"
                   className="pointer-events-none absolute inset-0 rounded-2xl"
@@ -174,28 +180,7 @@ const Navigation = () => {
         ))}
       </div>
 
-      {/* Floating particles effect - disabled on mobile for performance */}
-      {!isMobile && [...Array(3)].map((_, i) => (
-        <motion.div
-          key={i}
-          className="absolute w-1 h-1 bg-white/20 rounded-full"
-          style={{
-            left: `${20 + i * 30}%`,
-            top: `${20 + i * 20}%`,
-          }}
-          animate={{
-            y: [-5, 5, -5],
-            x: [-2, 2, -2],
-            opacity: [0.2, 0.5, 0.2],
-          }}
-          transition={{
-            duration: 3 + i,
-            repeat: Infinity,
-            ease: "easeInOut",
-            delay: i * 0.7,
-          }}
-        />
-      ))}
+      {/* Floating particles effect removed */}
     </motion.nav>
   );
 };

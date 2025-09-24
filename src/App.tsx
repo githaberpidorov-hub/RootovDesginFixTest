@@ -7,6 +7,7 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Home from "./pages/Home";
 import Portfolio from "./pages/Portfolio";
 import Admin from "./pages/Admin";
+import Request from "./pages/Request";
 import NotFound from "./pages/NotFound";
 import ThemeIsland from "./components/ThemeIsland";
 import PageLoader from "./components/PageLoader";
@@ -35,6 +36,7 @@ const App = () => {
             <Routes>
               <Route path="/" element={<Home />} />
               <Route path="/portfolio" element={<Portfolio />} />
+              <Route path="/request" element={<Request />} />
               <Route path="/admin" element={<Admin />} />
               {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
               <Route path="*" element={<NotFound />} />

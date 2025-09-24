@@ -72,9 +72,11 @@ const Home = () => {
             </p>
             
             <div className="flex flex-col sm:flex-row gap-6 justify-center items-center">
-              <GlassButton size="lg" glow>
-                Заказать проект
-              </GlassButton>
+              <a href="/request">
+                <GlassButton size="lg" glow>
+                  Заказать проект
+                </GlassButton>
+              </a>
               <Link to="/portfolio">
                 <GlassButton variant="secondary" size="lg">
                   Посмотреть работы
@@ -214,9 +216,11 @@ const Home = () => {
               Свяжитесь с нами для обсуждения деталей и получения персонального предложения
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <GlassButton size="lg" glow>
-                Связаться с нами
-              </GlassButton>
+              <a href="/request">
+                <GlassButton size="lg" glow>
+                  Связаться с нами
+                </GlassButton>
+              </a>
               <Link to="/portfolio">
                 <GlassButton variant="secondary" size="lg">
                   Посмотреть портфолио

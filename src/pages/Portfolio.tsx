@@ -21,6 +21,18 @@ const Portfolio = () => {
   const [templates, setTemplates] = useState<Template[]>([]);
   const [selectedCategory, setSelectedCategory] = useState("all");
   const [filteredTemplates, setFilteredTemplates] = useState<Template[]>([]);
+  const [previewByUrl, setPreviewByUrl] = useState<Record<string, string>>({});
+
+  const getPreviewImageUrl = (url?: string) => {
+    if (!url) return "";
+    try {
+      const withProtocol = /^(https?:)?\/\//i.test(url) ? url : `https://${url}`;
+      const encoded = encodeURIComponent(withProtocol);
+      return `https://v1.screenshot.11ty.dev/${encoded}/opengraph/`;
+    } catch {
+      return "";
+    }
+  };
 
   const categories = [
     { id: "all", name: "Все проекты" },
@@ -104,6 +116,61 @@ const Portfolio = () => {
       localStorage.setItem('portfolio-templates', JSON.stringify(mockTemplates));
     }
   }, []);
+
+  // Подтянуть OG-изображение с сайта (если он его предоставляет),
+  // иначе fallback на скриншот
+  const normalizeUrl = (url?: string) => {
+    if (!url) return "";
+    return /^(https?:)?\/\//i.test(url) ? url : `https://${url}`;
+  };
+
+  useEffect(() => {
+    const controller = new AbortController();
+    const urls = Array.from(new Set(templates.map(t => t.demoUrl).filter(Boolean) as string[]));
+
+    // восстановить кэш из localStorage
+    const cachedRaw = localStorage.getItem('portfolio-preview-cache');
+    const cached: Record<string, string> = cachedRaw ? (()=>{ try { return JSON.parse(cachedRaw); } catch { return {}; } })() : {};
+    if (Object.keys(cached).length) {
+      setPreviewByUrl(prev => ({ ...cached, ...prev }));
+    }
+
+    const fetchPreview = async (demoUrl: string) => {
+      const norm = normalizeUrl(demoUrl);
+      if (cached[norm]) return cached[norm];
+      try {
+        const api = `https://api.microlink.io?url=${encodeURIComponent(norm)}&meta=true&filter=image.url`;
+        const res = await fetch(api, { signal: controller.signal });
+        const json = await res.json();
+        const img = json?.data?.image?.url as string | undefined;
+        if (img) {
+          return img;
+        }
+      } catch {}
+      // fallback на скриншот сервиса
+      try {
+        const encoded = encodeURIComponent(norm);
+        return `https://v1.screenshot.11ty.dev/${encoded}/opengraph/`;
+      } catch {
+        return "";
+      }
+    };
+
+    (async () => {
+      const entries = await Promise.all(urls.map(async (u) => [normalizeUrl(u), await fetchPreview(u)] as const));
+      const map: Record<string, string> = {};
+      for (const [u, v] of entries) { if (v) map[u] = v; }
+      if (Object.keys(map).length) {
+        setPreviewByUrl(prev => {
+          const next = { ...prev, ...map };
+          localStorage.setItem('portfolio-preview-cache', JSON.stringify(next));
+          return next;
+        });
+      }
+    })();
+
+    return () => controller.abort();
+  }, [templates]);
 
   useEffect(() => {
     if (selectedCategory === "all") {
@@ -191,16 +258,23 @@ const Portfolio = () => {
                 >
                   {/* Template Image */}
                   <div className="relative h-48 bg-gradient-to-br from-white/10 to-white/5 overflow-hidden">
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent" />
+                    <div className="absolute inset-0">
+                      <LazyImage
+                        src={
+                          previewByUrl[normalizeUrl(template.demoUrl)]
+                          || getPreviewImageUrl(template.demoUrl)
+                          || template.image
+                          || "/placeholder.svg"
+                        }
+                        alt={template.title}
+                        className="w-full h-full"
+                      />
+                    </div>
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent" />
                     <div className="absolute top-4 right-4 z-10">
                       <span className="px-3 py-1 rounded-full bg-white/10 backdrop-blur-md text-xs font-medium text-foreground/80 border border-white/10">
                         {categories.find(cat => cat.id === template.category)?.name}
                       </span>
-                    </div>
-                    
-                    {/* Placeholder for template preview */}
-                    <div className="absolute inset-0 flex items-center justify-center">
-                      <div className="text-6xl opacity-20">🎨</div>
                     </div>
                   </div>
 
@@ -231,12 +305,19 @@ const Portfolio = () => {
                         {template.price}
                       </span>
                       <div className="flex gap-2">
-                        {template.demoUrl && (
-                          <GlassButton variant="ghost" size="sm">
-                            Демо
-                          </GlassButton>
-                        )}
-                        <GlassButton size="sm">
+                        {template.demoUrl && (() => {
+                          const href = /^(https?:)?\/\//i.test(template.demoUrl) ? template.demoUrl : `https://${template.demoUrl}`;
+                          return (
+                            <GlassButton
+                              variant="ghost"
+                              size="sm"
+                              onClick={(e) => { e.stopPropagation(); window.open(href, "_blank", "noopener,noreferrer"); }}
+                            >
+                              Демо
+                            </GlassButton>
+                          );
+                        })()}
+                        <GlassButton size="sm" onClick={(e)=>{ e.stopPropagation(); window.location.href = `/request?templateId=${encodeURIComponent(template.id)}`; }}>
                           Заказать
                         </GlassButton>
                       </div>
@@ -278,9 +359,11 @@ const Portfolio = () => {
               Мы создадим уникальный дизайн специально для ваших задач и требований
             </p>
             <div className="flex justify-center">
-              <GlassButton size="lg" glow>
-                Заказать индивидуальный проект
-              </GlassButton>
+              <a href="/request">
+                <GlassButton size="lg" glow>
+                  Заказать индивидуальный проект
+                </GlassButton>
+              </a>
             </div>
           </motion.div>
         </div>
