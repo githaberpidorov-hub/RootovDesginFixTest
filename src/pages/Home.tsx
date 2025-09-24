@@ -118,7 +118,6 @@ const Home = () => {
                 }}
                 viewport={{ once: true }}
                 whileHover={{ scale: 1.02, y: -5 }}
-                transition={{ duration: 0.2, ease: "easeOut" }}
                 className="glass-card p-8 group cursor-pointer flex flex-col"
                 mobileOptimized={true}
               >

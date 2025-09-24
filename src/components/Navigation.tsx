@@ -96,9 +96,12 @@ const Navigation = () => {
               initial="idle"
               whileHover="hover"
               className="relative"
-              whileHover={{ scale: 1.06 }}
               transition={{ scale: { duration: 0.55, ease: [0.16, 1, 0.3, 1] } }}
               style={{ willChange: "transform" }}
+              variants={{
+                idle: { scale: 1 },
+                hover: { scale: 1.06 }
+              }}
             >
               <Link
                 to={item.path}
@@ -136,31 +139,6 @@ const Navigation = () => {
 
               {/* (Removed hover-only glow layer to keep highlight fully synchronized with moving border/background) */}
               
-              {/* Shine effect (original look), plays only while hovered */}
-              <div className="pointer-events-none absolute inset-0 overflow-hidden rounded-2xl">
-                <motion.div
-                  className="absolute inset-0 rounded-2xl transform-gpu"
-                  style={{
-                    background: "linear-gradient(90deg, transparent 0%, transparent 40%, hsla(0, 0%, 100%, 0.18) 50%, transparent 60%, transparent 100%)",
-                    willChange: "transform"
-                  }}
-                  variants={{
-                    idle: {
-                      x: "-100%",
-                      opacity: 0,
-                      transition: { x: { duration: 0 }, opacity: { duration: 0.1, ease: [0.4, 0, 0.2, 1] } }
-                    },
-                    hover: {
-                      x: ["-100%", "100%"],
-                      opacity: 1,
-                      transition: {
-                        x: { duration: 1.2, ease: [0.22, 1, 0.36, 1], repeat: Infinity },
-                        opacity: { duration: 0.001 }
-                      }
-                    }
-                  }}
-                />
-              </div>
 
               {/* Shared moving border: appears on hovered item, otherwise on active route */}
               {((hoveredPath && hoveredPath === item.path) || (!hoveredPath && activePath === item.path)) && (

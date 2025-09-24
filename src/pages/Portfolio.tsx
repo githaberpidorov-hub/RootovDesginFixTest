@@ -252,7 +252,6 @@ const Portfolio = () => {
                     delay: index * 0.1 
                   }}
                   whileHover={{ scale: 1.02, y: -10 }}
-                  transition={{ duration: 0.2, ease: "easeOut" }}
                   className="glass-card overflow-hidden group cursor-pointer"
                   mobileOptimized={true}
                 >
