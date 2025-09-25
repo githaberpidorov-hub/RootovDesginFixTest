@@ -1,4 +1,12 @@
 {
+  "redirects": [
+    {
+      "source": "/(.*)",
+      "has": [{ "type": "host", "value": "www.rootov-dev.site" }],
+      "destination": "https://rootov-dev.site/$1",
+      "permanent": true
+    }
+  ],
   "rewrites": [
     {
       "source": "/((?!assets|.*\\..*).*)",
