@@ -33,7 +33,10 @@ export default async function handler(req: any, res: any) {
       const body = typeof req.body === 'string' ? JSON.parse(req.body) : req.body;
       const { language = 'RU' } = body;
 
-      // Создаем конфигурацию только для текущего языка
+      console.log('Calculator API - Language:', language);
+      console.log('Calculator API - Body:', body);
+
+      // Создаем конфигурацию для всех языков с одинаковыми данными
       const configData = {
         language,
         website_type_ru: body.websiteType || {},

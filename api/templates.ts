@@ -45,6 +45,9 @@ export default async function handler(req: any, res: any) {
       const { language = "RU" } = req.query;
       const body = typeof req.body === 'string' ? JSON.parse(req.body) : req.body;
 
+      console.log('Template POST - Language:', language);
+      console.log('Template POST - Body:', body);
+
       // Создаем записи для всех языков с одинаковыми данными
       const baseData = {
         category: body.category,
