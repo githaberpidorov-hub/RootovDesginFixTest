@@ -26,19 +26,31 @@ export default async function handler(req: any, res: any) {
     }
 
     if (req.method === "POST") {
-      const body = typeof req.body === 'string' ? JSON.parse(req.body || '{}') : (req.body || {});
+      // Parse body safely
+      let body: any = {};
+      try {
+        body = typeof req.body === 'string' ? JSON.parse(req.body || '{}') : (req.body || {});
+      } catch (e: any) {
+        return res.status(400).json({ ok: false, error: 'Invalid JSON body' });
+      }
+
       const upserts: Array<{ key: string; value: any }> = [];
       if (body.templates !== undefined) upserts.push({ key: 'templates', value: body.templates });
       if (body.calculator !== undefined) upserts.push({ key: 'calculator', value: body.calculator });
       if (body.telegram !== undefined) upserts.push({ key: 'telegram', value: body.telegram });
 
       if (upserts.length) {
-        const { error } = await supabase
+        const { data, error } = await supabase
           .from('settings')
-          .upsert(upserts, { onConflict: 'key' });
-        if (error) throw error;
+          .upsert(upserts, { onConflict: 'key' })
+          .select('key');
+        if (error) {
+          return res.status(500).json({ ok: false, error: error.message });
+        }
+        return res.status(200).json({ ok: true, updated: data?.map((r: any) => r.key) || [] });
       }
-      return res.status(200).json({ ok: true });
+
+      return res.status(400).json({ ok: false, error: 'Nothing to update' });
     }
 
     res.setHeader('Allow', 'GET, POST, OPTIONS');

@@ -120,25 +120,46 @@ const Admin = () => {
 
   const saveTemplates = async (updatedTemplates: Template[]) => {
     try {
-      await fetch('/api/settings', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ templates: updatedTemplates }) });
+      const r = await fetch('/api/settings', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ templates: updatedTemplates }) });
+      const j = await r.json().catch(()=>({ ok:false, error:'Ошибка парсинга ответа' }));
+      if (!r.ok || !j?.ok) {
+        throw new Error(j?.error || `Ошибка сервера (${r.status})`);
+      }
       setTemplates(updatedTemplates);
       toast({ title: 'Сохранено', description: 'Шаблоны обновлены' });
-    } catch {}
+    } catch (e:any) {
+      toast({ title: 'Не удалось сохранить', description: String(e?.message||e||'Неизвестная ошибка'), variant:'destructive' });
+    }
   };
 
   const saveCalculator = async (updated: CalcOptions) => {
     try {
-      await fetch('/api/settings', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ calculator: updated }) });
+      const r = await fetch('/api/settings', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ calculator: updated }) });
+      const j = await r.json().catch(()=>({ ok:false, error:'Ошибка парсинга ответа' }));
+      if (!r.ok || !j?.ok) {
+        throw new Error(j?.error || `Ошибка сервера (${r.status})`);
+      }
       setCalcOptions(updated);
       toast({ title: 'Сохранено', description: 'Настройки калькулятора обновлены' });
-    } catch {}
+    } catch (e:any) {
+      toast({ title: 'Не удалось сохранить', description: String(e?.message||e||'Неизвестная ошибка'), variant:'destructive' });
+    }
   };
 
   // Автосохранение калькулятора с небольшой задержкой
   useEffect(() => {
     if (!isAuthenticated) return;
-    const t = setTimeout(() => {
-      fetch('/api/settings', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ calculator: calcOptions }) }).catch(()=>{});
+    const t = setTimeout(async () => {
+      try {
+        const r = await fetch('/api/settings', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ calculator: calcOptions }) });
+        if (!r.ok) {
+          const j = await r.json().catch(()=>({}));
+          throw new Error(j?.error || `Ошибка сохранения (${r.status})`);
+        }
+      } catch (e:any) {
+        // Тихо логируем, чтобы не спамить тостами при наборе
+        console.warn('Auto-save calculator failed:', e?.message||e);
+      }
     }, 600);
     return () => clearTimeout(t);
   }, [calcOptions, isAuthenticated]);
