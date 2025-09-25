@@ -1,4 +1,4 @@
-import { getSupabase } from "./_supabase";
+import { getSupabase } from "./_supabase.js";
 
 // Serverless function to send a Telegram message using bot token and chat id
 // Configure environment variables in Vercel dashboard:

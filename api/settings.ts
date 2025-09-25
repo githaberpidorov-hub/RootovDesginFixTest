@@ -1,4 +1,4 @@
-import { getSupabase } from "./_supabase";
+import { getSupabase } from "./_supabase.js";
 
 // We'll store settings in a single table as key/value JSON
 // Table: settings (key text primary key, value jsonb)
