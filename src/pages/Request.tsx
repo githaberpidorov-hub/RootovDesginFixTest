@@ -135,11 +135,7 @@ const Request = () => {
       return;
     }
 
-    const cfg = readTelegramConfig();
-    if (!cfg.botToken || !cfg.chatId) {
-      // Телеграм не настроен — тихо выходим без уведомлений
-      return;
-    }
+    // Сборка текста сообщения; отправка будет через серверный эндпоинт
 
     const selectedTemplate = templates.find(t => t.id === form.templateId);
     const templateLink = selectedTemplate
@@ -162,20 +158,37 @@ const Request = () => {
     ].filter(Boolean);
 
     const text = messageLines.join('\n');
-    const url = `https://api.telegram.org/bot${cfg.botToken}/sendMessage`;
 
     setSubmitting(true);
     try {
-      const res = await fetch(url, {
+      const res = await fetch('/api/telegram', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ chat_id: cfg.chatId, text }),
+        body: JSON.stringify({ text }),
       });
-      if (!res.ok) throw new Error('TG API error');
+      if (!res.ok) {
+        let reason = 'TG API error';
+        try {
+          const contentType = res.headers.get('content-type') || '';
+          if (contentType.includes('application/json')) {
+            const data = await res.json();
+            if (data?.error) {
+              reason = String(data.error);
+            } else {
+              reason = JSON.stringify(data).slice(0, 300);
+            }
+          } else {
+            const textBody = await res.text();
+            if (textBody) reason = textBody.slice(0, 300);
+          }
+        } catch {}
+        throw new Error(`${reason} (status ${res.status})`);
+      }
       toast({ title: 'Заявка отправлена', description: 'Мы скоро свяжемся с вами' });
       navigate('/');
     } catch (err) {
-      toast({ title: 'Не удалось отправить заявку', description: 'Проверьте настройки Telegram', variant: 'destructive' });
+      const msg = err instanceof Error ? err.message : 'Ошибка отправки';
+      toast({ title: 'Не удалось отправить заявку', description: msg, variant: 'destructive' });
     } finally {
       setSubmitting(false);
     }
