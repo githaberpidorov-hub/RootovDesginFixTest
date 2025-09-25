@@ -61,13 +61,36 @@ const PriceCalculator = () => {
   const [options, setOptions] = useState<CalculatorOptions>(defaultOptions);
 
   useEffect(() => {
-    const saved = localStorage.getItem('calculator-options');
-    if (saved) {
-      try {
-        const parsed = JSON.parse(saved);
-        setOptions({ ...defaultOptions, ...parsed });
-      } catch {}
-    }
+    // 1) Пытаемся загрузить серверные опции калькулятора
+    fetch('/api/settings')
+      .then(r => r.json())
+      .then(data => {
+        const server = data?.calculator;
+        if (server && typeof server === 'object' && Object.keys(server).length) {
+          setOptions(prev => ({ ...prev, ...server }));
+          try { localStorage.setItem('calculator-options', JSON.stringify(server)); } catch {}
+          return;
+        }
+        // 2) Фолбэк: локальные сохраненные опции
+        const saved = localStorage.getItem('calculator-options');
+        if (saved) {
+          try {
+            const parsed = JSON.parse(saved);
+            setOptions({ ...defaultOptions, ...parsed });
+            return;
+          } catch {}
+        }
+        // 3) Если ничего нет — остаемся на дефолтных
+      })
+      .catch(() => {
+        const saved = localStorage.getItem('calculator-options');
+        if (saved) {
+          try {
+            const parsed = JSON.parse(saved);
+            setOptions({ ...defaultOptions, ...parsed });
+          } catch {}
+        }
+      });
   }, []);
 
   useEffect(() => {
