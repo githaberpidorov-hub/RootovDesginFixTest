@@ -33,14 +33,14 @@ export default function LanguageSwitcher() {
         role="group"
         aria-label="Language switcher"
         onClick={() => !isOpen && setIsOpen(true)}
-        className="fixed right-4 bottom-4 md:right-6 md:bottom-6 z-50 rounded-2xl border border-white/10 overflow-hidden backdrop-blur-2xl text-foreground/90 px-4 py-3"
+        className="fixed right-4 bottom-4 md:right-6 md:bottom-6 z-50 rounded-2xl border border-white/10 overflow-hidden backdrop-blur-2xl text-foreground/90 h-12 w-12 p-0 grid place-items-center sm:h-auto sm:w-auto sm:px-4 sm:py-3"
         style={{
           background: "linear-gradient(135deg, hsla(0, 0%, 100%, 0.06) 0%, hsla(220, 20%, 12%, 0.08) 100%)",
           boxShadow: "0 12px 28px hsla(220, 50%, 2%, 0.45), inset 0 1px 0 hsla(0, 0%, 100%, 0.08)",
           cursor: isOpen ? "default" : "pointer",
         }}
         initial={false}
-        animate={{ width: isOpen ? 266 : 120 }}
+        animate={{ width: isOpen ? 266 : undefined }}
         transition={{ duration: 0.7, ease: [0.2, 0.8, 0.2, 1] }}
       >
         <motion.div layout className="h-full flex items-center px-2">
@@ -56,7 +56,7 @@ export default function LanguageSwitcher() {
             </button>
             <motion.span
               layout
-              className="text-sm font-medium"
+              className="hidden sm:inline text-sm font-medium"
               initial={false}
               animate={{ opacity: 1, x: 0 }}
               transition={{ duration: 0.25, ease: [0.2, 0.8, 0.2, 1] }}

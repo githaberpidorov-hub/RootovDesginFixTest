@@ -86,7 +86,7 @@ const ThemeIsland = () => {
       <motion.button
         aria-label="Toggle black theme"
         onClick={toggleTheme}
-        className="fixed left-4 bottom-4 md:left-6 md:bottom-6 z-50 rounded-2xl border border-white/10 px-4 py-3 backdrop-blur-2xl text-foreground/90 hover:text-foreground transition-colors"
+        className="fixed left-4 bottom-4 md:left-6 md:bottom-6 z-50 rounded-2xl border border-white/10 h-12 w-12 p-0 grid place-items-center sm:h-auto sm:w-auto sm:px-4 sm:py-3 backdrop-blur-2xl text-foreground/90 hover:text-foreground transition-colors"
         style={{
           background: "linear-gradient(135deg, hsla(0, 0%, 100%, 0.06) 0%, hsla(220, 20%, 12%, 0.08) 100%)",
           boxShadow: "0 12px 28px hsla(220, 50%, 2%, 0.45), inset 0 1px 0 hsla(0, 0%, 100%, 0.08)",
