@@ -106,11 +106,28 @@ const Admin = () => {
       // Загружаем шаблоны с учетом текущего языка
       loadTemplates();
       // Загружаем остальные настройки
-      fetch('/api/settings')
-        .then(r => r.json())
-        .then(data => {
-          if (data?.calculator && Object.keys(data.calculator || {}).length > 0) setCalcOptions(prev=> ({ ...prev, ...(data.calculator as any) }));
-          if (data?.telegram) setTgConfig({ botToken: data.telegram.botToken || '', username: data.telegram.username || '', chatId: data.telegram.chatId || '' });
+      Promise.all([
+        fetch('/api/settings').then(r => r.json()),
+        fetch(`/api/calculator?language=${adminEditingLanguage}`).then(r => r.json())
+      ])
+        .then(([settingsData, calculatorData]) => {
+          if (calculatorData?.ok && calculatorData.config) {
+            const config = calculatorData.config;
+            setCalcOptions({
+              websiteType: config[`website_type_${adminEditingLanguage.toLowerCase()}`] || [],
+              complexity: config[`complexity_${adminEditingLanguage.toLowerCase()}`] || [],
+              timeline: config[`timeline_${adminEditingLanguage.toLowerCase()}`] || [],
+              features: config[`features_${adminEditingLanguage.toLowerCase()}`] || [],
+              design: config[`design_${adminEditingLanguage.toLowerCase()}`] || []
+            });
+          }
+          if (settingsData?.telegram) {
+            setTgConfig({ 
+              botToken: settingsData.telegram.botToken || '', 
+              username: settingsData.telegram.username || '', 
+              chatId: settingsData.telegram.chatId || '' 
+            });
+          }
         })
         .catch(() => {
           console.warn('Failed to load settings from API');
@@ -175,19 +192,19 @@ const Admin = () => {
     try {
       const configData = {
         language: adminEditingLanguage,
-        [`website_type_${adminEditingLanguage.toLowerCase()}`]: Object.fromEntries(
+        websiteType: Object.fromEntries(
           calcOptions.websiteType.map(opt => [opt.id, { label: opt.name, price: opt.price }])
         ),
-        [`complexity_${adminEditingLanguage.toLowerCase()}`]: Object.fromEntries(
+        complexity: Object.fromEntries(
           calcOptions.complexity.map(opt => [opt.id, { label: opt.name, multiplier: opt.multiplier }])
         ),
-        [`timeline_${adminEditingLanguage.toLowerCase()}`]: Object.fromEntries(
+        timeline: Object.fromEntries(
           calcOptions.timeline.map(opt => [opt.id, { label: opt.name, multiplier: opt.multiplier }])
         ),
-        [`features_${adminEditingLanguage.toLowerCase()}`]: Object.fromEntries(
+        features: Object.fromEntries(
           calcOptions.features.map(opt => [opt.id, { label: opt.name, price: opt.price }])
         ),
-        [`design_${adminEditingLanguage.toLowerCase()}`]: Object.fromEntries(
+        design: Object.fromEntries(
           calcOptions.design.map(opt => [opt.id, { label: opt.name, price: opt.price }])
         )
       };
@@ -260,7 +277,15 @@ const Admin = () => {
 
   const saveCalculator = async (updated: CalcOptions) => {
     try {
-      const r = await fetch('/api/settings', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ calculator: updated }) });
+      // Используем правильный API для калькулятора с передачей языка
+      const r = await fetch('/api/calculator', { 
+        method: 'POST', 
+        headers: { 'Content-Type': 'application/json' }, 
+        body: JSON.stringify({ 
+          ...updated, 
+          language: t.language 
+        }) 
+      });
       const j = await r.json().catch(()=>({ ok:false, error:'Ошибка парсинга ответа' }));
       if (!r.ok || !j?.ok) {
         throw new Error(j?.error || `Ошибка сервера (${r.status})`);
@@ -277,7 +302,14 @@ const Admin = () => {
     if (!isAuthenticated) return;
     const t = setTimeout(async () => {
       try {
-        const r = await fetch('/api/settings', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ calculator: calcOptions }) });
+        const r = await fetch('/api/calculator', { 
+          method: 'POST', 
+          headers: { 'Content-Type': 'application/json' }, 
+          body: JSON.stringify({ 
+            ...calcOptions, 
+            language: t.language 
+          }) 
+        });
         if (!r.ok) {
           const j = await r.json().catch(()=>({}));
           throw new Error(j?.error || `Ошибка сохранения (${r.status})`);
@@ -288,7 +320,7 @@ const Admin = () => {
       }
     }, 600);
     return () => clearTimeout(t);
-  }, [calcOptions, isAuthenticated]);
+  }, [calcOptions, isAuthenticated, t.language]);
 
   const handleLogin = (e: React.FormEvent) => {
     e.preventDefault();
@@ -297,18 +329,27 @@ const Admin = () => {
       setIsAuthenticated(true);
       localStorage.setItem('admin-auth', 'true');
       // После успешного входа – подтягиваем все настройки с сервера
-      fetch('/api/settings')
-        .then(r => r.json())
-        .then(data => {
-          if (data?.templates) setTemplates(data.templates);
-          if (data?.calculator && Object.keys(data.calculator || {}).length > 0) {
-            setCalcOptions(prev => ({ ...prev, ...(data.calculator as any) }));
+      Promise.all([
+        fetch('/api/settings').then(r => r.json()),
+        fetch(`/api/calculator?language=${adminEditingLanguage}`).then(r => r.json())
+      ])
+        .then(([settingsData, calculatorData]) => {
+          if (settingsData?.templates) setTemplates(settingsData.templates);
+          if (calculatorData?.ok && calculatorData.config) {
+            const config = calculatorData.config;
+            setCalcOptions({
+              websiteType: config[`website_type_${adminEditingLanguage.toLowerCase()}`] || [],
+              complexity: config[`complexity_${adminEditingLanguage.toLowerCase()}`] || [],
+              timeline: config[`timeline_${adminEditingLanguage.toLowerCase()}`] || [],
+              features: config[`features_${adminEditingLanguage.toLowerCase()}`] || [],
+              design: config[`design_${adminEditingLanguage.toLowerCase()}`] || []
+            });
           }
-          if (data?.telegram) {
+          if (settingsData?.telegram) {
             setTgConfig({
-              botToken: data.telegram.botToken || '',
-              username: data.telegram.username || '',
-              chatId: data.telegram.chatId || '',
+              botToken: settingsData.telegram.botToken || '',
+              username: settingsData.telegram.username || '',
+              chatId: settingsData.telegram.chatId || '',
             });
           }
         })
@@ -389,7 +430,7 @@ const Admin = () => {
 
       if (editingTemplate) {
         // Редактирование существующего шаблона
-        const response = await fetch(`/api/templates?id=${editingTemplate.id}`, {
+        const response = await fetch(`/api/templates?id=${editingTemplate.id}&language=${adminEditingLanguage}`, {
           method: 'PUT',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(templatePayload)
@@ -407,7 +448,7 @@ const Admin = () => {
         }
       } else {
         // Добавление нового шаблона
-        const response = await fetch('/api/templates', {
+        const response = await fetch(`/api/templates?language=${adminEditingLanguage}`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(templatePayload)
