@@ -96,42 +96,50 @@ const Admin = () => {
     const authStatus = localStorage.getItem('admin-auth');
     if (authStatus === 'true') {
       setIsAuthenticated(true);
-      loadTemplates();
-      const savedCalc = localStorage.getItem('calculator-options');
-      if (savedCalc) {
-        try { setCalcOptions(JSON.parse(savedCalc)); } catch {}
-      }
-      const savedTg = localStorage.getItem('telegram-config');
-      if (savedTg) {
-        try { setTgConfig(JSON.parse(savedTg)); } catch {}
-      }
+      // Загружаем все настройки из серверной БД
+      fetch('/api/settings')
+        .then(r => r.json())
+        .then(data => {
+          if (data?.templates) setTemplates(data.templates);
+          if (data?.calculator && Object.keys(data.calculator || {}).length > 0) setCalcOptions(prev=> ({ ...prev, ...(data.calculator as any) }));
+          if (data?.telegram) setTgConfig({ botToken: data.telegram.botToken || '', username: data.telegram.username || '', chatId: data.telegram.chatId || '' });
+        })
+        .catch(() => {
+          // Фолбэк на локальные данные, если сервер пока пуст
+          loadTemplates();
+        });
     }
   }, []);
 
   const loadTemplates = () => {
-    const savedTemplates = localStorage.getItem('portfolio-templates');
-    if (savedTemplates) {
-      setTemplates(JSON.parse(savedTemplates));
-    }
+    fetch('/api/settings')
+      .then(r => r.json())
+      .then(data => { if (data?.templates) setTemplates(data.templates); })
+      .catch(() => {});
   };
 
-  const saveTemplates = (updatedTemplates: Template[]) => {
-    localStorage.setItem('portfolio-templates', JSON.stringify(updatedTemplates));
-    setTemplates(updatedTemplates);
+  const saveTemplates = async (updatedTemplates: Template[]) => {
+    try {
+      await fetch('/api/settings', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ templates: updatedTemplates }) });
+      setTemplates(updatedTemplates);
+      toast({ title: 'Сохранено', description: 'Шаблоны обновлены' });
+    } catch {}
   };
 
-  const saveCalculator = (updated: CalcOptions) => {
-    localStorage.setItem('calculator-options', JSON.stringify(updated));
-    setCalcOptions(updated);
-    toast({ title: 'Сохранено', description: 'Настройки калькулятора обновлены' });
+  const saveCalculator = async (updated: CalcOptions) => {
+    try {
+      await fetch('/api/settings', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ calculator: updated }) });
+      setCalcOptions(updated);
+      toast({ title: 'Сохранено', description: 'Настройки калькулятора обновлены' });
+    } catch {}
   };
 
-  // Auto-save калькулятора с небольшой задержкой
+  // Автосохранение калькулятора с небольшой задержкой
   useEffect(() => {
     if (!isAuthenticated) return;
     const t = setTimeout(() => {
-      localStorage.setItem('calculator-options', JSON.stringify(calcOptions));
-    }, 500);
+      fetch('/api/settings', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ calculator: calcOptions }) }).catch(()=>{});
+    }, 600);
     return () => clearTimeout(t);
   }, [calcOptions, isAuthenticated]);
 
@@ -141,7 +149,26 @@ const Admin = () => {
     if (loginForm.username === "admin" && loginForm.password === "admin") {
       setIsAuthenticated(true);
       localStorage.setItem('admin-auth', 'true');
-      loadTemplates();
+      // После успешного входа – подтягиваем все настройки с сервера
+      fetch('/api/settings')
+        .then(r => r.json())
+        .then(data => {
+          if (data?.templates) setTemplates(data.templates);
+          if (data?.calculator && Object.keys(data.calculator || {}).length > 0) {
+            setCalcOptions(prev => ({ ...prev, ...(data.calculator as any) }));
+          }
+          if (data?.telegram) {
+            setTgConfig({
+              botToken: data.telegram.botToken || '',
+              username: data.telegram.username || '',
+              chatId: data.telegram.chatId || '',
+            });
+          }
+        })
+        .catch(() => {
+          // Фолбэк на загрузку только шаблонов
+          loadTemplates();
+        });
       toast({
         title: "Успешный вход",
         description: "Добро пожаловать в админ-панель!",
@@ -626,10 +653,10 @@ const Admin = () => {
                 </div>
               </div>
               <div className="flex gap-3 mt-6">
-                <GlassButton glow onClick={()=>{ localStorage.setItem('telegram-config', JSON.stringify(tgConfig)); toast({ title: 'Сохранено', description: 'Telegram настройки обновлены' }); }}>Сохранить</GlassButton>
-                <GlassButton variant="secondary" onClick={()=>{ setTgConfig({ botToken: '', username: '', chatId: '' }); localStorage.removeItem('telegram-config'); toast({ title: 'Сброшено' }); }}>Сбросить</GlassButton>
+                <GlassButton glow onClick={async ()=>{ await fetch('/api/settings', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ telegram: tgConfig }) }); toast({ title: 'Сохранено', description: 'Telegram настройки обновлены' }); }}>Сохранить</GlassButton>
+                <GlassButton variant="secondary" onClick={async ()=>{ setTgConfig({ botToken: '', username: '', chatId: '' }); await fetch('/api/settings', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ telegram: { botToken: '', username: '', chatId: '' } }) }); toast({ title: 'Сброшено' }); }}>Сбросить</GlassButton>
               </div>
-              <div className="text-sm text-foreground/60 mt-4">Данные хранятся локально в браузере.</div>
+              <div className="text-sm text-foreground/60 mt-4">Данные хранятся в общей базе (сервер).</div>
             </motion.div>
           )}
         </div>
