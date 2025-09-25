@@ -55,10 +55,11 @@ const ThemeIsland = () => {
       <motion.svg
         key="moon"
         width="22" height="22" viewBox="0 0 24 24" fill="none"
+        style={{ willChange: "transform, opacity" }}
         initial={{ rotate: -90, opacity: 0 }}
         animate={{ rotate: 0, opacity: 1 }}
         exit={{ rotate: 90, opacity: 0 }}
-        transition={{ duration: 0.35, ease: [0.16, 1, 0.3, 1] }}
+        transition={{ type: "spring", stiffness: 420, damping: 30 }}
       >
         <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" stroke="currentColor" strokeWidth="1.5" fill="currentColor" />
       </motion.svg>
@@ -67,10 +68,11 @@ const ThemeIsland = () => {
       <motion.svg
         key="sun"
         width="22" height="22" viewBox="0 0 24 24" fill="none"
+        style={{ willChange: "transform, opacity" }}
         initial={{ rotate: 90, opacity: 0 }}
         animate={{ rotate: 0, opacity: 1 }}
         exit={{ rotate: -90, opacity: 0 }}
-        transition={{ duration: 0.35, ease: [0.16, 1, 0.3, 1] }}
+        transition={{ type: "spring", stiffness: 420, damping: 30 }}
       >
         <circle cx="12" cy="12" r="4.5" stroke="currentColor" strokeWidth="1.5" />
         <path d="M12 2v2M12 20v2M4 12H2M22 12h-2M5 5l-1.4-1.4M20.4 19.4L19 18M5 19l-1.4 1.4M20.4 4.6L19 6" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />

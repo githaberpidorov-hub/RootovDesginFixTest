@@ -11,6 +11,7 @@ import Request from "./pages/Request";
 import NotFound from "./pages/NotFound";
 import ThemeIsland from "./components/ThemeIsland";
 import PageLoader from "./components/PageLoader";
+import LanguageSwitcher from "./components/LanguageSwitcher";
 
 const queryClient = new QueryClient();
 
@@ -43,6 +44,7 @@ const App = () => {
             </Routes>
           </BrowserRouter>
           <ThemeIsland />
+          <LanguageSwitcher />
         </PageLoader>
       </TooltipProvider>
     </QueryClientProvider>

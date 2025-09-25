@@ -23,6 +23,26 @@ const Portfolio = () => {
   const [filteredTemplates, setFilteredTemplates] = useState<Template[]>([]);
   const [previewByUrl, setPreviewByUrl] = useState<Record<string, string>>({});
 
+  // Variants to stagger children on mount without affecting hover animations
+  const gridVariants = {
+    hidden: {},
+    show: {
+      transition: {
+        staggerChildren: 0.08,
+        when: "beforeChildren",
+      },
+    },
+  } as const;
+
+  const cardVariants = {
+    hidden: { opacity: 0, y: 50 },
+    show: {
+      opacity: 1,
+      y: 0,
+      transition: { duration: 0.6, ease: [0.16, 1, 0.3, 1] },
+    },
+  } as const;
+
   const getPreviewImageUrl = (url?: string) => {
     if (!url) return "";
     try {
@@ -235,23 +255,17 @@ const Portfolio = () => {
           <AnimatePresence mode="wait">
             <motion.div
               key={selectedCategory}
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
+              initial="hidden"
+              animate="show"
               exit={{ opacity: 0, y: -20 }}
-              transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
+              variants={gridVariants}
               className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8"
             >
               {filteredTemplates.map((template, index) => (
                 <OptimizedMotion
                   key={template.id}
-                  initial={{ opacity: 0, y: 50 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ 
-                    duration: 0.6,
-                    ease: [0.16, 1, 0.3, 1],
-                    delay: index * 0.1 
-                  }}
-                  whileHover={{ scale: 1.02, y: -10 }}
+                  variants={cardVariants}
+                  whileHover={{ scale: 1.02, y: -10, transition: { duration: 0.18, ease: "easeOut", delay: 0 } }}
                   className="glass-card overflow-hidden group cursor-pointer"
                   mobileOptimized={true}
                 >

@@ -11,13 +11,6 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   }
 
   try {
-    const botToken = process.env.TELEGRAM_BOT_TOKEN;
-    const chatId = process.env.TELEGRAM_CHAT_ID;
-
-    if (!botToken || !chatId) {
-      return res.status(500).json({ ok: false, error: "Telegram is not configured" });
-    }
-
     // Be robust to body being a string or already-parsed object
     let parsed: any = undefined;
     if (typeof req.body === "string") {
@@ -28,6 +21,17 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       }
     } else {
       parsed = req.body || {};
+    }
+
+    // Allow overriding bot token and chat id from request body (e.g., when running locally)
+    const overrideToken = typeof parsed?.botToken === 'string' ? parsed.botToken.trim() : '';
+    const overrideChatId = typeof parsed?.chatId === 'string' ? parsed.chatId.trim() : '';
+
+    const botToken = overrideToken || process.env.TELEGRAM_BOT_TOKEN;
+    const chatId = overrideChatId || process.env.TELEGRAM_CHAT_ID;
+
+    if (!botToken || !chatId) {
+      return res.status(500).json({ ok: false, error: "Telegram is not configured" });
     }
 
     const { text } = (parsed as { text?: string }) || {};

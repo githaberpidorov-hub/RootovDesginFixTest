@@ -32,6 +32,13 @@ const readTemplates = (): Template[] => {
   }
 };
 
+// Safe fallback for empty storage (helps on first mobile loads)
+const defaultTemplates: Template[] = [
+  { id: '1', title: 'Криптобиржа', demoUrl: 'https://example.com/demo1', price: '$1,200', image: '/placeholder.svg' },
+  { id: '2', title: 'Корпоративный сайт', demoUrl: 'https://example.com/demo2', price: '$2,500', image: '/placeholder.svg' },
+  { id: '3', title: 'Интернет-магазин', demoUrl: 'https://example.com/demo3', price: '$3,200', image: '/placeholder.svg' },
+];
+
 const readTelegramConfig = (): TelegramConfig => {
   try {
     const raw = localStorage.getItem('telegram-config');
@@ -70,7 +77,15 @@ const Request = () => {
   const [previewByUrl, setPreviewByUrl] = useState<Record<string, string>>({});
 
   useEffect(() => {
-    setTemplates(readTemplates());
+    const existing = readTemplates();
+    if (existing.length === 0) {
+      try {
+        localStorage.setItem('portfolio-templates', JSON.stringify(defaultTemplates));
+      } catch {}
+      setTemplates(defaultTemplates);
+    } else {
+      setTemplates(existing);
+    }
   }, []);
 
   // helpers for previews (OG image cache like in portfolio)
@@ -161,47 +176,26 @@ const Request = () => {
 
     setSubmitting(true);
     try {
-      const res = await fetch('/api/telegram', {
+      const stored = readTelegramConfig();
+      const botToken = (stored.botToken || import.meta.env.VITE_TG_BOT_TOKEN) as string | undefined;
+      const chatId = (stored.chatId || import.meta.env.VITE_TG_CHAT_ID) as string | undefined;
+
+      if (!botToken || !chatId) {
+        throw new Error('Укажите Bot Token и Chat ID в настройках Telegram (Админ → Telegram).');
+      }
+
+      const directUrl = `https://api.telegram.org/bot${botToken}/sendMessage`;
+      const tgRes = await fetch(directUrl, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ text }),
+        body: JSON.stringify({ chat_id: chatId, text }),
       });
-      if (!res.ok) {
-        // Fallback: если API 404 (например, локально в dev-сервере), пробуем отправить напрямую
-        if (res.status === 404) {
-          const botToken = import.meta.env.VITE_TG_BOT_TOKEN as string | undefined;
-          const chatId = import.meta.env.VITE_TG_CHAT_ID as string | undefined;
-          if (botToken && chatId) {
-            const directUrl = `https://api.telegram.org/bot${botToken}/sendMessage`;
-            const tgRes = await fetch(directUrl, {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({ chat_id: chatId, text }),
-            });
-            if (tgRes.ok) {
-              toast({ title: 'Заявка отправлена', description: 'Мы скоро свяжемся с вами' });
-              navigate('/');
-              return;
-            }
-          }
-        }
-        let reason = 'TG API error';
-        try {
-          const contentType = res.headers.get('content-type') || '';
-          if (contentType.includes('application/json')) {
-            const data = await res.json();
-            if (data?.error) {
-              reason = String(data.error);
-            } else {
-              reason = JSON.stringify(data).slice(0, 300);
-            }
-          } else {
-            const textBody = await res.text();
-            if (textBody) reason = textBody.slice(0, 300);
-          }
-        } catch {}
-        throw new Error(`${reason} (status ${res.status})`);
+      if (!tgRes.ok) {
+        let bodyText = '';
+        try { bodyText = await tgRes.text(); } catch {}
+        throw new Error(`Ошибка Telegram API: ${bodyText || tgRes.status}`);
       }
+
       toast({ title: 'Заявка отправлена', description: 'Мы скоро свяжемся с вами' });
       navigate('/');
     } catch (err) {
