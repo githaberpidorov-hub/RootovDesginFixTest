@@ -77,15 +77,32 @@ const Request = () => {
   const [previewByUrl, setPreviewByUrl] = useState<Record<string, string>>({});
 
   useEffect(() => {
-    const existing = readTemplates();
-    if (existing.length === 0) {
-      try {
-        localStorage.setItem('portfolio-templates', JSON.stringify(defaultTemplates));
-      } catch {}
-      setTemplates(defaultTemplates);
-    } else {
-      setTemplates(existing);
-    }
+    // Пытаемся загрузить серверные шаблоны; на случай оффлайна — локальный фолбэк
+    fetch('/api/settings')
+      .then(r => r.json())
+      .then(data => {
+        if (Array.isArray(data?.templates) && data.templates.length) {
+          setTemplates(data.templates);
+          try { localStorage.setItem('portfolio-templates', JSON.stringify(data.templates)); } catch {}
+        } else {
+          const existing = readTemplates();
+          if (existing.length === 0) {
+            try { localStorage.setItem('portfolio-templates', JSON.stringify(defaultTemplates)); } catch {}
+            setTemplates(defaultTemplates);
+          } else {
+            setTemplates(existing);
+          }
+        }
+      })
+      .catch(() => {
+        const existing = readTemplates();
+        if (existing.length === 0) {
+          try { localStorage.setItem('portfolio-templates', JSON.stringify(defaultTemplates)); } catch {}
+          setTemplates(defaultTemplates);
+        } else {
+          setTemplates(existing);
+        }
+      });
   }, []);
 
   // helpers for previews (OG image cache like in portfolio)
@@ -176,24 +193,15 @@ const Request = () => {
 
     setSubmitting(true);
     try {
-      const stored = readTelegramConfig();
-      const botToken = (stored.botToken || import.meta.env.VITE_TG_BOT_TOKEN) as string | undefined;
-      const chatId = (stored.chatId || import.meta.env.VITE_TG_CHAT_ID) as string | undefined;
-
-      if (!botToken || !chatId) {
-        throw new Error('Укажите Bot Token и Chat ID в настройках Telegram (Админ → Telegram).');
-      }
-
-      const directUrl = `https://api.telegram.org/bot${botToken}/sendMessage`;
-      const tgRes = await fetch(directUrl, {
+      // Отправляем через наш серверный эндпоинт — он сам достанет токены из БД
+      const tgRes = await fetch('/api/telegram', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ chat_id: chatId, text }),
+        body: JSON.stringify({ text }),
       });
-      if (!tgRes.ok) {
-        let bodyText = '';
-        try { bodyText = await tgRes.text(); } catch {}
-        throw new Error(`Ошибка Telegram API: ${bodyText || tgRes.status}`);
+      const tgJson = await tgRes.json().catch(()=>({ ok:false }));
+      if (!tgRes.ok || !tgJson?.ok) {
+        throw new Error(tgJson?.error || `Ошибка сервера (${tgRes.status})`);
       }
 
       toast({ title: 'Заявка отправлена', description: 'Мы скоро свяжемся с вами' });

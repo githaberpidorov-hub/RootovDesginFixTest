@@ -62,7 +62,7 @@ const Portfolio = () => {
     { id: "portfolio", name: "Портфолио" },
   ];
 
-  // Mock data - в реальном проекте это будет из API/базы данных
+  // Mock data — fallback, в проде подменяется данными с сервера
   const mockTemplates: Template[] = [
     {
       id: "1",
@@ -127,14 +127,31 @@ const Portfolio = () => {
   ];
 
   useEffect(() => {
-    // Загрузка шаблонов из localStorage или API
-    const savedTemplates = localStorage.getItem('portfolio-templates');
-    if (savedTemplates) {
-      setTemplates(JSON.parse(savedTemplates));
-    } else {
-      setTemplates(mockTemplates);
-      localStorage.setItem('portfolio-templates', JSON.stringify(mockTemplates));
-    }
+    // Пытаемся загрузить с сервера; если недоступен — используем локальный фолбэк
+    fetch('/api/settings')
+      .then(r => r.json())
+      .then(data => {
+        if (Array.isArray(data?.templates) && data.templates.length) {
+          setTemplates(data.templates);
+          try { localStorage.setItem('portfolio-templates', JSON.stringify(data.templates)); } catch {}
+        } else {
+          const saved = localStorage.getItem('portfolio-templates');
+          if (saved) {
+            setTemplates(JSON.parse(saved));
+          } else {
+            setTemplates(mockTemplates);
+            try { localStorage.setItem('portfolio-templates', JSON.stringify(mockTemplates)); } catch {}
+          }
+        }
+      })
+      .catch(() => {
+        const saved = localStorage.getItem('portfolio-templates');
+        if (saved) {
+          setTemplates(JSON.parse(saved));
+        } else {
+          setTemplates(mockTemplates);
+        }
+      });
   }, []);
 
   // Подтянуть OG-изображение с сайта (если он его предоставляет),
