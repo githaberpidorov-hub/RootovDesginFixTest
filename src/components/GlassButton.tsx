@@ -9,7 +9,7 @@ interface GlassButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement>
 
 const GlassButton = forwardRef<HTMLButtonElement, GlassButtonProps>(
   ({ className, variant = "primary", size = "md", glow = false, children, ...props }, ref) => {
-    const baseStyles = "glass-button relative flex items-center justify-center font-medium transition-all duration-300 ease-out focus:outline-none disabled:opacity-50 disabled:cursor-not-allowed border bg-white/5 border-white/10 backdrop-blur-xl shadow-[0_6px_24px_rgba(0,0,0,0.28)] will-change-transform";
+    const baseStyles = "glass-button relative flex items-center justify-center font-medium transition-all duration-300 ease-out focus:outline-none disabled:opacity-50 disabled:cursor-not-allowed border bg-white/5 border-white/10 backdrop-blur-xl shadow-[0_6px_24px_rgba(0,0,0,0.28)] will-change-transform overflow-hidden";
     
     const variants = {
       primary: "text-foreground hover:text-foreground",
@@ -41,8 +41,8 @@ const GlassButton = forwardRef<HTMLButtonElement, GlassButtonProps>(
         {...props}
       >
         {/* Subtle inner highlight */}
-        <div className="pointer-events-none absolute inset-0 rounded-inherit">
-          <div className="absolute inset-px rounded-inherit" style={{
+        <div className="pointer-events-none absolute inset-0 rounded-[inherit]">
+          <div className="absolute inset-px rounded-[inherit]" style={{
             background: "linear-gradient(180deg, rgba(255,255,255,0.10), rgba(255,255,255,0.02))"
           }} />
         </div>
