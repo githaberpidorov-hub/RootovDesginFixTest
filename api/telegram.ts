@@ -1,4 +1,5 @@
 import type { VercelRequest, VercelResponse } from "@vercel/node";
+import { getSupabase } from "./_supabase";
 
 // Serverless function to send a Telegram message using bot token and chat id
 // Configure environment variables in Vercel dashboard:
@@ -27,8 +28,20 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     const overrideToken = typeof parsed?.botToken === 'string' ? parsed.botToken.trim() : '';
     const overrideChatId = typeof parsed?.chatId === 'string' ? parsed.chatId.trim() : '';
 
-    const botToken = overrideToken || process.env.TELEGRAM_BOT_TOKEN;
-    const chatId = overrideChatId || process.env.TELEGRAM_CHAT_ID;
+    let botToken = overrideToken || process.env.TELEGRAM_BOT_TOKEN;
+    let chatId = overrideChatId || process.env.TELEGRAM_CHAT_ID;
+
+    // Fallback: read from Supabase settings
+    if (!botToken || !chatId) {
+      try {
+        const supabase = getSupabase();
+        const { data, error } = await supabase.from('settings').select('value').eq('key','telegram').single();
+        if (!error && data?.value) {
+          botToken = botToken || data.value.botToken;
+          chatId = chatId || data.value.chatId;
+        }
+      } catch {}
+    }
 
     if (!botToken || !chatId) {
       return res.status(500).json({ ok: false, error: "Telegram is not configured" });
