@@ -61,9 +61,10 @@ export default async function handler(req: any, res: any) {
         .eq('language', language)
         .single();
 
-      if (fetchError && fetchError.code !== 'PGRST116') {
+      // В разных версиях postgrest коды могут отличаться. Если просто нет строки — existingData будет null
+      if (fetchError && fetchError.message && !String(fetchError.message).toLowerCase().includes('row not found')) {
         console.error('Error fetching existing config:', fetchError);
-        return res.status(500).json({ ok: false, error: 'Failed to fetch existing config' });
+        return res.status(500).json({ ok: false, error: fetchError.message });
       }
 
       if (existingData) {
@@ -86,7 +87,7 @@ export default async function handler(req: any, res: any) {
 
         if (error) {
           console.error('Error updating calculator config:', error);
-          return res.status(500).json({ ok: false, error: 'Failed to update calculator config' });
+          return res.status(500).json({ ok: false, error: error.message });
         }
 
         return res.status(200).json({ ok: true, config: data });
@@ -100,7 +101,7 @@ export default async function handler(req: any, res: any) {
 
         if (error) {
           console.error('Error creating calculator config:', error);
-          return res.status(500).json({ ok: false, error: 'Failed to create calculator config' });
+          return res.status(500).json({ ok: false, error: error.message });
         }
 
         return res.status(201).json({ ok: true, config: data });
@@ -108,8 +109,8 @@ export default async function handler(req: any, res: any) {
     }
 
     return res.status(405).json({ ok: false, error: 'Method not allowed' });
-  } catch (error) {
+  } catch (error: any) {
     console.error('API Error:', error);
-    return res.status(500).json({ ok: false, error: 'Internal server error' });
+    return res.status(500).json({ ok: false, error: error?.message || 'Internal server error' });
   }
 }

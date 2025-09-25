@@ -44,20 +44,31 @@ export default async function handler(req: any, res: any) {
     if (req.method === "POST") {
       const { language = "RU" } = req.query;
       const body = typeof req.body === 'string' ? JSON.parse(req.body) : req.body;
-      
+
+      // Определяем базовые значения из любого переданного языка
+      const titleAny = body.title_ru || body.title_eng || body.title_uk || body.title;
+      const descAny = body.description_ru || body.description_eng || body.description_uk || body.description;
+
       const templateData = {
-        title_ru: body.title_ru || body.title,
-        title_eng: body.title_eng || body.title,
-        title_uk: body.title_uk || body.title,
-        description_ru: body.description_ru || body.description,
-        description_eng: body.description_eng || body.description,
-        description_uk: body.description_uk || body.description,
+        // Заполняем все языки. Если пришло только одно поле (например, title_ru) —
+        // остальные языки получат то же значение, чтобы не нарушать NOT NULL
+        title_ru: body.title_ru ?? titleAny,
+        title_eng: body.title_eng ?? titleAny,
+        title_uk: body.title_uk ?? titleAny,
+        description_ru: body.description_ru ?? descAny,
+        description_eng: body.description_eng ?? descAny,
+        description_uk: body.description_uk ?? descAny,
         category: body.category,
         image: body.image,
         technologies: body.technologies || [],
         demo_url: body.demoUrl || body.demo_url,
         price: body.price,
-      };
+      } as any;
+
+      // Быстрая валидация обязательных полей
+      if (!templateData.title_ru || !templateData.description_ru || !templateData.category || !templateData.price) {
+        return res.status(400).json({ ok: false, error: 'Missing required fields' });
+      }
 
       const { data, error } = await supabase
         .from('templates')
@@ -65,7 +76,7 @@ export default async function handler(req: any, res: any) {
         .select()
         .single();
 
-      if (error) throw error;
+      if (error) return res.status(500).json({ ok: false, error: error.message });
 
       return res.status(201).json({ ok: true, template: data });
     }
@@ -95,7 +106,7 @@ export default async function handler(req: any, res: any) {
         .select()
         .single();
 
-      if (error) throw error;
+      if (error) return res.status(500).json({ ok: false, error: error.message });
 
       return res.status(200).json({ ok: true, template: data });
     }
@@ -108,7 +119,7 @@ export default async function handler(req: any, res: any) {
         .delete()
         .eq('id', id);
 
-      if (error) throw error;
+      if (error) return res.status(500).json({ ok: false, error: error.message });
 
       return res.status(200).json({ ok: true });
     }
