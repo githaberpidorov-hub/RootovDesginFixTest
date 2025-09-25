@@ -141,7 +141,10 @@ const Home = () => {
                   <span className="text-2xl font-bold text-gradient">
                     {service.price}
                   </span>
-                  <Link to="/portfolio">
+                  <Link 
+                    to="/portfolio" 
+                    onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
+                  >
                     <GlassButton variant="ghost" size="sm">
                       Подробнее
                     </GlassButton>
@@ -220,7 +223,10 @@ const Home = () => {
                   Связаться с нами
                 </GlassButton>
               </a>
-              <Link to="/portfolio">
+              <Link 
+                to="/portfolio" 
+                onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
+              >
                 <GlassButton variant="secondary" size="lg">
                   Посмотреть портфолио
                 </GlassButton>
