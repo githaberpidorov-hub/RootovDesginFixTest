@@ -167,6 +167,24 @@ const Request = () => {
         body: JSON.stringify({ text }),
       });
       if (!res.ok) {
+        // Fallback: если API 404 (например, локально в dev-сервере), пробуем отправить напрямую
+        if (res.status === 404) {
+          const botToken = import.meta.env.VITE_TG_BOT_TOKEN as string | undefined;
+          const chatId = import.meta.env.VITE_TG_CHAT_ID as string | undefined;
+          if (botToken && chatId) {
+            const directUrl = `https://api.telegram.org/bot${botToken}/sendMessage`;
+            const tgRes = await fetch(directUrl, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ chat_id: chatId, text }),
+            });
+            if (tgRes.ok) {
+              toast({ title: 'Заявка отправлена', description: 'Мы скоро свяжемся с вами' });
+              navigate('/');
+              return;
+            }
+          }
+        }
         let reason = 'TG API error';
         try {
           const contentType = res.headers.get('content-type') || '';
