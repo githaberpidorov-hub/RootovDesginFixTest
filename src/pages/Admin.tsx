@@ -5,6 +5,8 @@ import Navigation from "@/components/Navigation";
 import LiquidBackground from "@/components/LiquidBackground";
 import GlassButton from "@/components/GlassButton";
 import { useToast } from "@/hooks/use-toast";
+import { useLanguage } from "@/hooks/use-language";
+import { getAvailableLanguages, getLanguageLabel, LanguageCode } from "@/lib/i18n";
 
 interface Template {
   id: string;
@@ -24,6 +26,7 @@ interface LoginForm {
 
 const Admin = () => {
   const navigate = useNavigate();
+  const { t, language: currentLanguage } = useLanguage();
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [activeTab, setActiveTab] = useState<'templates' | 'calculator' | 'telegram'>('templates');
   const [loginForm, setLoginForm] = useState<LoginForm>({ username: "", password: "" });
@@ -42,6 +45,10 @@ const Admin = () => {
   const [techInput, setTechInput] = useState("");
   const { toast } = useToast();
   const [tgConfig, setTgConfig] = useState({ botToken: '', username: '', chatId: '' });
+  
+  // Language selector for admin editing
+  const [adminEditingLanguage, setAdminEditingLanguage] = useState<LanguageCode>('RU');
+  const availableLanguages = getAvailableLanguages();
 
   // Calculator config (editable)
   type CalcOptions = {
@@ -85,10 +92,10 @@ const Admin = () => {
   });
 
   const categories = [
-    { id: "landing", name: "Лендинги" },
-    { id: "corporate", name: "Корпоративные" },
-    { id: "ecommerce", name: "E-commerce" },
-    { id: "portfolio", name: "Портфолио" },
+    { id: "landing", name: t.admin.templates.categories.landing },
+    { id: "corporate", name: t.admin.templates.categories.corporate },
+    { id: "ecommerce", name: t.admin.templates.categories.ecommerce },
+    { id: "portfolio", name: t.admin.templates.categories.portfolio },
   ];
 
   useEffect(() => {
@@ -96,39 +103,158 @@ const Admin = () => {
     const authStatus = localStorage.getItem('admin-auth');
     if (authStatus === 'true') {
       setIsAuthenticated(true);
-      // Загружаем все настройки из серверной БД
+      // Загружаем шаблоны с учетом текущего языка
+      loadTemplates();
+      // Загружаем остальные настройки
       fetch('/api/settings')
         .then(r => r.json())
         .then(data => {
-          if (data?.templates) setTemplates(data.templates);
           if (data?.calculator && Object.keys(data.calculator || {}).length > 0) setCalcOptions(prev=> ({ ...prev, ...(data.calculator as any) }));
           if (data?.telegram) setTgConfig({ botToken: data.telegram.botToken || '', username: data.telegram.username || '', chatId: data.telegram.chatId || '' });
         })
         .catch(() => {
-          // Фолбэк на локальные данные, если сервер пока пуст
-          loadTemplates();
+          console.warn('Failed to load settings from API');
         });
     }
-  }, []);
+  }, [t.language]);
 
-  const loadTemplates = () => {
-    fetch('/api/settings')
-      .then(r => r.json())
-      .then(data => { if (data?.templates) setTemplates(data.templates); })
-      .catch(() => {});
+  const loadTemplates = async () => {
+    try {
+      const response = await fetch(`/api/templates?language=${t.language}`);
+      const data = await response.json();
+      
+      if (data.ok && Array.isArray(data.templates)) {
+        setTemplates(data.templates);
+      }
+    } catch (error) {
+      console.warn('Failed to load templates from API:', error);
+    }
+  };
+
+  const loadCalculatorConfig = async () => {
+    try {
+      const response = await fetch(`/api/calculator?language=${adminEditingLanguage}`);
+      const data = await response.json();
+
+      if (data.ok && data.config) {
+        const config = data.config;
+        setCalcOptions({
+          websiteType: Object.entries(config[`website_type_${adminEditingLanguage.toLowerCase()}`] || {}).map(([id, value]: [string, any]) => ({
+            id,
+            name: value.label || id,
+            price: value.price || 0
+          })),
+          complexity: Object.entries(config[`complexity_${adminEditingLanguage.toLowerCase()}`] || {}).map(([id, value]: [string, any]) => ({
+            id,
+            name: value.label || id,
+            multiplier: value.multiplier || 1
+          })),
+          timeline: Object.entries(config[`timeline_${adminEditingLanguage.toLowerCase()}`] || {}).map(([id, value]: [string, any]) => ({
+            id,
+            name: value.label || id,
+            multiplier: value.multiplier || 1
+          })),
+          features: Object.entries(config[`features_${adminEditingLanguage.toLowerCase()}`] || {}).map(([id, value]: [string, any]) => ({
+            id,
+            name: value.label || id,
+            price: value.price || 0
+          })),
+          design: Object.entries(config[`design_${adminEditingLanguage.toLowerCase()}`] || {}).map(([id, value]: [string, any]) => ({
+            id,
+            name: value.label || id,
+            price: value.price || 0
+          }))
+        });
+      }
+    } catch (error) {
+      console.warn('Failed to load calculator config from API:', error);
+    }
+  };
+
+  const saveCalculatorConfig = async () => {
+    try {
+      const configData = {
+        language: adminEditingLanguage,
+        [`website_type_${adminEditingLanguage.toLowerCase()}`]: Object.fromEntries(
+          calcOptions.websiteType.map(opt => [opt.id, { label: opt.name, price: opt.price }])
+        ),
+        [`complexity_${adminEditingLanguage.toLowerCase()}`]: Object.fromEntries(
+          calcOptions.complexity.map(opt => [opt.id, { label: opt.name, multiplier: opt.multiplier }])
+        ),
+        [`timeline_${adminEditingLanguage.toLowerCase()}`]: Object.fromEntries(
+          calcOptions.timeline.map(opt => [opt.id, { label: opt.name, multiplier: opt.multiplier }])
+        ),
+        [`features_${adminEditingLanguage.toLowerCase()}`]: Object.fromEntries(
+          calcOptions.features.map(opt => [opt.id, { label: opt.name, price: opt.price }])
+        ),
+        [`design_${adminEditingLanguage.toLowerCase()}`]: Object.fromEntries(
+          calcOptions.design.map(opt => [opt.id, { label: opt.name, price: opt.price }])
+        )
+      };
+
+      const response = await fetch('/api/calculator', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(configData)
+      });
+
+      if (response.ok) {
+        toast({
+          title: t.common.success,
+          description: "Конфигурация калькулятора сохранена",
+        });
+      } else {
+        throw new Error('Failed to save calculator config');
+      }
+    } catch (error) {
+      toast({
+        title: t.common.error,
+        description: "Не удалось сохранить конфигурацию калькулятора",
+        variant: "destructive",
+      });
+    }
   };
 
   const saveTemplates = async (updatedTemplates: Template[]) => {
     try {
-      const r = await fetch('/api/settings', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ templates: updatedTemplates }) });
-      const j = await r.json().catch(()=>({ ok:false, error:'Ошибка парсинга ответа' }));
-      if (!r.ok || !j?.ok) {
-        throw new Error(j?.error || `Ошибка сервера (${r.status})`);
-      }
+      // Для каждого шаблона отправляем отдельный запрос
+      const promises = updatedTemplates.map(template => {
+        const templateData = {
+          title_ru: template.title,
+          title_eng: template.title,
+          title_uk: template.title,
+          description_ru: template.description,
+          description_eng: template.description,
+          description_uk: template.description,
+          category: template.category,
+          image: template.image,
+          technologies: template.technologies,
+          demoUrl: template.demoUrl,
+          price: template.price,
+        };
+
+        if (template.id && template.id !== 'new') {
+          // Обновляем существующий
+          return fetch(`/api/templates?id=${template.id}`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(templateData)
+          });
+        } else {
+          // Создаем новый
+          return fetch('/api/templates', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(templateData)
+          });
+        }
+      });
+
+      await Promise.all(promises);
       setTemplates(updatedTemplates);
-      toast({ title: 'Сохранено', description: 'Шаблоны обновлены' });
+      toast({ title: t.common.success, description: 'Шаблоны обновлены' });
     } catch (e:any) {
-      toast({ title: 'Не удалось сохранить', description: String(e?.message||e||'Неизвестная ошибка'), variant:'destructive' });
+      toast({ title: t.common.error, description: String(e?.message||e||'Неизвестная ошибка'), variant:'destructive' });
     }
   };
 
@@ -191,13 +317,13 @@ const Admin = () => {
           loadTemplates();
         });
       toast({
-        title: "Успешный вход",
-        description: "Добро пожаловать в админ-панель!",
+        title: t.common.success,
+        description: t.admin.login.success,
       });
     } else {
       toast({
-        title: "Ошибка входа",
-        description: "Неверный логин ли пароль",
+        title: t.common.error,
+        description: t.admin.login.error,
         variant: "destructive",
       });
     }
@@ -238,68 +364,106 @@ const Admin = () => {
     }
   };
 
-  const handleSaveTemplate = () => {
+  const handleSaveTemplate = async () => {
     const templateData = editingTemplate || newTemplate;
     
     if (!templateData.title || !templateData.description || !templateData.price) {
       toast({
-        title: "Ошибка",
+        title: t.common.error,
         description: "Заполните все обязательные поля",
         variant: "destructive",
       });
       return;
     }
 
-    if (editingTemplate) {
-      // Редактирование существующего шаблона
-      const updatedTemplates = templates.map(t => 
-        t.id === editingTemplate.id ? editingTemplate : t
-      );
-      saveTemplates(updatedTemplates);
-      setEditingTemplate(null);
-      toast({
-        title: "Шаблон обновлен",
-        description: "Изменения сохранены успешно",
-      });
-    } else {
-      // Добавление нового шаблона
-      const template: Template = {
-        id: Date.now().toString(),
-        title: templateData.title!,
-        description: templateData.description!,
+    try {
+      const templatePayload = {
+        [`title_${adminEditingLanguage.toLowerCase()}`]: templateData.title!,
+        [`description_${adminEditingLanguage.toLowerCase()}`]: templateData.description!,
         category: templateData.category!,
         image: templateData.image || "/api/placeholder/600/400",
         technologies: templateData.technologies || [],
         demoUrl: templateData.demoUrl,
         price: templateData.price!,
       };
-      
-      const updatedTemplates = [...templates, template];
-      saveTemplates(updatedTemplates);
-      setNewTemplate({
-        title: "",
-        description: "",
-        category: "landing",
-        image: "",
-        technologies: [],
-        demoUrl: "",
-        price: "",
-      });
-      setIsAddingTemplate(false);
+
+      if (editingTemplate) {
+        // Редактирование существующего шаблона
+        const response = await fetch(`/api/templates?id=${editingTemplate.id}`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(templatePayload)
+        });
+        
+        if (response.ok) {
+          await loadTemplates();
+          setEditingTemplate(null);
+          toast({
+            title: t.common.success,
+            description: "Шаблон обновлен",
+          });
+        } else {
+          throw new Error('Failed to update template');
+        }
+      } else {
+        // Добавление нового шаблона
+        const response = await fetch('/api/templates', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(templatePayload)
+        });
+        
+        if (response.ok) {
+          await loadTemplates();
+          setNewTemplate({
+            title: "",
+            description: "",
+            category: "landing",
+            image: "",
+            technologies: [],
+            demoUrl: "",
+            price: "",
+          });
+          setIsAddingTemplate(false);
+          toast({
+            title: t.common.success,
+            description: "Шаблон добавлен",
+          });
+        } else {
+          throw new Error('Failed to create template');
+        }
+      }
+    } catch (error) {
       toast({
-        title: "Шаблон добавлен",
-        description: "Новый шаблон успешно создан",
+        title: t.common.error,
+        description: "Не удалось сохранить шаблон",
+        variant: "destructive",
       });
     }
   };
 
-  const handleDeleteTemplate = (id: string) => {
-    const updatedTemplates = templates.filter(t => t.id !== id);
-    saveTemplates(updatedTemplates);
-    toast({
-      title: "Шаблон удален",
-      description: "Шаблон успешно удален из портфолио",
-    });
+  const handleDeleteTemplate = async (id: string) => {
+    try {
+      const response = await fetch(`/api/templates?id=${id}`, {
+        method: 'DELETE'
+      });
+      
+      if (response.ok) {
+        await loadTemplates();
+        toast({
+          title: t.common.success,
+          description: "Шаблон удален",
+        });
+      } else {
+        throw new Error('Failed to delete template');
+      }
+    } catch (error) {
+      toast({
+        title: t.common.error,
+        description: "Не удалось удалить шаблон",
+        variant: "destructive",
+      });
+    }
   };
 
   const cancelEdit = () => {
@@ -329,12 +493,12 @@ const Admin = () => {
           className="glass-card p-8 w-full max-w-md"
         >
           <h1 className="text-3xl font-bold text-gradient text-center mb-8">
-            Админ-панель
+            {t.admin.login.title}
           </h1>
           
           <form onSubmit={handleLogin} className="space-y-6">
             <div>
-              <label className="block text-foreground/80 mb-2 font-medium">Логин</label>
+              <label className="block text-foreground/80 mb-2 font-medium">{t.admin.login.username}</label>
               <input
                 type="text"
                 value={loginForm.username}
@@ -346,7 +510,7 @@ const Admin = () => {
             </div>
             
             <div>
-              <label className="block text-foreground/80 mb-2 font-medium">Пароль</label>
+              <label className="block text-foreground/80 mb-2 font-medium">{t.admin.login.password}</label>
               <input
                 type="password"
                 value={loginForm.password}
@@ -358,7 +522,7 @@ const Admin = () => {
             </div>
             
             <GlassButton type="submit" className="w-full" glow>
-              Войти
+              {t.admin.login.submit}
             </GlassButton>
           </form>
         </motion.div>
@@ -380,23 +544,44 @@ const Admin = () => {
             transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
             className="flex flex-col gap-6 md:flex-row md:items-end md:justify-between mb-12"
           >
-            <h1 className="text-4xl md:text-5xl font-bold text-gradient">
-              Админ-панель
-            </h1>
+            <div>
+              <h1 className="text-4xl md:text-5xl font-bold text-gradient mb-4">
+                {t.admin.title}
+              </h1>
+              {/* Language Selector */}
+              <div className="flex items-center gap-3">
+                <span className="text-sm text-foreground/70">{t.admin.languageSelector}:</span>
+                <div className="flex gap-2">
+                  {availableLanguages.map((lang) => (
+                    <button
+                      key={lang.code}
+                      onClick={() => setAdminEditingLanguage(lang.code)}
+                      className={`px-3 py-1 rounded-lg text-sm transition-colors ${
+                        adminEditingLanguage === lang.code
+                          ? 'bg-white/20 text-white border border-white/30'
+                          : 'bg-white/5 text-foreground/70 border border-white/10 hover:bg-white/10'
+                      }`}
+                    >
+                      {lang.label}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            </div>
             <div className="flex gap-4">
               <GlassButton onClick={() => setIsAddingTemplate(true)}>
-                Добавить шаблон
+                {t.admin.templates.add}
               </GlassButton>
               <GlassButton variant="secondary" onClick={handleLogout}>
-                Выйти
+                {t.common.back}
               </GlassButton>
             </div>
           </motion.div>
 
           <div className="flex gap-2 mb-10">
-            <button onClick={() => setActiveTab('templates')} className={`px-4 py-2 rounded-xl border ${activeTab==='templates' ? 'border-white/30 bg-white/10' : 'border-white/10 hover:border-white/20'}`}>Шаблоны</button>
-            <button onClick={() => setActiveTab('calculator')} className={`px-4 py-2 rounded-xl border ${activeTab==='calculator' ? 'border-white/30 bg-white/10' : 'border-white/10 hover:border-white/20'}`}>Калькулятор</button>
-            <button onClick={() => setActiveTab('telegram')} className={`px-4 py-2 rounded-xl border ${activeTab==='telegram' ? 'border-white/30 bg-white/10' : 'border-white/10 hover:border-white/20'}`}>Telegram</button>
+            <button onClick={() => setActiveTab('templates')} className={`px-4 py-2 rounded-xl border ${activeTab==='templates' ? 'border-white/30 bg-white/10' : 'border-white/10 hover:border-white/20'}`}>{t.admin.tabs.templates}</button>
+            <button onClick={() => setActiveTab('calculator')} className={`px-4 py-2 rounded-xl border ${activeTab==='calculator' ? 'border-white/30 bg-white/10' : 'border-white/10 hover:border-white/20'}`}>{t.admin.tabs.calculator}</button>
+            <button onClick={() => setActiveTab('telegram')} className={`px-4 py-2 rounded-xl border ${activeTab==='telegram' ? 'border-white/30 bg-white/10' : 'border-white/10 hover:border-white/20'}`}>{t.admin.tabs.telegram}</button>
           </div>
 
           {/* Add/Edit Template Form */}
@@ -410,12 +595,15 @@ const Admin = () => {
                 className="glass-card p-8 mb-12"
               >
                 <h2 className="text-2xl font-bold text-gradient mb-6">
-                  {editingTemplate ? "Редактировать шаблон" : "Добавить новый шаблон"}
+                  {editingTemplate ? t.admin.templates.edit : t.admin.templates.add}
                 </h2>
+                <div className="text-sm text-foreground/60 bg-white/5 px-3 py-1 rounded-lg inline-block mb-4">
+                  {t.admin.templates.form.currentLanguage}: {getLanguageLabel(adminEditingLanguage)}
+                </div>
                 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div>
-                    <label className="block text-foreground/80 mb-2 font-medium">Название *</label>
+                    <label className="block text-foreground/80 mb-2 font-medium">{t.admin.templates.form.title}</label>
                     <input
                       type="text"
                       value={editingTemplate ? editingTemplate.title : newTemplate.title}
@@ -432,7 +620,7 @@ const Admin = () => {
                   </div>
                   
                   <div>
-                    <label className="block text-foreground/80 mb-2 font-medium">Категория</label>
+                    <label className="block text-foreground/80 mb-2 font-medium">{t.admin.templates.form.category}</label>
                     <select
                       value={editingTemplate ? editingTemplate.category : newTemplate.category}
                       onChange={(e) => {
@@ -453,7 +641,7 @@ const Admin = () => {
                   </div>
                   
                   <div className="md:col-span-2">
-                    <label className="block text-foreground/80 mb-2 font-medium">Описание *</label>
+                    <label className="block text-foreground/80 mb-2 font-medium">{t.admin.templates.form.description}</label>
                     <textarea
                       value={editingTemplate ? editingTemplate.description : newTemplate.description}
                       onChange={(e) => {
@@ -470,7 +658,7 @@ const Admin = () => {
                   </div>
                   
                   <div>
-                    <label className="block text-foreground/80 mb-2 font-medium">Цена *</label>
+                    <label className="block text-foreground/80 mb-2 font-medium">{t.admin.templates.form.price}</label>
                     <input
                       type="text"
                       value={editingTemplate ? editingTemplate.price : newTemplate.price}
@@ -488,7 +676,7 @@ const Admin = () => {
                   </div>
                   
                   <div>
-                    <label className="block text-foreground/80 mb-2 font-medium">Demo URL</label>
+                    <label className="block text-foreground/80 mb-2 font-medium">{t.admin.templates.form.demoUrl}</label>
                     <input
                       type="url"
                       value={editingTemplate ? editingTemplate.demoUrl || "" : newTemplate.demoUrl}
@@ -505,7 +693,7 @@ const Admin = () => {
                   </div>
                   
                   <div className="md:col-span-2">
-                    <label className="block text-foreground/80 mb-2 font-medium">Технологии</label>
+                    <label className="block text-foreground/80 mb-2 font-medium">{t.admin.templates.form.technologies}</label>
                     <div className="flex gap-2 mb-3">
                       <input
                         type="text"
@@ -513,10 +701,10 @@ const Admin = () => {
                         onChange={(e) => setTechInput(e.target.value)}
                         onKeyPress={(e) => e.key === 'Enter' && (e.preventDefault(), addTechnology())}
                         className="flex-1 px-4 py-2 rounded-xl bg-white/5 border border-white/10 text-foreground focus:outline-none focus:border-white/30"
-                        placeholder="Добавить технологию"
+                        placeholder={t.admin.templates.form.addTech}
                       />
                       <GlassButton variant="ghost" onClick={addTechnology}>
-                        Добавить
+                        {t.common.add}
                       </GlassButton>
                     </div>
                     <div className="flex flex-wrap gap-2">
@@ -540,10 +728,10 @@ const Admin = () => {
                 
                 <div className="flex gap-4 mt-8">
                   <GlassButton onClick={handleSaveTemplate} glow>
-                    {editingTemplate ? "Сохранить изменения" : "Добавить шаблон"}
+                    {editingTemplate ? t.admin.templates.form.save : t.admin.templates.add}
                   </GlassButton>
                   <GlassButton variant="secondary" onClick={cancelEdit}>
-                    Отмена
+                    {t.common.cancel}
                   </GlassButton>
                 </div>
               </motion.div>
@@ -558,7 +746,7 @@ const Admin = () => {
           >
             {activeTab==='templates' && (
               <>
-                <h2 className="text-2xl font-bold text-foreground mb-6">Шаблоны ({templates.length})</h2>
+                <h2 className="text-2xl font-bold text-foreground mb-6">{t.admin.templates.title} ({templates.length})</h2>
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                   {templates.map((template) => (
                     <motion.div key={template.id} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }} className="glass-card p-6">
@@ -567,8 +755,8 @@ const Admin = () => {
                       <div className="text-sm text-foreground/60 mb-4">Категория: {categories.find(cat => cat.id === template.category)?.name}</div>
                       <div className="text-lg font-bold text-gradient mb-4">{template.price}</div>
                       <div className="flex gap-2">
-                        <GlassButton variant="ghost" size="sm" onClick={() => setEditingTemplate(template)}>Редактировать</GlassButton>
-                        <GlassButton variant="secondary" size="sm" onClick={() => handleDeleteTemplate(template.id)}>Удалить</GlassButton>
+                        <GlassButton variant="ghost" size="sm" onClick={() => setEditingTemplate(template)}>{t.common.edit}</GlassButton>
+                        <GlassButton variant="secondary" size="sm" onClick={() => handleDeleteTemplate(template.id)}>{t.common.delete}</GlassButton>
                       </div>
                     </motion.div>
                   ))}
@@ -582,13 +770,18 @@ const Admin = () => {
 
           {activeTab==='calculator' && (
             <motion.div initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }} className="glass-card p-8">
-              <h2 className="text-2xl font-bold text-gradient mb-6">Калькулятор — конфигурация</h2>
+              <div className="flex items-center justify-between mb-6">
+                <h2 className="text-2xl font-bold text-gradient">{t.admin.calculator.title}</h2>
+                <div className="text-sm text-foreground/60 bg-white/5 px-3 py-1 rounded-lg">
+                  {t.admin.calculator.currentLanguage}: {getLanguageLabel(adminEditingLanguage)}
+                </div>
+              </div>
               {([
-                ['websiteType','Тип сайта'],
-                ['complexity','Сложность'],
-                ['timeline','Сроки'],
-                ['features','Доп. функции'],
-                ['design','Дизайн'],
+                ['websiteType', t.admin.calculator.websiteType],
+                ['complexity', t.admin.calculator.complexity],
+                ['timeline', t.admin.calculator.timeline],
+                ['features', t.admin.calculator.features],
+                ['design', t.admin.calculator.design],
               ] as const).map(([groupKey, groupLabel]) => (
                 <div key={groupKey} className="mb-8">
                   <div className="flex items-center justify-between mb-3">
@@ -650,32 +843,32 @@ const Admin = () => {
                 </div>
               ))}
               <div className="flex gap-3">
-                <GlassButton glow onClick={()=> saveCalculator(calcOptions)}>Сохранить калькулятор</GlassButton>
-                <GlassButton variant="secondary" onClick={()=>{ localStorage.removeItem('calculator-options'); toast({ title: 'Сброшено', description: 'Возвращены настройки по умолчанию' }); }}>Сбросить</GlassButton>
+                      <GlassButton glow onClick={saveCalculatorConfig}>{t.admin.calculator.save}</GlassButton>
+                      <GlassButton variant="secondary" onClick={()=>{ localStorage.removeItem('calculator-options'); toast({ title: 'Сброшено', description: 'Возвращены настройки по умолчанию' }); }}>{t.admin.calculator.reset}</GlassButton>
               </div>
             </motion.div>
           )}
 
           {activeTab==='telegram' && (
             <motion.div initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }} className="glass-card p-8">
-              <h2 className="text-2xl font-bold text-gradient mb-6">Telegram — настройки</h2>
+              <h2 className="text-2xl font-bold text-gradient mb-6">{t.admin.telegram.title}</h2>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div className="md:col-span-2">
-                  <label className="block text-foreground/80 mb-2 font-medium">Bot Token</label>
+                  <label className="block text-foreground/80 mb-2 font-medium">{t.admin.telegram.botToken}</label>
                   <input className="w-full px-4 py-3 rounded-xl bg-white/5 border border-white/10 text-foreground" value={tgConfig.botToken} onChange={(e)=> setTgConfig(prev=> ({...prev, botToken: e.target.value}))} placeholder="12345:ABCDEF..." />
                 </div>
                 <div>
-                  <label className="block text-foreground/80 mb-2 font-medium">Username (для справки)</label>
+                  <label className="block text-foreground/80 mb-2 font-medium">{t.admin.telegram.username}</label>
                   <input className="w-full px-4 py-3 rounded-xl bg-white/5 border border-white/10 text-foreground" value={tgConfig.username} onChange={(e)=> setTgConfig(prev=> ({...prev, username: e.target.value}))} placeholder="@your_bot" />
                 </div>
                 <div>
-                  <label className="block text-foreground/80 mb-2 font-medium">Chat ID получателя</label>
+                  <label className="block text-foreground/80 mb-2 font-medium">{t.admin.telegram.chatId}</label>
                   <input className="w-full px-4 py-3 rounded-xl bg-white/5 border border-white/10 text-foreground" value={tgConfig.chatId} onChange={(e)=> setTgConfig(prev=> ({...prev, chatId: e.target.value}))} placeholder="6793841885" />
                 </div>
               </div>
               <div className="flex gap-3 mt-6">
-                <GlassButton glow onClick={async ()=>{ await fetch('/api/settings', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ telegram: tgConfig }) }); toast({ title: 'Сохранено', description: 'Telegram настройки обновлены' }); }}>Сохранить</GlassButton>
-                <GlassButton variant="secondary" onClick={async ()=>{ setTgConfig({ botToken: '', username: '', chatId: '' }); await fetch('/api/settings', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ telegram: { botToken: '', username: '', chatId: '' } }) }); toast({ title: 'Сброшено' }); }}>Сбросить</GlassButton>
+                <GlassButton glow onClick={async ()=>{ await fetch('/api/settings', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ telegram: tgConfig }) }); toast({ title: 'Сохранено', description: 'Telegram настройки обновлены' }); }}>{t.admin.telegram.save}</GlassButton>
+                <GlassButton variant="secondary" onClick={async ()=>{ setTgConfig({ botToken: '', username: '', chatId: '' }); await fetch('/api/settings', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ telegram: { botToken: '', username: '', chatId: '' } }) }); toast({ title: 'Сброшено' }); }}>{t.admin.telegram.reset}</GlassButton>
               </div>
               <div className="text-sm text-foreground/60 mt-4">Данные хранятся в общей базе (сервер).</div>
             </motion.div>

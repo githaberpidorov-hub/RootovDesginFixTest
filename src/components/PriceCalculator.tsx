@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import GlassButton from "./GlassButton";
+import { useLanguage } from "@/hooks/use-language";
 
 interface CalculatorState {
   websiteType: string;
@@ -59,6 +60,7 @@ const PriceCalculator = () => {
   type CalculatorOptions = typeof defaultOptions;
 
   const [options, setOptions] = useState<CalculatorOptions>(defaultOptions);
+  const { t } = useLanguage();
 
   useEffect(() => {
     // 1) Пытаемся загрузить серверные опции калькулятора
@@ -181,7 +183,6 @@ const PriceCalculator = () => {
 
   const SummaryChip = ({ label, onRemove }: { label: string; onRemove?: () => void }) => (
     <motion.div
-      layout
       initial={{ opacity: 0, scale: 0.98 }}
       animate={{ opacity: 1, scale: 1 }}
       exit={{ opacity: 0, scale: 0.98 }}
@@ -229,9 +230,9 @@ const PriceCalculator = () => {
         background: 'radial-gradient(60% 60% at 20% 0%, rgba(255,255,255,0.10) 0%, rgba(255,255,255,0) 60%)'
       }} />
       <div className="relative z-10 flex items-center gap-3 text-left">
-        <div className={`text-xl w-10 h-10 rounded-xl flex items-center justify-center shrink-0 ${
+        <div className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 ${
           active ? 'bg-white/15' : 'bg-white/5 group-hover:bg-white/10'
-        }`}>{icon}</div>
+        }`}></div>
         <div>
           <div className="font-medium text-foreground">{headline}</div>
           {subline && <div className="text-sm text-foreground/60">{subline}</div>}
@@ -250,27 +251,27 @@ const PriceCalculator = () => {
   );
 
   return (
-    <section className="py-20 px-6">
+    <section className="py-32 px-6">
       <div className="max-w-5xl mx-auto">
         <motion.div
           initial={{ opacity: 0, y: 50 }}
           whileInView={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
           viewport={{ once: true }}
-          className="text-center mb-10"
+          className="text-center mb-16 pb-8"
         >
-          <h2 className="text-4xl md:text-5xl font-bold text-gradient mb-4">
-            Калькулятор стоимости
+          <h2 className="text-4xl md:text-5xl font-bold text-gradient mb-8 leading-tight py-2">
+            {t.calculatorUi.title}
           </h2>
-          <p className="text-lg md:text-xl text-foreground/70 max-w-2xl mx-auto">
-            Подберите конфигурацию — увидите ориентировочную цену и сможете оставить заявку
+          <p className="text-lg md:text-xl text-foreground/70 max-w-2xl mx-auto leading-relaxed py-2">
+            {t.calculatorUi.subtitle}
           </p>
         </motion.div>
 
         {/* Progress */}
         <div className="glass-card p-5 mb-8">
           <div className="flex items-center justify-between mb-2 text-sm text-foreground/70">
-            <span>Заполнено</span>
+            <span>{t.calculatorUi.filled}</span>
             <span>{progress}%</span>
           </div>
           <div className="h-2 rounded-full bg-white/10 overflow-hidden">
@@ -287,7 +288,7 @@ const PriceCalculator = () => {
           <div className="space-y-12">
             {/* Website Type */}
             <div>
-              <h3 className="text-2xl font-semibold mb-6 text-foreground">Тип сайта</h3>
+              <h3 className="text-2xl font-semibold mb-6 text-foreground">{t.calculatorUi.websiteType}</h3>
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                 {options.websiteType.map((option) => (
                   <OptionCard
@@ -296,7 +297,7 @@ const PriceCalculator = () => {
                     onClick={() => handleOptionSelect('websiteType', option.id)}
                     icon={(option as any).icon}
                     headline={option.name as string}
-                    subline={`от $${(option as any).price}`}
+                    subline={`${t.calculatorUi.fromPrefix}${(option as any).price}`}
                   />
                 ))}
               </div>
@@ -304,7 +305,7 @@ const PriceCalculator = () => {
 
             {/* Complexity */}
             <div>
-              <h3 className="text-2xl font-semibold mb-6 text-foreground">Сложность</h3>
+              <h3 className="text-2xl font-semibold mb-6 text-foreground">{t.calculatorUi.complexity}</h3>
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 {options.complexity.map((option) => (
                   <OptionCard
@@ -313,7 +314,7 @@ const PriceCalculator = () => {
                     onClick={() => handleOptionSelect('complexity', option.id)}
                     icon={(option as any).icon}
                     headline={option.name as string}
-                    subline={`×${(option as any).multiplier}`}
+                    subline={`${t.calculatorUi.multiplyPrefix}${(option as any).multiplier}`}
                   />
                 ))}
               </div>
@@ -321,7 +322,7 @@ const PriceCalculator = () => {
 
             {/* Timeline */}
             <div>
-              <h3 className="text-2xl font-semibold mb-6 text-foreground">Сроки</h3>
+              <h3 className="text-2xl font-semibold mb-6 text-foreground">{t.calculatorUi.timeline}</h3>
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 {options.timeline.map((option) => (
                   <OptionCard
@@ -330,7 +331,7 @@ const PriceCalculator = () => {
                     onClick={() => handleOptionSelect('timeline', option.id)}
                     icon={(option as any).icon}
                     headline={option.name as string}
-                    subline={`×${(option as any).multiplier}`}
+                    subline={`${t.calculatorUi.multiplyPrefix}${(option as any).multiplier}`}
                   />
                 ))}
               </div>
@@ -338,7 +339,7 @@ const PriceCalculator = () => {
 
             {/* Features */}
             <div>
-              <h3 className="text-2xl font-semibold mb-6 text-foreground">Дополнительные функции</h3>
+              <h3 className="text-2xl font-semibold mb-6 text-foreground">{t.calculatorUi.features}</h3>
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                 {options.features.map((option) => (
                   <OptionCard
@@ -347,7 +348,7 @@ const PriceCalculator = () => {
                     onClick={() => handleOptionSelect('features', option.id)}
                     icon={(option as any).icon}
                     headline={option.name as string}
-                    subline={`+$${(option as any).price}`}
+                    subline={`${t.calculatorUi.plusPrefix}${(option as any).price}`}
                   />
                 ))}
               </div>
@@ -355,7 +356,7 @@ const PriceCalculator = () => {
 
             {/* Design */}
             <div>
-              <h3 className="text-2xl font-semibold mb-6 text-foreground">Дизайн</h3>
+              <h3 className="text-2xl font-semibold mb-6 text-foreground">{t.calculatorUi.design}</h3>
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 {options.design.map((option) => (
                   <OptionCard
@@ -364,7 +365,7 @@ const PriceCalculator = () => {
                     onClick={() => handleOptionSelect('design', option.id)}
                     icon={(option as any).icon}
                     headline={option.name as string}
-                    subline={`×${(option as any).multiplier}`}
+                    subline={`${t.calculatorUi.multiplyPrefix}${(option as any).multiplier}`}
                   />
                 ))}
               </div>
@@ -386,7 +387,6 @@ const PriceCalculator = () => {
                   style={{ overflow: 'hidden' }}
                 >
                   <motion.div
-                    layout
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 1 }}
                     exit={{ opacity: 0 }}
@@ -440,17 +440,17 @@ const PriceCalculator = () => {
                       transition={{ duration: 0.5, delay: 0.1 }}
                       className="text-2xl text-foreground/70 mb-2"
                     >
-                      Примерная стоимость
+                      {t.calculatorUi.estimatedPrice}
                     </motion.div>
                     {/* Price wrapper with fixed height to prevent layout shift */}
                     <div className="relative mb-8 h-16 md:h-20">
-                      <motion.div
-                        key={totalPrice}
-                        initial={{ opacity: 0, y: 6 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ duration: 0.35, ease: [0.22, 1, 0.36, 1] }}
-                        className="absolute inset-0 flex items-center justify-center"
-                      >
+                    <motion.div
+                      key={totalPrice}
+                      initial={{ opacity: 0, y: 6 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ duration: 0.35, ease: [0.22, 1, 0.36, 1] }}
+                      className="absolute inset-0 flex items-center justify-center"
+                    >
                         <div className="text-6xl font-bold text-gradient">{`$${totalPrice.toLocaleString()}`}</div>
                       </motion.div>
                     </div>
@@ -462,7 +462,7 @@ const PriceCalculator = () => {
                     >
                       <a href={buildRequestHref()}>
                         <GlassButton size="lg" glow>
-                          Получить консультацию
+                          {t.calculatorUi.consultCta}
                         </GlassButton>
                       </a>
                     </motion.div>

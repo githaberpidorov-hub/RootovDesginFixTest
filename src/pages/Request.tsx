@@ -6,6 +6,7 @@ import LiquidBackground from "@/components/LiquidBackground";
 import GlassButton from "@/components/GlassButton";
 import { useToast } from "@/hooks/use-toast";
 import LazyImage from "@/components/LazyImage";
+import { useLanguage } from "@/hooks/use-language";
 
 type Template = {
   id: string;
@@ -51,6 +52,7 @@ const readTelegramConfig = (): TelegramConfig => {
 
 const Request = () => {
   const { toast } = useToast();
+  const { t } = useLanguage();
   const navigate = useNavigate();
   const location = useLocation();
   const [templates, setTemplates] = useState<Template[]>([]);
@@ -77,11 +79,13 @@ const Request = () => {
   const [previewByUrl, setPreviewByUrl] = useState<Record<string, string>>({});
 
   useEffect(() => {
-    // Пытаемся загрузить серверные шаблоны; на случай оффлайна — локальный фолбэк
-    fetch('/api/settings')
-      .then(r => r.json())
-      .then(data => {
-        if (Array.isArray(data?.templates) && data.templates.length) {
+    // Загружаем шаблоны с учетом текущего языка
+    const loadTemplates = async () => {
+      try {
+        const response = await fetch(`/api/templates?language=${t.language}`);
+        const data = await response.json();
+        
+        if (data.ok && Array.isArray(data.templates)) {
           setTemplates(data.templates);
           try { localStorage.setItem('portfolio-templates', JSON.stringify(data.templates)); } catch {}
         } else {
@@ -93,8 +97,8 @@ const Request = () => {
             setTemplates(existing);
           }
         }
-      })
-      .catch(() => {
+      } catch (error) {
+        console.warn('Failed to load templates from API:', error);
         const existing = readTemplates();
         if (existing.length === 0) {
           try { localStorage.setItem('portfolio-templates', JSON.stringify(defaultTemplates)); } catch {}
@@ -102,8 +106,11 @@ const Request = () => {
         } else {
           setTemplates(existing);
         }
-      });
-  }, []);
+      }
+    };
+
+    loadTemplates();
+  }, [t.language]);
 
   // helpers for previews (OG image cache like in portfolio)
   const normalizeUrl = (url?: string) => {
@@ -163,7 +170,7 @@ const Request = () => {
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!form.phone.trim()) {
-      toast({ title: 'Введите номер телефона', variant: 'destructive' });
+      toast({ title: t.request.form.phone.label, variant: 'destructive' });
       return;
     }
 
@@ -204,11 +211,11 @@ const Request = () => {
         throw new Error(tgJson?.error || `Ошибка сервера (${tgRes.status})`);
       }
 
-      toast({ title: 'Заявка отправлена', description: 'Мы скоро свяжемся с вами' });
+      toast({ title: t.common.success, description: 'Мы скоро свяжемся с вами' });
       navigate('/');
     } catch (err) {
       const msg = err instanceof Error ? err.message : 'Ошибка отправки';
-      toast({ title: 'Не удалось отправить заявку', description: msg, variant: 'destructive' });
+      toast({ title: t.common.error, description: msg, variant: 'destructive' });
     } finally {
       setSubmitting(false);
     }
@@ -222,18 +229,18 @@ const Request = () => {
       <div className="pt-32 pb-20 px-6">
         <div className="max-w-3xl mx-auto">
           <div className="glass-card p-8">
-            <h1 className="text-3xl md:text-4xl font-bold text-gradient mb-6">Оставить заявку</h1>
-            <p className="text-foreground/70 mb-8">Выберите шаблон (необязательно) и оставьте контакты. Мы свяжемся для обсуждения деталей.</p>
+            <h1 className="text-3xl md:text-4xl font-bold text-gradient mb-6">{t.request.title}</h1>
+            <p className="text-foreground/70 mb-8">{t.request.description}</p>
 
             <form onSubmit={submit} className="space-y-6">
               <div className="relative">
-                <label className="block text-foreground/80 mb-2 font-medium">Шаблон (необязательно)</label>
+                <label className="block text-foreground/80 mb-2 font-medium">{t.request.form.template.label}</label>
                 <button
                   type="button"
                   onClick={() => setPickerOpen(v => !v)}
                   className="w-full text-left px-4 py-3 rounded-xl bg-white/5 border border-white/10 text-foreground focus:outline-none focus:border-white/30 hover:bg-white/10 transition-colors"
                 >
-                  {form.templateId ? (templates.find(t=>t.id===form.templateId)?.title || 'Выбранный шаблон') : '— Не выбирать —'}
+                  {form.templateId ? (templates.find(t=>t.id===form.templateId)?.title || 'Выбранный шаблон') : t.request.form.template.placeholder}
                 </button>
 
                 <AnimatePresence>
@@ -279,7 +286,7 @@ const Request = () => {
                           className="relative overflow-hidden ring-1 ring-white/15 hover:ring-white/35 [box-shadow:0_0_24px_rgba(255,255,255,0.10)] hover:[box-shadow:0_0_44px_rgba(255,255,255,0.18)] before:content-[''] before:absolute before:inset-[-1px] before:rounded-inherit before:bg-[linear-gradient(135deg,rgba(255,255,255,0.25),rgba(255,255,255,0.08))] before:opacity-0 hover:before:opacity-100 before:transition-opacity"
                           onClick={()=> setPickerOpen(false)}
                         >
-                          Закрыть
+                          {t.common.close}
                         </GlassButton>
                         <GlassButton
                           variant="ghost"
@@ -288,7 +295,7 @@ const Request = () => {
                           className="relative overflow-hidden ring-1 ring-white/10 hover:ring-white/30 [box-shadow:0_0_22px_rgba(255,255,255,0.08)] hover:[box-shadow:0_0_40px_rgba(255,255,255,0.16)] before:content-[''] before:absolute before:inset-[-1px] before:rounded-inherit before:bg-[radial-gradient(ellipse_at_center,rgba(255,255,255,0.22),rgba(255,255,255,0)_60%)] before:opacity-0 hover:before:opacity-100 before:transition-opacity"
                           onClick={()=>{ setForm(prev=>({...prev, templateId: ''})); setPickerOpen(false); }}
                         >
-                          Не выбирать
+                          {t.request.form.template.notSelected}
                         </GlassButton>
                       </div>
                     </motion.div>
@@ -297,11 +304,11 @@ const Request = () => {
               </div>
 
               <div>
-                <label className="block text-foreground/80 mb-2 font-medium">Номер телефона *</label>
+                <label className="block text-foreground/80 mb-2 font-medium">{t.request.form.phone.label}</label>
                 <input
                   type="tel"
                   required
-                  placeholder="+380 99 123 45 67"
+                  placeholder={t.request.form.phone.placeholder}
                   value={form.phone}
                   onChange={(e) => setForm(prev => ({ ...prev, phone: e.target.value }))}
                   className="w-full px-4 py-3 rounded-xl bg-white/5 border border-white/10 text-foreground placeholder-foreground/50 focus:outline-none focus:border-white/30"
@@ -309,10 +316,10 @@ const Request = () => {
               </div>
 
               <div>
-                <label className="block text-foreground/80 mb-2 font-medium">Telegram (необязательно)</label>
+                <label className="block text-foreground/80 mb-2 font-medium">{t.request.form.telegram.label}</label>
                 <input
                   type="text"
-                  placeholder="@username"
+                  placeholder={t.request.form.telegram.placeholder}
                   value={form.telegram}
                   onChange={(e) => setForm(prev => ({ ...prev, telegram: e.target.value }))}
                   className="w-full px-4 py-3 rounded-xl bg-white/5 border border-white/10 text-foreground placeholder-foreground/50 focus:outline-none focus:border-white/30"
@@ -320,10 +327,10 @@ const Request = () => {
               </div>
 
               <div>
-                <label className="block text-foreground/80 mb-2 font-medium">Описание (необязательно)</label>
+                <label className="block text-foreground/80 mb-2 font-medium">{t.request.form.description.label}</label>
                 <textarea
                   rows={4}
-                  placeholder="Расскажите о задаче, желаемых функциях и сроках"
+                  placeholder={t.request.form.description.placeholder}
                   value={form.description}
                   onChange={(e) => setForm(prev => ({ ...prev, description: e.target.value }))}
                   className="w-full px-4 py-3 rounded-xl bg-white/5 border border-white/10 text-foreground placeholder-foreground/50 focus:outline-none focus:border-white/30 resize-none"
@@ -332,9 +339,9 @@ const Request = () => {
 
               <div className="flex gap-3">
                 <GlassButton type="submit" glow disabled={submitting}>
-                  {submitting ? 'Отправка…' : 'Отправить заявку'}
+                  {submitting ? t.request.form.submitting : t.request.form.submit}
                 </GlassButton>
-                <GlassButton type="button" variant="secondary" onClick={() => navigate(-1)}>Назад</GlassButton>
+                <GlassButton type="button" variant="secondary" onClick={() => navigate(-1)}>{t.common.back}</GlassButton>
               </div>
             </form>
           </div>

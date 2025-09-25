@@ -2,11 +2,13 @@ import { useState, useEffect, useCallback, useMemo } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { useLanguage } from "@/hooks/use-language";
 
 const Navigation = () => {
   const [isVisible, setIsVisible] = useState(true);
   const [lastScrollY, setLastScrollY] = useState(0);
   const location = useLocation();
+  const { t } = useLanguage();
   const activePath = useMemo(() => {
     const path = location.pathname || "/";
     if (path.startsWith("/portfolio")) return "/portfolio";
@@ -55,8 +57,8 @@ const Navigation = () => {
   }, [controlNavbar]);
 
   const navItems = [
-    { name: "Главная", path: "/" },
-    { name: "Шаблоны", path: "/portfolio" },
+    { name: t.nav.home, path: "/" },
+    { name: t.nav.portfolio, path: "/portfolio" },
   ];
 
   return (

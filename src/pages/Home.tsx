@@ -5,45 +5,48 @@ import LiquidBackground from "@/components/LiquidBackground";
 import GlassButton from "@/components/GlassButton";
 import PriceCalculator from "@/components/PriceCalculator";
 import OptimizedMotion from "@/components/OptimizedMotion";
+import { useLanguage } from "@/hooks/use-language";
 
 const Home = () => {
+  const { t } = useLanguage();
+  
   const services = [
     {
-      title: "Лендинги",
-      description: "Продающие страницы с высокой конверсией",
-      features: ["Адаптивный дизайн", "SEO оптимизация", "Быстрая загрузка"],
-      price: "от $500",
+      title: t.home.services.landing.title,
+      description: t.home.services.landing.description,
+      features: t.home.services.landing.features,
+      price: t.home.services.landing.price,
     },
     {
-      title: "Корпоративные сайты",
-      description: "Представительские сайты для бизнеса",
-      features: ["CMS система", "Многоязычность", "Интеграции"],
-      price: "от $1,200",
+      title: t.home.services.corporate.title,
+      description: t.home.services.corporate.description,
+      features: t.home.services.corporate.features,
+      price: t.home.services.corporate.price,
     },
     {
-      title: "Интернет-магазины",
-      description: "Полнофункциональные eCommerce решения",
-      features: ["Каталог товаров", "Корзина", "Платежи"],
-      price: "от $2,500",
+      title: t.home.services.ecommerce.title,
+      description: t.home.services.ecommerce.description,
+      features: t.home.services.ecommerce.features,
+      price: t.home.services.ecommerce.price,
     },
   ];
 
   const advantages = [
     {
-      title: "Современный дизайн",
-      description: "Используем последние тренды в веб-дизайне",
+      title: t.home.advantages.modernDesign.title,
+      description: t.home.advantages.modernDesign.description,
     },
     {
-      title: "Быстрая разработка",
-      description: "Сдаем проекты в оговоренные сроки",
+      title: t.home.advantages.fastDevelopment.title,
+      description: t.home.advantages.fastDevelopment.description,
     },
     {
-      title: "Техподдержка",
-      description: "Поддерживаем и развиваем ваш сайт",
+      title: t.home.advantages.support.title,
+      description: t.home.advantages.support.description,
     },
     {
-      title: "SEO готовность",
-      description: "Все сайты оптимизированы для поисковиков",
+      title: t.home.advantages.seoReady.title,
+      description: t.home.advantages.seoReady.description,
     },
   ];
 
@@ -61,25 +64,24 @@ const Home = () => {
             transition={{ duration: 1, ease: [0.16, 1, 0.3, 1] }}
           >
             <h1 className="text-6xl md:text-8xl font-bold mb-8 text-gradient text-glow">
-              Создание сайтов
+              {t.home.hero.title}
               <br />
-              <span className="text-5xl md:text-7xl">под ключ</span>
+              <span className="text-5xl md:text-7xl">{t.home.hero.subtitle}</span>
             </h1>
             
             <p className="text-xl md:text-2xl text-foreground/70 mb-12 max-w-3xl mx-auto leading-relaxed">
-              Разрабатываем современные веб-сайты с уникальным дизайном 
-              и безупречной функциональностью
+              {t.home.hero.description}
             </p>
             
             <div className="flex flex-col sm:flex-row gap-6 justify-center items-center">
               <a href="/request">
                 <GlassButton size="lg" glow>
-                  Заказать проект
+                  {t.home.hero.orderProject}
                 </GlassButton>
               </a>
               <Link to="/portfolio">
                 <GlassButton variant="secondary" size="lg">
-                  Посмотреть работы
+                  {t.home.hero.viewWorks}
                 </GlassButton>
               </Link>
             </div>
@@ -98,10 +100,10 @@ const Home = () => {
             className="text-center mb-16"
           >
             <h2 className="text-4xl md:text-5xl font-bold text-gradient mb-6">
-              Наши услуги
+              {t.home.services.title}
             </h2>
             <p className="text-xl text-foreground/70 max-w-2xl mx-auto">
-              Полный цикл создания веб-сайтов от идеи до запуска
+              {t.home.services.description}
             </p>
           </motion.div>
 
@@ -146,7 +148,7 @@ const Home = () => {
                     onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
                   >
                     <GlassButton variant="ghost" size="sm">
-                      Подробнее
+                      {t.common.more}
                     </GlassButton>
                   </Link>
                 </div>
@@ -167,7 +169,7 @@ const Home = () => {
             className="text-center mb-16"
           >
             <h2 className="text-4xl md:text-5xl font-bold text-gradient mb-6">
-              Почему выбирают нас
+              {t.home.advantages.title}
             </h2>
           </motion.div>
 
@@ -212,15 +214,15 @@ const Home = () => {
             className="glass-card p-12"
           >
             <h2 className="text-4xl md:text-5xl font-bold text-gradient mb-6">
-              Готовы начать проект?
+              {t.home.cta.title}
             </h2>
             <p className="text-xl text-foreground/70 mb-8 max-w-2xl mx-auto">
-              Свяжитесь с нами для обсуждения деталей и получения персонального предложения
+              {t.home.cta.description}
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <a href="/request">
                 <GlassButton size="lg" glow>
-                  Связаться с нами
+                  {t.home.cta.contactUs}
                 </GlassButton>
               </a>
               <Link 
@@ -228,7 +230,7 @@ const Home = () => {
                 onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
               >
                 <GlassButton variant="secondary" size="lg">
-                  Посмотреть портфолио
+                  {t.home.cta.viewPortfolio}
                 </GlassButton>
               </Link>
             </div>

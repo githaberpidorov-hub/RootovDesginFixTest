@@ -492,6 +492,15 @@
     }
   }
 
+  @keyframes pulse {
+    0%, 100% { 
+      transform: scale(1);
+    }
+    50% { 
+      transform: scale(1.05);
+    }
+  }
+
   /* Scroll Animations */
   .fade-in-up {
     @apply opacity-0 translate-y-10;

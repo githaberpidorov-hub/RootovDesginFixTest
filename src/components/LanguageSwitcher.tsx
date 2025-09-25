@@ -1,28 +1,13 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { Globe2Icon } from "lucide-react";
-
-type LanguageCode = "RU" | "ENG" | "UK";
-
-const LANG_STORAGE_KEY = "app_language";
-
-const languages: { code: LanguageCode; label: string }[] = [
-  { code: "RU", label: "RU" },
-  { code: "ENG", label: "ENG" },
-  { code: "UK", label: "UK" },
-];
+import { useLanguage } from "@/hooks/use-language";
+import { getAvailableLanguages, getLanguageLabel } from "@/lib/i18n";
 
 export default function LanguageSwitcher() {
   const [isOpen, setIsOpen] = useState(false);
-  const [current, setCurrent] = useState<LanguageCode>(() => {
-    const saved = typeof window !== "undefined" ? (localStorage.getItem(LANG_STORAGE_KEY) as LanguageCode | null) : null;
-    return saved ?? "ENG";
-  });
-
-  useEffect(() => {
-    localStorage.setItem(LANG_STORAGE_KEY, current);
-    document.documentElement.setAttribute("lang", current.toLowerCase());
-  }, [current]);
+  const { language: current, setLanguage } = useLanguage();
+  const languages = getAvailableLanguages();
 
   const transition = { duration: 0.8, ease: [0.2, 0.8, 0.2, 1] as const };
 
@@ -61,7 +46,7 @@ export default function LanguageSwitcher() {
               animate={{ opacity: 1, x: 0 }}
               transition={{ duration: 0.25, ease: [0.2, 0.8, 0.2, 1] }}
             >
-              {current}
+              {getLanguageLabel(current)}
             </motion.span>
             <AnimatePresence>
               {isOpen && (
@@ -79,7 +64,7 @@ export default function LanguageSwitcher() {
                       <motion.button
                         key={lang.code}
                         type="button"
-                        onClick={(e) => { e.stopPropagation(); setCurrent(lang.code); setIsOpen(false); }}
+                        onClick={(e) => { e.stopPropagation(); setLanguage(lang.code); setIsOpen(false); }}
                         className={`h-8 px-2 rounded-xl border text-sm transition-colors ${active ? "bg-white/10 border-white/10" : "border-white/10 hover:bg-white/10"}`}
                         initial={{ opacity: 0, x: 12, y: 4, scale: 0.96 }}
                         animate={{ opacity: 1, x: 0, y: 0, scale: 1 }}

@@ -5,6 +5,7 @@ import LiquidBackground from "@/components/LiquidBackground";
 import GlassButton from "@/components/GlassButton";
 import OptimizedMotion from "@/components/OptimizedMotion";
 import LazyImage from "@/components/LazyImage";
+import { useLanguage } from "@/hooks/use-language";
 
 interface Template {
   id: string;
@@ -18,6 +19,7 @@ interface Template {
 }
 
 const Portfolio = () => {
+  const { t } = useLanguage();
   const [templates, setTemplates] = useState<Template[]>([]);
   const [selectedCategory, setSelectedCategory] = useState("all");
   const [filteredTemplates, setFilteredTemplates] = useState<Template[]>([]);
@@ -55,11 +57,11 @@ const Portfolio = () => {
   };
 
   const categories = [
-    { id: "all", name: "Все проекты" },
-    { id: "landing", name: "Лендинги" },
-    { id: "corporate", name: "Корпоративные" },
-    { id: "ecommerce", name: "E-commerce" },
-    { id: "portfolio", name: "Портфолио" },
+    { id: "all", name: t.portfolio.categories.all },
+    { id: "landing", name: t.portfolio.categories.landing },
+    { id: "corporate", name: t.portfolio.categories.corporate },
+    { id: "ecommerce", name: t.portfolio.categories.ecommerce },
+    { id: "portfolio", name: t.portfolio.categories.portfolio },
   ];
 
   // Mock data — fallback, в проде подменяется данными с сервера
@@ -127,14 +129,17 @@ const Portfolio = () => {
   ];
 
   useEffect(() => {
-    // Пытаемся загрузить с сервера; если недоступен — используем локальный фолбэк
-    fetch('/api/settings')
-      .then(r => r.json())
-      .then(data => {
-        if (Array.isArray(data?.templates) && data.templates.length) {
+    // Загружаем шаблоны с учетом текущего языка
+    const loadTemplates = async () => {
+      try {
+        const response = await fetch(`/api/templates?language=${t.language}`);
+        const data = await response.json();
+        
+        if (data.ok && Array.isArray(data.templates)) {
           setTemplates(data.templates);
           try { localStorage.setItem('portfolio-templates', JSON.stringify(data.templates)); } catch {}
         } else {
+          // Fallback на локальные данные
           const saved = localStorage.getItem('portfolio-templates');
           if (saved) {
             setTemplates(JSON.parse(saved));
@@ -143,16 +148,20 @@ const Portfolio = () => {
             try { localStorage.setItem('portfolio-templates', JSON.stringify(mockTemplates)); } catch {}
           }
         }
-      })
-      .catch(() => {
+      } catch (error) {
+        console.warn('Failed to load templates from API:', error);
+        // Fallback на локальные данные
         const saved = localStorage.getItem('portfolio-templates');
         if (saved) {
           setTemplates(JSON.parse(saved));
         } else {
           setTemplates(mockTemplates);
         }
-      });
-  }, []);
+      }
+    };
+
+    loadTemplates();
+  }, [t.language]);
 
   // Подтянуть OG-изображение с сайта (если он его предоставляет),
   // иначе fallback на скриншот
@@ -231,10 +240,10 @@ const Portfolio = () => {
             transition={{ duration: 1, ease: [0.16, 1, 0.3, 1] }}
           >
             <h1 className="text-5xl md:text-7xl font-bold text-gradient text-glow mb-6">
-              Наши работы
+              {t.portfolio.title}
             </h1>
             <p className="text-xl text-foreground/70 max-w-3xl mx-auto">
-              Портфолио выполненных проектов — от лендингов до сложных веб-приложений
+              {t.portfolio.description}
             </p>
           </motion.div>
         </div>
@@ -343,12 +352,12 @@ const Portfolio = () => {
                               size="sm"
                               onClick={(e) => { e.stopPropagation(); window.open(href, "_blank", "noopener,noreferrer"); }}
                             >
-                              Демо
+                              {t.common.demo}
                             </GlassButton>
                           );
                         })()}
                         <GlassButton size="sm" onClick={(e)=>{ e.stopPropagation(); window.location.href = `/request?templateId=${encodeURIComponent(template.id)}`; }}>
-                          Заказать
+                          {t.common.order}
                         </GlassButton>
                       </div>
                     </div>
@@ -365,7 +374,7 @@ const Portfolio = () => {
               className="text-center py-20"
             >
               <p className="text-xl text-foreground/60">
-                В этой категории пока нет проектов
+                {t.portfolio.noProjects}
               </p>
             </motion.div>
           )}
@@ -383,15 +392,15 @@ const Portfolio = () => {
             className="glass-card p-12"
           >
             <h2 className="text-4xl md:text-5xl font-bold text-gradient mb-6">
-              Не нашли подходящий проект?
+              {t.portfolio.cta.title}
             </h2>
             <p className="text-xl text-foreground/70 mb-8 max-w-2xl mx-auto">
-              Мы создадим уникальный дизайн специально для ваших задач и требований
+              {t.portfolio.cta.description}
             </p>
             <div className="flex justify-center">
               <a href="/request">
                 <GlassButton size="lg" glow>
-                  Заказать индивидуальный проект
+                  {t.portfolio.cta.orderCustom}
                 </GlassButton>
               </a>
             </div>
