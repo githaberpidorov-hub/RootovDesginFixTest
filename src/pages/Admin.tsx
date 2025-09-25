@@ -277,22 +277,32 @@ const Admin = () => {
 
   const saveCalculator = async (updated: CalcOptions) => {
     try {
+      const payload = { 
+        ...updated, 
+        language: t.language 
+      };
+      
+      console.log('Saving calculator:', payload);
+      console.log('Language:', t.language);
+      
       // Используем правильный API для калькулятора с передачей языка
       const r = await fetch('/api/calculator', { 
         method: 'POST', 
         headers: { 'Content-Type': 'application/json' }, 
-        body: JSON.stringify({ 
-          ...updated, 
-          language: t.language 
-        }) 
+        body: JSON.stringify(payload) 
       });
+      
+      console.log('Calculator response status:', r.status);
       const j = await r.json().catch(()=>({ ok:false, error:'Ошибка парсинга ответа' }));
+      console.log('Calculator response data:', j);
+      
       if (!r.ok || !j?.ok) {
         throw new Error(j?.error || `Ошибка сервера (${r.status})`);
       }
       setCalcOptions(updated);
       toast({ title: 'Сохранено', description: 'Настройки калькулятора обновлены' });
     } catch (e:any) {
+      console.error('Calculator save error:', e);
       toast({ title: 'Не удалось сохранить', description: String(e?.message||e||'Неизвестная ошибка'), variant:'destructive' });
     }
   };
@@ -419,8 +429,8 @@ const Admin = () => {
 
     try {
       const templatePayload = {
-        [`title_${adminEditingLanguage.toLowerCase()}`]: templateData.title!,
-        [`description_${adminEditingLanguage.toLowerCase()}`]: templateData.description!,
+        title: templateData.title!,
+        description: templateData.description!,
         category: templateData.category!,
         image: templateData.image || "/api/placeholder/600/400",
         technologies: templateData.technologies || [],
@@ -428,13 +438,21 @@ const Admin = () => {
         price: templateData.price!,
       };
 
+      console.log('Saving template:', templatePayload);
+      console.log('Language:', adminEditingLanguage);
+
       if (editingTemplate) {
         // Редактирование существующего шаблона
+        console.log('Updating template with ID:', editingTemplate.id);
         const response = await fetch(`/api/templates?id=${editingTemplate.id}&language=${adminEditingLanguage}`, {
           method: 'PUT',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(templatePayload)
         });
+        
+        console.log('Update response status:', response.status);
+        const responseData = await response.json();
+        console.log('Update response data:', responseData);
         
         if (response.ok) {
           await loadTemplates();
@@ -444,15 +462,20 @@ const Admin = () => {
             description: "Шаблон обновлен",
           });
         } else {
-          throw new Error('Failed to update template');
+          throw new Error(responseData.error || 'Failed to update template');
         }
       } else {
         // Добавление нового шаблона
+        console.log('Creating new template');
         const response = await fetch(`/api/templates?language=${adminEditingLanguage}`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(templatePayload)
         });
+        
+        console.log('Create response status:', response.status);
+        const responseData = await response.json();
+        console.log('Create response data:', responseData);
         
         if (response.ok) {
           await loadTemplates();
@@ -471,13 +494,14 @@ const Admin = () => {
             description: "Шаблон добавлен",
           });
         } else {
-          throw new Error('Failed to create template');
+          throw new Error(responseData.error || 'Failed to create template');
         }
       }
     } catch (error) {
+      console.error('Template save error:', error);
       toast({
         title: t.common.error,
-        description: "Не удалось сохранить шаблон",
+        description: `Не удалось сохранить шаблон: ${error instanceof Error ? error.message : 'Неизвестная ошибка'}`,
         variant: "destructive",
       });
     }
