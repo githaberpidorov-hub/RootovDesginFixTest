@@ -1,16 +1,15 @@
-import type { VercelRequest, VercelResponse } from "@vercel/node";
-import { getSupabase } from "./_supabase";
+import { getSupabase } from "./_supabase.js";
 
 // We'll store settings in a single table as key/value JSON
 // Table: settings (key text primary key, value jsonb)
 
-function setCors(res: VercelResponse) {
+function setCors(res: any) {
   res.setHeader("Access-Control-Allow-Origin", "*");
   res.setHeader("Access-Control-Allow-Methods", "GET,POST,OPTIONS");
   res.setHeader("Access-Control-Allow-Headers", "Content-Type");
 }
 
-export default async function handler(req: VercelRequest, res: VercelResponse) {
+export default async function handler(req: any, res: any) {
   setCors(res);
   if (req.method === "OPTIONS") return res.status(204).end();
 

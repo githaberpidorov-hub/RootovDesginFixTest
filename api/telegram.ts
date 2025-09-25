@@ -1,11 +1,10 @@
-import type { VercelRequest, VercelResponse } from "@vercel/node";
-import { getSupabase } from "./_supabase";
+import { getSupabase } from "./_supabase.js";
 
 // Serverless function to send a Telegram message using bot token and chat id
 // Configure environment variables in Vercel dashboard:
 // TELEGRAM_BOT_TOKEN, TELEGRAM_CHAT_ID
 
-export default async function handler(req: VercelRequest, res: VercelResponse) {
+export default async function handler(req: any, res: any) {
   if (req.method !== "POST") {
     res.setHeader("Allow", "POST");
     return res.status(405).json({ ok: false, error: "Method Not Allowed" });
