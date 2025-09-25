@@ -33,24 +33,24 @@ export default async function handler(req: any, res: any) {
       const body = typeof req.body === 'string' ? JSON.parse(req.body) : req.body;
       const { language = 'RU' } = body;
 
-      // Создаем конфигурацию для всех языков, обновляя только текущий язык
+      // Создаем конфигурацию только для текущего языка
       const configData = {
         language,
-        website_type_ru: language === 'RU' ? (body.websiteType || {}) : (body.website_type_ru || {}),
-        website_type_eng: language === 'ENG' ? (body.websiteType || {}) : (body.website_type_eng || {}),
-        website_type_uk: language === 'UK' ? (body.websiteType || {}) : (body.website_type_uk || {}),
-        complexity_ru: language === 'RU' ? (body.complexity || {}) : (body.complexity_ru || {}),
-        complexity_eng: language === 'ENG' ? (body.complexity || {}) : (body.complexity_eng || {}),
-        complexity_uk: language === 'UK' ? (body.complexity || {}) : (body.complexity_uk || {}),
-        timeline_ru: language === 'RU' ? (body.timeline || {}) : (body.timeline_ru || {}),
-        timeline_eng: language === 'ENG' ? (body.timeline || {}) : (body.timeline_eng || {}),
-        timeline_uk: language === 'UK' ? (body.timeline || {}) : (body.timeline_uk || {}),
-        features_ru: language === 'RU' ? (body.features || {}) : (body.features_ru || {}),
-        features_eng: language === 'ENG' ? (body.features || {}) : (body.features_eng || {}),
-        features_uk: language === 'UK' ? (body.features || {}) : (body.features_uk || {}),
-        design_ru: language === 'RU' ? (body.design || {}) : (body.design_ru || {}),
-        design_eng: language === 'ENG' ? (body.design || {}) : (body.design_eng || {}),
-        design_uk: language === 'UK' ? (body.design || {}) : (body.design_uk || {}),
+        website_type_ru: body.websiteType || {},
+        complexity_ru: body.complexity || {},
+        timeline_ru: body.timeline || {},
+        features_ru: body.features || {},
+        design_ru: body.design || {},
+        website_type_eng: body.websiteType || {},
+        complexity_eng: body.complexity || {},
+        timeline_eng: body.timeline || {},
+        features_eng: body.features || {},
+        design_eng: body.design || {},
+        website_type_uk: body.websiteType || {},
+        complexity_uk: body.complexity || {},
+        timeline_uk: body.timeline || {},
+        features_uk: body.features || {},
+        design_uk: body.design || {},
         updated_at: new Date().toISOString(),
       };
 
@@ -68,7 +68,7 @@ export default async function handler(req: any, res: any) {
       }
 
       if (existingData) {
-        // Обновляем существующую запись, сохраняя данные других языков
+        // Обновляем существующую запись
         const updateData = {
           [`website_type_${language.toLowerCase()}`]: body.websiteType || {},
           [`complexity_${language.toLowerCase()}`]: body.complexity || {},

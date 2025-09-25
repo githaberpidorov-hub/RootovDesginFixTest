@@ -45,38 +45,42 @@ export default async function handler(req: any, res: any) {
       const { language = "RU" } = req.query;
       const body = typeof req.body === 'string' ? JSON.parse(req.body) : req.body;
 
-      // Определяем базовые значения из любого переданного языка
-      const titleAny = body.title_ru || body.title_eng || body.title_uk || body.title;
-      const descAny = body.description_ru || body.description_eng || body.description_uk || body.description;
-
-      const templateData = {
-        // Заполняем все языки. Если пришло только одно поле (например, title_ru) —
-        // остальные языки получат то же значение, чтобы не нарушать NOT NULL
-        title_ru: body.title_ru ?? titleAny,
-        title_eng: body.title_eng ?? titleAny,
-        title_uk: body.title_uk ?? titleAny,
-        description_ru: body.description_ru ?? descAny,
-        description_eng: body.description_eng ?? descAny,
-        description_uk: body.description_uk ?? descAny,
+      // Создаем записи для всех языков с одинаковыми данными
+      const baseData = {
         category: body.category,
-        image: body.image,
+        image: body.image || "/api/placeholder/600/400",
         technologies: body.technologies || [],
         demo_url: body.demoUrl || body.demo_url,
         price: body.price,
-      } as any;
+      };
 
-      // Быстрая валидация обязательных полей
-      if (!templateData.title_ru || !templateData.description_ru || !templateData.category || !templateData.price) {
-        return res.status(400).json({ ok: false, error: 'Missing required fields' });
+      // Валидация обязательных полей
+      if (!body.title || !body.description || !body.category || !body.price) {
+        return res.status(400).json({ ok: false, error: 'Missing required fields: title, description, category, price' });
       }
+
+      const templatesToInsert = [
+        {
+          ...baseData,
+          title_ru: body.title,
+          title_eng: body.title,
+          title_uk: body.title,
+          description_ru: body.description,
+          description_eng: body.description,
+          description_uk: body.description,
+        }
+      ];
 
       const { data, error } = await supabase
         .from('templates')
-        .insert([templateData])
+        .insert(templatesToInsert)
         .select()
         .single();
 
-      if (error) return res.status(500).json({ ok: false, error: error.message });
+      if (error) {
+        console.error('Template insert error:', error);
+        return res.status(500).json({ ok: false, error: error.message });
+      }
 
       return res.status(201).json({ ok: true, template: data });
     }
@@ -86,18 +90,20 @@ export default async function handler(req: any, res: any) {
       const { language = "RU" } = req.query;
       const body = typeof req.body === 'string' ? JSON.parse(req.body) : req.body;
       
-        const updateData: any = {};
+      const updateData: any = {};
 
-        // Обновляем только переданные поля
-        Object.keys(body).forEach(key => {
-          if (key.startsWith('title_') || key.startsWith('description_')) {
-            updateData[key] = body[key];
-          } else if (key === 'category') updateData.category = body.category;
-          else if (key === 'image') updateData.image = body.image;
-          else if (key === 'technologies') updateData.technologies = body.technologies;
-          else if (key === 'demoUrl') updateData.demo_url = body.demoUrl;
-          else if (key === 'price') updateData.price = body.price;
-        });
+      // Обновляем только переданные поля
+      if (body.title) {
+        updateData[`title_${language.toLowerCase()}`] = body.title;
+      }
+      if (body.description) {
+        updateData[`description_${language.toLowerCase()}`] = body.description;
+      }
+      if (body.category) updateData.category = body.category;
+      if (body.image) updateData.image = body.image;
+      if (body.technologies) updateData.technologies = body.technologies;
+      if (body.demoUrl) updateData.demo_url = body.demoUrl;
+      if (body.price) updateData.price = body.price;
 
       const { data, error } = await supabase
         .from('templates')
@@ -106,7 +112,10 @@ export default async function handler(req: any, res: any) {
         .select()
         .single();
 
-      if (error) return res.status(500).json({ ok: false, error: error.message });
+      if (error) {
+        console.error('Template update error:', error);
+        return res.status(500).json({ ok: false, error: error.message });
+      }
 
       return res.status(200).json({ ok: true, template: data });
     }
