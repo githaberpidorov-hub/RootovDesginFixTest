@@ -2,46 +2,67 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 
 /**
- * Floating bottom-left island that toggles a "black" theme.
- * Applies the `theme-black` class to the <html> element and persists to localStorage.
- * Plays a radial reveal animation from the bottom-left corner when toggling.
+ * Floating bottom-left island that lets user select a color theme.
+ * Applies a `theme-*` class to <html> and persists to localStorage.
+ * Plays a radial reveal animation from the bottom-left corner when switching.
  */
-const STORAGE_KEY = "theme-black-enabled";
+const STORAGE_KEY = "app-color-theme"; // stores class name like: theme-black/theme-white/theme-pink/...
 const THEME_TRANSITION_MS = 800;
 
+const THEMES: { id: string; label: string; color: string }[] = [
+  { id: "theme-black", label: "Чёрный", color: "#0a0c10" },
+  { id: "theme-white", label: "Белый", color: "#ffffff" },
+  { id: "theme-pink", label: "Розовый", color: "#ffd6e7" },
+  { id: "theme-mint", label: "Мятный", color: "#dcf8ee" },
+  { id: "theme-lavender", label: "Лавандовый", color: "#ece7ff" },
+  { id: "theme-peach", label: "Персиковый", color: "#ffe9d8" },
+];
+
 const ThemeIsland = () => {
-  const [enabled, setEnabled] = useState<boolean>(false);
+  const [current, setCurrent] = useState<string>("theme-black");
+  const [open, setOpen] = useState<boolean>(false);
+  const [isMobile, setIsMobile] = useState<boolean>(false);
   const [justToggled, setJustToggled] = useState<boolean>(false);
   const timeoutRef = useRef<number | null>(null);
 
-  // Load persisted theme (default to dark for all users)
+  // Load persisted theme (default to black)
   useEffect(() => {
     const saved = localStorage.getItem(STORAGE_KEY);
-    if (saved === "1" || saved === null) {
-      // Default theme: dark
-      setEnabled(true);
-      document.documentElement.classList.add("theme-black");
-      if (saved === null) localStorage.setItem(STORAGE_KEY, "1");
-    }
+    const initial = saved && THEMES.some(t => t.id === saved) ? saved : "theme-black";
+    setCurrent(initial);
+    document.documentElement.classList.add(initial);
+    if (!saved) localStorage.setItem(STORAGE_KEY, initial);
+  }, []);
+
+  // Detect mobile (match Tailwind sm breakpoint: < 640px)
+  useEffect(() => {
+    const mq = window.matchMedia("(max-width: 639px)");
+    const onChange = (e: MediaQueryListEvent | MediaQueryList) => setIsMobile(!!e.matches);
+    // Initialize
+    onChange(mq);
+    // Listen
+    const listener = (e: MediaQueryListEvent) => onChange(e);
+    mq.addEventListener ? mq.addEventListener("change", listener) : mq.addListener(listener);
+    return () => {
+      mq.removeEventListener ? mq.removeEventListener("change", listener) : mq.removeListener(listener);
+    };
   }, []);
 
   // Cleanup timer on unmount
   useEffect(() => () => { if (timeoutRef.current) window.clearTimeout(timeoutRef.current); }, []);
 
-  const toggleTheme = () => {
-    const next = !enabled;
-    setEnabled(next);
+  const applyTheme = (themeClass: string) => {
     setJustToggled(true);
-    // Add a temporary class to smoothly transition colors across the app
     document.documentElement.classList.add("theme-transition");
-    if (next) {
-      document.documentElement.classList.add("theme-black");
-      localStorage.setItem(STORAGE_KEY, "1");
-    } else {
-      document.documentElement.classList.remove("theme-black");
-      localStorage.removeItem(STORAGE_KEY);
-    }
-    // Hide overlay after animation completes
+    // Remove any previous theme-* class
+    const classes = document.documentElement.className.split(" ").filter(Boolean);
+    classes
+      .filter(c => c.startsWith("theme-"))
+      .forEach(c => document.documentElement.classList.remove(c));
+    document.documentElement.classList.add(themeClass);
+    setCurrent(themeClass);
+    localStorage.setItem(STORAGE_KEY, themeClass);
+
     if (timeoutRef.current) window.clearTimeout(timeoutRef.current);
     timeoutRef.current = window.setTimeout(() => {
       setJustToggled(false);
@@ -50,24 +71,10 @@ const ThemeIsland = () => {
   };
 
   const icon = useMemo(() => {
-    return enabled ? (
-      // Moon icon
+    return (
       <motion.svg
-        key="moon"
-        width="22" height="22" viewBox="0 0 24 24" fill="none"
-        style={{ willChange: "transform, opacity" }}
-        initial={{ rotate: -90, opacity: 0 }}
-        animate={{ rotate: 0, opacity: 1 }}
-        exit={{ rotate: 90, opacity: 0 }}
-        transition={{ type: "spring", stiffness: 420, damping: 30 }}
-      >
-        <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" stroke="currentColor" strokeWidth="1.5" fill="currentColor" />
-      </motion.svg>
-    ) : (
-      // Sun icon
-      <motion.svg
-        key="sun"
-        width="22" height="22" viewBox="0 0 24 24" fill="none"
+        key={current}
+        width="24" height="24" viewBox="0 0 24 24" fill="none"
         style={{ willChange: "transform, opacity" }}
         initial={{ rotate: 90, opacity: 0 }}
         animate={{ rotate: 0, opacity: 1 }}
@@ -75,31 +82,70 @@ const ThemeIsland = () => {
         transition={{ type: "spring", stiffness: 420, damping: 30 }}
       >
         <circle cx="12" cy="12" r="4.5" stroke="currentColor" strokeWidth="1.5" />
-        <path d="M12 2v2M12 20v2M4 12H2M22 12h-2M5 5l-1.4-1.4M20.4 19.4L19 18M5 19l-1.4 1.4M20.4 4.6L19 6" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
       </motion.svg>
     );
-  }, [enabled]);
+  }, [current]);
 
   return (
     <>
-      {/* Island */}
-      <motion.button
-        aria-label="Toggle black theme"
-        onClick={toggleTheme}
-        className="fixed left-4 bottom-4 md:left-6 md:bottom-6 z-50 rounded-2xl border border-white/10 h-12 w-12 p-0 grid place-items-center sm:h-auto sm:w-auto sm:px-4 sm:py-3 backdrop-blur-2xl text-foreground/90 hover:text-foreground transition-colors"
-        style={{
-          background: "linear-gradient(135deg, hsla(0, 0%, 100%, 0.06) 0%, hsla(220, 20%, 12%, 0.08) 100%)",
-          boxShadow: "0 12px 28px hsla(220, 50%, 2%, 0.45), inset 0 1px 0 hsla(0, 0%, 100%, 0.08)",
-        }}
-        whileHover={{ scale: 1.05 }}
-        whileTap={{ scale: 0.97 }}
-        transition={{ duration: 0.35, ease: [0.16, 1, 0.3, 1] }}
-      >
-        <div className="flex items-center gap-3">
-          <AnimatePresence mode="wait">{icon}</AnimatePresence>
-          <span className="hidden sm:inline text-sm font-medium">{enabled ? "Чёрная тема" : "Белая тема"}</span>
-        </div>
-      </motion.button>
+      {/* Floating palette */}
+      <div className="fixed left-4 bottom-4 md:left-6 md:bottom-6 z-50">
+        <motion.div
+          role="group"
+          aria-label="Color theme switcher"
+          onClick={() => !open && setOpen(true)}
+          className="rounded-2xl border px-2.5 py-2 sm:px-3 sm:py-2.5 backdrop-blur-2xl text-foreground/90 overflow-hidden"
+          style={{
+            background: "var(--gradient-glass)",
+            boxShadow: "var(--shadow-glass)",
+            borderColor: "hsl(var(--border))",
+          }}
+          initial={false}
+          animate={isMobile ? { width: 60, height: open ? 252 : 60, opacity: 1, y: 0 } : { width: open ? 280 : 64, opacity: 1, y: 0 }}
+          transition={{ duration: 0.7, ease: [0.2, 0.8, 0.2, 1] }}
+          layout
+        >
+          <motion.div layout className={`h-full flex items-center ${isMobile ? "flex-col-reverse" : ""}`}>
+            <button
+              type="button"
+              aria-label={open ? "Свернуть палитру" : "Показать палитру"}
+              aria-expanded={open}
+              onClick={(e) => { if (open) { e.stopPropagation(); setOpen(false); } else { setOpen(true); } }}
+              className="h-10 w-10 shrink-0 grid place-items-center rounded-xl border hover:bg-white/10 transition-colors"
+              style={{ borderColor: "hsl(var(--border))" }}
+            >
+              <AnimatePresence mode="wait">{icon}</AnimatePresence>
+            </button>
+            <AnimatePresence>
+              {open && (
+                <motion.div
+                  key="swatches"
+                  className={isMobile ? "flex flex-col items-center gap-2 mb-2" : "flex items-center gap-2 sm:gap-3 ml-2"}
+                  initial={{ opacity: 0, x: isMobile ? 0 : 10, y: isMobile ? -10 : 0 }}
+                  animate={{ opacity: 1, x: 0, y: 0 }}
+                  exit={{ opacity: 0, x: isMobile ? 0 : 10, y: isMobile ? -10 : 0 }}
+                  transition={{ when: "beforeChildren", duration: 0.65, ease: [0.16, 1, 0.3, 1], staggerChildren: 0.06 }}
+                >
+                  {THEMES.map((t) => (
+                    <motion.button
+                      key={t.id}
+                      type="button"
+                      onClick={(e) => { e.stopPropagation(); applyTheme(t.id); setOpen(false); }}
+                      aria-label={`Выбрать тему: ${t.label}`}
+                      className={`h-6 w-6 rounded-full border transition-colors ${current === t.id ? "ring-2 ring-ring" : "hover:opacity-90"}`}
+                      style={{ backgroundColor: t.color, borderColor: "hsl(var(--border))" }}
+                      initial={{ opacity: 0, x: isMobile ? 0 : 12, y: isMobile ? -8 : 4, scale: 0.96 }}
+                      animate={{ opacity: 1, x: 0, y: 0, scale: 1 }}
+                      exit={{ opacity: 0, x: isMobile ? 0 : 12, y: isMobile ? -8 : 4, scale: 0.96 }}
+                      transition={{ duration: 0.45, ease: [0.16, 1, 0.3, 1] }}
+                    />
+                  ))}
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </motion.div>
+        </motion.div>
+      </div>
 
       {/* Radial reveal overlay from bottom-left corner */}
       <AnimatePresence>
@@ -111,7 +157,7 @@ const ThemeIsland = () => {
             animate={{ clipPath: "circle(180% at 44px calc(100% - 44px))", opacity: 0 }}
             exit={{ opacity: 0 }}
             transition={{ duration: THEME_TRANSITION_MS / 1000, ease: [0.2, 0.8, 0.2, 1] }}
-            style={{ background: enabled ? "#000" : "#0b0e12" }}
+            style={{ background: current === "theme-black" ? "#000" : "#0b0e12" }}
           />
         )}
       </AnimatePresence>

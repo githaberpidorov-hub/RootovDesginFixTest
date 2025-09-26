@@ -239,18 +239,18 @@ const PriceCalculator = () => {
       layout
       whileHover={{ y: -2 }}
       onClick={onClick}
-      className={`relative p-4 rounded-2xl border transition-all duration-300 overflow-hidden group ${
-        active ? 'border-white/30 bg-white/10 shadow-[0_12px_40px_rgba(0,0,0,0.35)]' : 'border-white/10 hover:border-white/20 hover:bg-white/5'
+      className={`option-card relative p-4 rounded-2xl border transition-all duration-300 overflow-hidden group ${
+        active ? 'option-card--active border-white/30 bg-white/10 shadow-[0_12px_40px_rgba(0,0,0,0.35)]' : 'border-white/10 hover:border-white/20 hover:bg-white/5'
       }`}
     >
       {/* Accent gradient ring */}
-      <div className={`pointer-events-none absolute inset-0 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity ${
+      <div className={`option-card__ring pointer-events-none absolute inset-0 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity ${
         active ? 'opacity-100' : ''
       }`} style={{
         background: 'radial-gradient(60% 60% at 20% 0%, rgba(255,255,255,0.10) 0%, rgba(255,255,255,0) 60%)'
       }} />
       <div className="relative z-10 flex items-center gap-3 text-left">
-        <div className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 ${
+        <div className={`option-card__icon w-10 h-10 rounded-xl flex items-center justify-center shrink-0 ${
           active ? 'bg-white/15' : 'bg-white/5 group-hover:bg-white/10'
         }`}></div>
         <div>
@@ -260,7 +260,7 @@ const PriceCalculator = () => {
       </div>
       {active && (
         <div
-          className="absolute inset-0 rounded-2xl"
+          className="option-card__shine absolute inset-0 rounded-2xl"
           style={{
             background:
               'linear-gradient(180deg, rgba(255,255,255,0.10) 0%, rgba(255,255,255,0.00) 60%)'
@@ -271,7 +271,7 @@ const PriceCalculator = () => {
   );
 
   return (
-    <section className="py-32 px-6">
+    <section className="calculator-section py-32 px-6">
       <div className="max-w-5xl mx-auto">
         <motion.div
           initial={{ opacity: 0, y: 50 }}
@@ -294,12 +294,12 @@ const PriceCalculator = () => {
             <span>{t.calculatorUi.filled}</span>
             <span>{progress}%</span>
           </div>
-          <div className="h-2 rounded-full bg-white/10 overflow-hidden">
+          <div className="progress-track h-2 rounded-full bg-white/10 overflow-hidden">
             <motion.div
               initial={{ width: 0 }}
               animate={{ width: `${progress}%` }}
               transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
-              className="h-full rounded-full bg-white"
+              className="progress-fill h-full rounded-full"
             />
           </div>
         </div>
