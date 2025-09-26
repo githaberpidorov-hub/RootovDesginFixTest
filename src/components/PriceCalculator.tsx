@@ -1,5 +1,5 @@
-import { useState, useEffect } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import { useState, useEffect, useRef } from "react";
+import { motion, AnimatePresence, LayoutGroup, useAnimation } from "framer-motion";
 import GlassButton from "./GlassButton";
 import { useLanguage } from "@/hooks/use-language";
 
@@ -23,6 +23,26 @@ const PriceCalculator = () => {
   const [totalPrice, setTotalPrice] = useState(0);
   const [showResult, setShowResult] = useState(false);
   // Smooth expand/collapse handled by framer's auto height
+  const chipsContentRef = useRef<HTMLDivElement | null>(null);
+  const [chipsMeasuredHeight, setChipsMeasuredHeight] = useState(0);
+
+  useEffect(() => {
+    const el = chipsContentRef.current;
+    if (!el) return;
+    
+    const measureHeight = () => {
+      setChipsMeasuredHeight(el.offsetHeight);
+    };
+    
+    if (typeof ResizeObserver !== 'undefined') {
+      const ro = new ResizeObserver(measureHeight);
+      ro.observe(el);
+      return () => ro.disconnect();
+    } else {
+      // Fallback for browsers without ResizeObserver
+      measureHeight();
+    }
+  }, []);
 
   const defaultOptions = {
     websiteType: [
@@ -116,45 +136,46 @@ const PriceCalculator = () => {
   }, [language]);
 
   useEffect(() => {
-    calculatePrice();
-  }, [calculator]);
+    // Only calculate if options are loaded and not empty
+    if (options.websiteType.length > 0) {
+      calculatePrice();
+    }
+  }, [calculator, options]);
 
   const calculatePrice = () => {
-    setTimeout(() => {
-      let basePrice = 0;
-      let multiplier = 1;
-      let additionalFeatures = 0;
+    let basePrice = 0;
+    let multiplier = 1;
+    let additionalFeatures = 0;
 
-      // Base price from website type
-      const websiteTypeOption = options.websiteType.find(opt => opt.id === calculator.websiteType);
-      if (websiteTypeOption) {
-        basePrice = websiteTypeOption.price as number;
+    // Base price from website type
+    const websiteTypeOption = options.websiteType.find(opt => opt.id === calculator.websiteType);
+    if (websiteTypeOption) {
+      basePrice = websiteTypeOption.price as number;
+    }
+
+    // Complexity multiplier
+    const complexityOption = options.complexity.find(opt => opt.id === calculator.complexity);
+    multiplier *= Number((complexityOption as any)?.multiplier ?? 1);
+
+    // Timeline multiplier
+    const timelineOption = options.timeline.find(opt => opt.id === calculator.timeline);
+    multiplier *= Number((timelineOption as any)?.multiplier ?? 1);
+
+    // Design multiplier
+    const designOption = options.design.find(opt => opt.id === calculator.design);
+    multiplier *= Number((designOption as any)?.multiplier ?? 1);
+
+    // Additional features
+    calculator.features.forEach(featureId => {
+      const feature = options.features.find(opt => opt.id === featureId);
+      if (feature) {
+        additionalFeatures += Number((feature as any).price ?? 0);
       }
+    });
 
-      // Complexity multiplier
-      const complexityOption = options.complexity.find(opt => opt.id === calculator.complexity);
-      multiplier *= Number((complexityOption as any)?.multiplier ?? 1);
-
-      // Timeline multiplier
-      const timelineOption = options.timeline.find(opt => opt.id === calculator.timeline);
-      multiplier *= Number((timelineOption as any)?.multiplier ?? 1);
-
-      // Design multiplier
-      const designOption = options.design.find(opt => opt.id === calculator.design);
-      multiplier *= Number((designOption as any)?.multiplier ?? 1);
-
-      // Additional features
-      calculator.features.forEach(featureId => {
-        const feature = options.features.find(opt => opt.id === featureId);
-        if (feature) {
-          additionalFeatures += Number((feature as any).price ?? 0);
-        }
-      });
-
-      const total = Math.round((basePrice * multiplier) + additionalFeatures);
-      setTotalPrice(total);
-      setShowResult(total > 0);
-    }, 300);
+    const total = Math.round((basePrice * multiplier) + additionalFeatures);
+    setTotalPrice(total);
+    setShowResult(total > 0);
   };
 
   const handleOptionSelect = (category: keyof CalculatorState, value: string) => {
@@ -203,11 +224,11 @@ const PriceCalculator = () => {
 
   const SummaryChip = ({ label, onRemove }: { label: string; onRemove?: () => void }) => (
     <motion.div
-      initial={{ opacity: 0, scale: 0.98 }}
+      initial={false}
       animate={{ opacity: 1, scale: 1 }}
       exit={{ opacity: 0, scale: 0.98 }}
       transition={{ duration: 0.28, ease: [0.22, 1, 0.36, 1] }}
-      className="flex items-center gap-2 px-3 py-1.5 rounded-full border border-white/10 bg-white/5 text-sm text-foreground/80 shadow-[inset_0_0_0_1px_rgba(255,255,255,0.04)]"
+      className="flex items-center gap-2 px-3 py-1.5 rounded-full border border-white/10 bg-white/5 text-sm text-foreground/80 shadow-[inset_0_0_0_1px_rgba(255,255,255,0.04)] whitespace-nowrap"
     >
       <span>{label}</span>
       {onRemove && (
@@ -228,47 +249,115 @@ const PriceCalculator = () => {
     subline,
     icon,
     onClick,
+    category,
+    enableSharedActiveBg = false,
   }: {
     active: boolean;
     headline: string;
     subline?: string;
     icon?: string;
     onClick: () => void;
-  }) => (
+    category: keyof CalculatorState;
+    enableSharedActiveBg?: boolean;
+  }) => {
+    return (
     <motion.button
-      layout
-      whileHover={{ y: -2 }}
+      initial={false}
       onClick={onClick}
-      className={`option-card relative p-4 rounded-2xl border transition-all duration-300 overflow-hidden group ${
-        active ? 'option-card--active border-white/30 bg-white/10 shadow-[0_12px_40px_rgba(0,0,0,0.35)]' : 'border-white/10 hover:border-white/20 hover:bg-white/5'
+      animate={{ 
+        scale: active ? 1.01 : 1,
+        opacity: active ? 1 : 0.9 
+      }}
+      transition={{ 
+        duration: 0.3,
+        ease: [0.25, 0.8, 0.25, 1]
+      }}
+      className={`option-card relative p-4 rounded-2xl border overflow-hidden group transition-colors transition-shadow duration-500 ease-out ${
+        active
+          ? 'option-card--active border-white/30 bg-white/10 shadow-[0_12px_40px_rgba(0,0,0,0.35)]'
+          : 'border-white/10 hover:border-white/20 hover:bg-white/5'
       }`}
+      style={{ willChange: 'transform, background, box-shadow' }}
     >
+      {/* Removed shared moving background to prevent sweeping stripe */}
+      {/* Shared moving highlight for active card (state-driven, no remount) */}
+      <motion.div
+        className="absolute inset-0 rounded-2xl"
+        initial={false}
+        animate={{ opacity: active ? 1 : 0 }}
+        transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1], type: 'tween' }}
+        style={{
+          background:
+            'radial-gradient(120% 120% at 50% 50%, rgba(255,255,255,0.06) 0%, rgba(255,255,255,0.03) 55%, rgba(255,255,255,0.00) 80%)'
+        }}
+      />
+
       {/* Accent gradient ring */}
-      <div className={`option-card__ring pointer-events-none absolute inset-0 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity ${
-        active ? 'opacity-100' : ''
-      }`} style={{
-        background: 'radial-gradient(60% 60% at 20% 0%, rgba(255,255,255,0.10) 0%, rgba(255,255,255,0) 60%)'
-      }} />
+      <div
+        className={`option-card__ring pointer-events-none absolute inset-0 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity ${
+          active ? 'opacity-100' : ''
+        }`}
+        style={{
+          background:
+            'radial-gradient(60% 60% at 20% 0%, rgba(255,255,255,0.10) 0%, rgba(255,255,255,0) 60%)'
+        }}
+      />
+
       <div className="relative z-10 flex items-center gap-3 text-left">
-        <div className={`option-card__icon w-10 h-10 rounded-xl flex items-center justify-center shrink-0 ${
-          active ? 'bg-white/15' : 'bg-white/5 group-hover:bg-white/10'
-        }`}></div>
-        <div>
-          <div className="font-medium text-foreground">{headline}</div>
-          {subline && <div className="text-sm text-foreground/60">{subline}</div>}
+        <motion.div
+          className={`option-card__icon w-10 h-10 rounded-xl flex items-center justify-center shrink-0 transition-colors transition-shadow duration-500 ease-out ${
+            active ? 'bg-white/15' : 'bg-white/5'
+          }`}
+          initial={false}
+          animate={{ 
+            scale: active ? 1.05 : 1, 
+            opacity: active ? 1 : 0.7 
+          }}
+          transition={{ 
+            duration: 0.8,
+            ease: [0.25, 0.8, 0.25, 1]
+          }}
+        >
+          {icon && (
+            <motion.span
+              aria-hidden="true"
+              initial={false}
+              animate={{ scale: active ? 1.1 : 1 }}
+              transition={{ 
+                duration: 0.8,
+                ease: [0.25, 0.8, 0.25, 1]
+              }}
+            >
+              {icon}
+            </motion.span>
+          )}
+        </motion.div>
+            <div>
+          <motion.div
+            className="font-medium text-foreground"
+            initial={false}
+                animate={{ y: active ? -0.2 : 0, opacity: 1 }}
+                transition={{ duration: 0.18, ease: [0.22, 1, 0.36, 1] }}
+          >
+            {headline}
+          </motion.div>
+          {subline && (
+            <motion.div
+              className="text-sm text-foreground/60"
+              initial={{ opacity: 0.85 }}
+              animate={{ opacity: active ? 1 : 0.85 }}
+              transition={{ duration: 0.25 }}
+            >
+              {subline}
+            </motion.div>
+          )}
         </div>
       </div>
-      {active && (
-        <div
-          className="option-card__shine absolute inset-0 rounded-2xl"
-          style={{
-            background:
-              'linear-gradient(180deg, rgba(255,255,255,0.10) 0%, rgba(255,255,255,0.00) 60%)'
-          }}
-        />
-      )}
+
+      {/* Removed shine overlay to avoid occasional sweeping stripe */}
     </motion.button>
   );
+  }
 
   return (
     <section className="calculator-section py-32 px-6">
@@ -298,7 +387,11 @@ const PriceCalculator = () => {
             <motion.div
               initial={{ width: 0 }}
               animate={{ width: `${progress}%` }}
-              transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
+              transition={{ 
+                duration: 0.8, 
+                ease: [0.23, 1, 0.32, 1],
+                type: "tween"
+              }}
               className="progress-fill h-full rounded-full"
             />
           </div>
@@ -309,130 +402,201 @@ const PriceCalculator = () => {
             {/* Website Type */}
             <div>
               <h3 className="text-2xl font-semibold mb-6 text-foreground">{t.calculatorUi.websiteType}</h3>
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                {options.websiteType.map((option) => (
-                  <OptionCard
-                    key={option.id}
-                    active={calculator.websiteType === option.id}
-                    onClick={() => handleOptionSelect('websiteType', option.id)}
-                    icon={(option as any).icon}
-                    headline={option.name as string}
-                    subline={`${t.calculatorUi.fromPrefix}${(option as any).price}`}
-                  />
-                ))}
-              </div>
+              <LayoutGroup id="websiteType">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                  {options.websiteType.map((option) => (
+                    <OptionCard
+                      key={option.id}
+                      active={calculator.websiteType === option.id}
+                      onClick={() => handleOptionSelect('websiteType', option.id)}
+                      icon={(option as any).icon}
+                      headline={option.name as string}
+                      subline={`${t.calculatorUi.fromPrefix}${(option as any).price}`}
+                      category={'websiteType'}
+                    />
+                  ))}
+                </div>
+              </LayoutGroup>
             </div>
 
             {/* Complexity */}
             <div>
               <h3 className="text-2xl font-semibold mb-6 text-foreground">{t.calculatorUi.complexity}</h3>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                {options.complexity.map((option) => (
-                  <OptionCard
-                    key={option.id}
-                    active={calculator.complexity === option.id}
-                    onClick={() => handleOptionSelect('complexity', option.id)}
-                    icon={(option as any).icon}
-                    headline={option.name as string}
-                    subline={`${t.calculatorUi.multiplyPrefix}${(option as any).multiplier}`}
-                  />
-                ))}
-              </div>
+              <LayoutGroup id="complexity">
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  {options.complexity.map((option) => (
+                    <OptionCard
+                      key={option.id}
+                      active={calculator.complexity === option.id}
+                      onClick={() => handleOptionSelect('complexity', option.id)}
+                      icon={(option as any).icon}
+                      headline={option.name as string}
+                      subline={`${t.calculatorUi.multiplyPrefix}${(option as any).multiplier}`}
+                      category={'complexity'}
+                    />
+                  ))}
+                </div>
+              </LayoutGroup>
             </div>
 
             {/* Timeline */}
             <div>
               <h3 className="text-2xl font-semibold mb-6 text-foreground">{t.calculatorUi.timeline}</h3>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                {options.timeline.map((option) => (
-                  <OptionCard
-                    key={option.id}
-                    active={calculator.timeline === option.id}
-                    onClick={() => handleOptionSelect('timeline', option.id)}
-                    icon={(option as any).icon}
-                    headline={option.name as string}
-                    subline={`${t.calculatorUi.multiplyPrefix}${(option as any).multiplier}`}
-                  />
-                ))}
-              </div>
+              <LayoutGroup id="timeline">
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  {options.timeline.map((option) => (
+                    <OptionCard
+                      key={option.id}
+                      active={calculator.timeline === option.id}
+                      onClick={() => handleOptionSelect('timeline', option.id)}
+                      icon={(option as any).icon}
+                      headline={option.name as string}
+                      subline={`${t.calculatorUi.multiplyPrefix}${(option as any).multiplier}`}
+                      category={'timeline'}
+                    />
+                  ))}
+                </div>
+              </LayoutGroup>
             </div>
 
             {/* Features */}
             <div>
               <h3 className="text-2xl font-semibold mb-6 text-foreground">{t.calculatorUi.features}</h3>
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                {options.features.map((option) => (
-                  <OptionCard
-                    key={option.id}
-                    active={calculator.features.includes(option.id)}
-                    onClick={() => handleOptionSelect('features', option.id)}
-                    icon={(option as any).icon}
-                    headline={option.name as string}
-                    subline={`${t.calculatorUi.plusPrefix}${(option as any).price}`}
-                  />
-                ))}
-              </div>
+              <LayoutGroup id="features">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                  {options.features.map((option) => (
+                    <OptionCard
+                      key={option.id}
+                      active={calculator.features.includes(option.id)}
+                      onClick={() => handleOptionSelect('features', option.id)}
+                      icon={(option as any).icon}
+                      headline={option.name as string}
+                      subline={`${t.calculatorUi.plusPrefix}${(option as any).price}`}
+                      category={'features'}
+                      enableSharedActiveBg={false}
+                    />
+                  ))}
+                </div>
+              </LayoutGroup>
             </div>
 
             {/* Design */}
             <div>
               <h3 className="text-2xl font-semibold mb-6 text-foreground">{t.calculatorUi.design}</h3>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                {options.design.map((option) => (
-                  <OptionCard
-                    key={option.id}
-                    active={calculator.design === option.id}
-                    onClick={() => handleOptionSelect('design', option.id)}
-                    icon={(option as any).icon}
-                    headline={option.name as string}
-                    subline={`${t.calculatorUi.multiplyPrefix}${(option as any).multiplier}`}
-                  />
-                ))}
-              </div>
+              <LayoutGroup id="design">
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  {options.design.map((option) => (
+                    <OptionCard
+                      key={option.id}
+                      active={calculator.design === option.id}
+                      onClick={() => handleOptionSelect('design', option.id)}
+                      icon={(option as any).icon}
+                      headline={option.name as string}
+                      subline={`${t.calculatorUi.multiplyPrefix}${(option as any).multiplier}`}
+                      category={'design'}
+                    />
+                  ))}
+                </div>
+              </LayoutGroup>
             </div>
           </div>
 
           {/* Summary chips */}
-          <div className="mt-10">
-            <AnimatePresence initial={false} mode="wait">
-              {completedSteps > 0 && (
-                <motion.div
-                  initial={{ opacity: 0, height: 0 }}
-                  animate={{ opacity: 1, height: 'auto' }}
-                  exit={{ opacity: 0, height: 0 }}
-                  transition={{
-                    height: { duration: 0.42, ease: [0.16, 1, 0.3, 1] },
-                    opacity: { duration: 0.28, ease: [0.22, 1, 0.36, 1] },
-                  }}
-                  style={{ overflow: 'hidden' }}
-                >
-                  <motion.div
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    exit={{ opacity: 0 }}
-                    transition={{ duration: 0.2, delay: 0.35 }}
-                    className="flex flex-wrap gap-2 py-2"
-                    style={{ overflow: 'visible' }}
-                  >
-                    {calculator.websiteType && (
+          <div className="mt-10 relative" style={{ contain: 'layout style' }}>
+            {/* Height spacer controls layout without clipping content */}
+            <motion.div
+              aria-hidden
+              initial={false}
+              animate={{ height: completedSteps > 0 ? (chipsMeasuredHeight || 0) : 0, marginTop: completedSteps > 0 ? 8 : 0, marginBottom: completedSteps > 0 ? 8 : 0 }}
+              transition={{ height: { duration: 0.34, ease: 'linear' }, marginTop: { duration: 0.34, ease: 'linear' }, marginBottom: { duration: 0.34, ease: 'linear' } }}
+              style={{ height: 0 }}
+            />
+            {/* Actual content overlays the spacer, so it never gets clipped */}
+            <div ref={chipsContentRef} className="absolute inset-x-0 top-0 z-10 pointer-events-auto" style={{ overflow: 'visible' }}>
+              <motion.div
+                className="flex flex-wrap gap-2"
+                initial={false}
+                animate={{ opacity: completedSteps > 0 ? 1 : 0, scaleY: completedSteps > 0 ? 1 : 0.98 }}
+                transition={{ duration: 0.24, ease: [0.22, 1, 0.36, 1] }}
+                style={{ transformOrigin: 'top', overflow: 'visible' }}
+              >
+                {/* One AnimatePresence per chip group to ensure exit/enter on replacement */}
+                <AnimatePresence mode="popLayout">
+                  {calculator.websiteType && (
+                    <motion.div
+                      key={`websiteType-${calculator.websiteType}`}
+                      layout
+                      initial={{ opacity: 0, scale: 0.8, y: 10 }}
+                      animate={{ opacity: 1, scale: 1, y: 0 }}
+                      exit={{ opacity: 0, scale: 0.85, y: 10 }}
+                      transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
+                    >
                       <SummaryChip label={(options.websiteType.find(o=>o.id===calculator.websiteType)?.name as string) || ''} onRemove={() => handleOptionSelect('websiteType', calculator.websiteType)} />
-                    )}
-                    {calculator.complexity && (
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+
+                <AnimatePresence mode="popLayout">
+                  {calculator.complexity && (
+                    <motion.div
+                      key={`complexity-${calculator.complexity}`}
+                      layout
+                      initial={{ opacity: 0, scale: 0.8, y: 10 }}
+                      animate={{ opacity: 1, scale: 1, y: 0 }}
+                      exit={{ opacity: 0, scale: 0.85, y: 10 }}
+                      transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
+                    >
                       <SummaryChip label={(options.complexity.find(o=>o.id===calculator.complexity)?.name as string) || ''} onRemove={() => handleOptionSelect('complexity', calculator.complexity)} />
-                    )}
-                    {calculator.timeline && (
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+
+                <AnimatePresence mode="popLayout">
+                  {calculator.timeline && (
+                    <motion.div
+                      key={`timeline-${calculator.timeline}`}
+                      layout
+                      initial={{ opacity: 0, scale: 0.8, y: 10 }}
+                      animate={{ opacity: 1, scale: 1, y: 0 }}
+                      exit={{ opacity: 0, scale: 0.85, y: 10 }}
+                      transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
+                    >
                       <SummaryChip label={(options.timeline.find(o=>o.id===calculator.timeline)?.name as string) || ''} onRemove={() => handleOptionSelect('timeline', calculator.timeline)} />
-                    )}
-                    {calculator.design && (
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+
+                <AnimatePresence mode="popLayout">
+                  {calculator.design && (
+                    <motion.div
+                      key={`design-${calculator.design}`}
+                      layout
+                      initial={{ opacity: 0, scale: 0.8, y: 10 }}
+                      animate={{ opacity: 1, scale: 1, y: 0 }}
+                      exit={{ opacity: 0, scale: 0.85, y: 10 }}
+                      transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
+                    >
                       <SummaryChip label={(options.design.find(o=>o.id===calculator.design)?.name as string) || ''} onRemove={() => handleOptionSelect('design', calculator.design)} />
-                    )}
-                    {calculator.features.map((fid, i) => (
-                      <SummaryChip key={fid} label={(options.features.find(o=>o.id===fid)?.name as string) || ''} onRemove={() => handleOptionSelect('features', fid)} />
-                    ))}
-                  </motion.div>
-                </motion.div>
-              )}
-            </AnimatePresence>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+
+                <AnimatePresence mode="popLayout">
+                  {calculator.features.map((fid) => (
+                    <motion.div
+                      key={`feature-${fid}`}
+                      layout
+                      initial={{ opacity: 0, scale: 0.8, y: 10 }}
+                      animate={{ opacity: 1, scale: 1, y: 0 }}
+                      exit={{ opacity: 0, scale: 0.85, y: 10 }}
+                      transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
+                    >
+                      <SummaryChip label={(options.features.find(o=>o.id===fid)?.name as string) || ''} onRemove={() => handleOptionSelect('features', fid)} />
+                    </motion.div>
+                  ))}
+                </AnimatePresence>
+              </motion.div>
+            </div>
           </div>
 
           {/* Result */}
@@ -464,14 +628,28 @@ const PriceCalculator = () => {
                     </motion.div>
                     {/* Price wrapper with fixed height to prevent layout shift */}
                     <div className="relative mb-8 h-16 md:h-20">
-                    <motion.div
-                      key={totalPrice}
-                      initial={{ opacity: 0, y: 6 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      transition={{ duration: 0.35, ease: [0.22, 1, 0.36, 1] }}
-                      className="absolute inset-0 flex items-center justify-center"
-                    >
-                        <div className="text-6xl font-bold text-gradient">{`$${totalPrice.toLocaleString()}`}</div>
+                      <motion.div
+                        initial={false}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ duration: 0.35, ease: [0.22, 1, 0.36, 1] }}
+                        className="absolute inset-0 flex items-center justify-center"
+                      >
+                        <AnimatePresence mode="wait">
+                          <motion.div 
+                            key={totalPrice}
+                            initial={{ scale: 0.95, opacity: 0, y: 6 }}
+                            animate={{ scale: 1, opacity: 1, y: 0 }}
+                            exit={{ scale: 0.98, opacity: 0, y: -4 }}
+                            transition={{ 
+                              duration: 0.15, 
+                              ease: [0.3, 0.7, 0.3, 1],
+                              type: "tween"
+                            }}
+                            className="text-6xl font-bold text-gradient"
+                          >
+                            ${totalPrice.toLocaleString()}
+                          </motion.div>
+                        </AnimatePresence>
                       </motion.div>
                     </div>
                     <motion.div 
