@@ -129,6 +129,11 @@ export interface Translations {
       submit: string;
       submitting: string;
     };
+    notifications?: {
+      submittedSuccess: string;
+      submittedError: string;
+      phoneRequired: string;
+    };
   };
 
   // Admin page
@@ -332,6 +337,11 @@ const translations: Record<LanguageCode, Translations> = {
         submit: "Отправить заявку",
         submitting: "Отправка…",
       },
+      notifications: {
+        submittedSuccess: "Мы скоро свяжемся с вами",
+        submittedError: "Не удалось отправить заявку",
+        phoneRequired: "Введите номер телефона",
+      },
     },
     admin: {
       title: "Админ-панель",
@@ -529,6 +539,11 @@ const translations: Record<LanguageCode, Translations> = {
         submit: "Submit Request",
         submitting: "Submitting…",
       },
+      notifications: {
+        submittedSuccess: "We will contact you soon",
+        submittedError: "Failed to submit request",
+        phoneRequired: "Please enter your phone number",
+      },
     },
     admin: {
       title: "Admin Panel",
@@ -725,6 +740,11 @@ const translations: Record<LanguageCode, Translations> = {
         },
         submit: "Відправити заявку",
         submitting: "Відправка…",
+      },
+      notifications: {
+        submittedSuccess: "Ми скоро з вами зв'яжемося",
+        submittedError: "Не вдалося відправити заявку",
+        phoneRequired: "Введіть номер телефону",
       },
     },
     admin: {

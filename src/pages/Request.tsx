@@ -170,7 +170,7 @@ const Request = () => {
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!form.phone.trim()) {
-      toast({ title: t.request.form.phone.label, variant: 'destructive' });
+      toast({ title: t.common.error, description: t.request.notifications?.phoneRequired || t.request.form.phone.label, variant: 'destructive' });
       return;
     }
 
@@ -211,10 +211,10 @@ const Request = () => {
         throw new Error(tgJson?.error || `Ошибка сервера (${tgRes.status})`);
       }
 
-      toast({ title: t.common.success, description: 'Мы скоро свяжемся с вами' });
+      toast({ title: t.common.success, description: t.request.notifications?.submittedSuccess || 'OK' });
       navigate('/');
     } catch (err) {
-      const msg = err instanceof Error ? err.message : 'Ошибка отправки';
+      const msg = err instanceof Error ? err.message : (t.request.notifications?.submittedError || 'Error');
       toast({ title: t.common.error, description: msg, variant: 'destructive' });
     } finally {
       setSubmitting(false);
