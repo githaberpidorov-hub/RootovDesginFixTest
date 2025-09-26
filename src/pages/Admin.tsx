@@ -28,7 +28,8 @@ const Admin = () => {
   const navigate = useNavigate();
   const { t, language: currentLanguage } = useLanguage();
   const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [activeTab, setActiveTab] = useState<'templates' | 'calculator' | 'telegram'>('templates');
+  // Calculator admin tab disabled. To re-enable, restore union below.
+  const [activeTab, setActiveTab] = useState<'templates' | 'telegram'>('templates');
   const [loginForm, setLoginForm] = useState<LoginForm>({ username: "", password: "" });
   const [templates, setTemplates] = useState<Template[]>([]);
   const [isAddingTemplate, setIsAddingTemplate] = useState(false);
@@ -50,46 +51,9 @@ const Admin = () => {
   const [adminEditingLanguage, setAdminEditingLanguage] = useState<LanguageCode>('RU');
   const availableLanguages = getAvailableLanguages();
 
-  // Calculator config (editable)
-  type CalcOptions = {
-    websiteType: { id: string; name: string; price: number }[];
-    complexity: { id: string; name: string; multiplier: number }[];
-    timeline: { id: string; name: string; multiplier: number }[];
-    features: { id: string; name: string; price: number }[];
-    design: { id: string; name: string; multiplier: number }[];
-  };
-  const [calcOptions, setCalcOptions] = useState<CalcOptions>({
-    websiteType: [
-      { id: "landing", name: "Лендинг", price: 500 },
-      { id: "corporate", name: "Корпоративный сайт", price: 1200 },
-      { id: "ecommerce", name: "Интернет-магазин", price: 2500 },
-      { id: "portfolio", name: "Портфолио", price: 800 },
-      { id: "blog", name: "Блог/СМИ", price: 1000 },
-    ],
-    complexity: [
-      { id: "simple", name: "Простой", multiplier: 1 },
-      { id: "medium", name: "Средний", multiplier: 1.5 },
-      { id: "complex", name: "Сложный", multiplier: 2.2 },
-    ],
-    timeline: [
-      { id: "urgent", name: "Срочно (1-2 недели)", multiplier: 1.8 },
-      { id: "normal", name: "Обычно (3-4 недели)", multiplier: 1 },
-      { id: "flexible", name: "Не горит (1-2 месяца)", multiplier: 0.8 },
-    ],
-    features: [
-      { id: "cms", name: "Система управления", price: 300 },
-      { id: "seo", name: "SEO оптимизация", price: 400 },
-      { id: "analytics", name: "Аналитика", price: 200 },
-      { id: "mobile", name: "Мобильная версия", price: 500 },
-      { id: "multilang", name: "Многоязычность", price: 600 },
-      { id: "integration", name: "Интеграции", price: 800 },
-    ],
-    design: [
-      { id: "template", name: "На основе шаблона", multiplier: 0.7 },
-      { id: "custom", name: "Индивидуальный дизайн", multiplier: 1 },
-      { id: "premium", name: "Premium дизайн", multiplier: 1.4 },
-    ],
-  });
+  // Calculator editing disabled
+  // type CalcOptions = { websiteType: { id: string; name: string; price: number }[]; complexity: { id: string; name: string; multiplier: number }[]; timeline: { id: string; name: string; multiplier: number }[]; features: { id: string; name: string; price: number }[]; design: { id: string; name: string; multiplier: number }[]; };
+  // const [calcOptions, setCalcOptions] = useState<CalcOptions>(/* initial */);
 
   const categories = [
     { id: "landing", name: t.admin.templates.categories.landing },
@@ -105,22 +69,11 @@ const Admin = () => {
       setIsAuthenticated(true);
       // Загружаем шаблоны с учетом выбранного языка редактирования в админке
       loadTemplates();
-      // Загружаем остальные настройки
+      // Загружаем остальные настройки (калькулятор отключен)
       Promise.all([
         fetch('/api/settings').then(r => r.json()),
-        fetch(`/api/calculator?language=${adminEditingLanguage}`).then(r => r.json())
       ])
-        .then(([settingsData, calculatorData]) => {
-          if (calculatorData?.ok && calculatorData.config) {
-            const config = calculatorData.config;
-            setCalcOptions({
-              websiteType: Object.entries(config[`website_type_${adminEditingLanguage.toLowerCase()}`] || {}).map(([id, value]: [string, any]) => ({ id, name: (value as any).label || id, price: (value as any).price || 0 })),
-              complexity: Object.entries(config[`complexity_${adminEditingLanguage.toLowerCase()}`] || {}).map(([id, value]: [string, any]) => ({ id, name: (value as any).label || id, multiplier: (value as any).multiplier || 1 })),
-              timeline: Object.entries(config[`timeline_${adminEditingLanguage.toLowerCase()}`] || {}).map(([id, value]: [string, any]) => ({ id, name: (value as any).label || id, multiplier: (value as any).multiplier || 1 })),
-              features: Object.entries(config[`features_${adminEditingLanguage.toLowerCase()}`] || {}).map(([id, value]: [string, any]) => ({ id, name: (value as any).label || id, price: (value as any).price || 0 })),
-              design: Object.entries(config[`design_${adminEditingLanguage.toLowerCase()}`] || {}).map(([id, value]: [string, any]) => ({ id, name: (value as any).label || id, price: (value as any).price || 0 })),
-            });
-          }
+        .then(([settingsData]) => {
           if (settingsData?.telegram) {
             setTgConfig({ 
               botToken: settingsData.telegram.botToken || '', 
@@ -155,84 +108,9 @@ const Admin = () => {
     loadTemplates();
   }, [adminEditingLanguage, isAuthenticated]);
 
-  const loadCalculatorConfig = async () => {
-    try {
-      const response = await fetch(`/api/calculator?language=${adminEditingLanguage}`);
-      const data = await response.json();
+  // const loadCalculatorConfig = async () => { /* disabled */ };
 
-      if (data.ok && data.config) {
-        const config = data.config;
-        const normalizePriceGroup = (group: any) => {
-          if (!group) return [] as Array<{ id: string; name: string; price: number }>;
-          const entries = Array.isArray(group)
-            ? (group as any[]).map((val, idx) => [String(val?.id ?? idx), val] as const)
-            : Object.entries(group as Record<string, any>);
-          return entries.map(([id, value]) => ({ id, name: value?.label || value?.name || id, price: Number(value?.price || 0) }));
-        };
-        const normalizeMultGroup = (group: any) => {
-          if (!group) return [] as Array<{ id: string; name: string; multiplier: number }>;
-          const entries = Array.isArray(group)
-            ? (group as any[]).map((val, idx) => [String(val?.id ?? idx), val] as const)
-            : Object.entries(group as Record<string, any>);
-          return entries.map(([id, value]) => ({ id, name: value?.label || value?.name || id, multiplier: Number(value?.multiplier || 1) }));
-        };
-
-        setCalcOptions({
-          websiteType: normalizePriceGroup(config[`website_type_${adminEditingLanguage.toLowerCase()}`]),
-          complexity: normalizeMultGroup(config[`complexity_${adminEditingLanguage.toLowerCase()}`]),
-          timeline: normalizeMultGroup(config[`timeline_${adminEditingLanguage.toLowerCase()}`]),
-          features: normalizePriceGroup(config[`features_${adminEditingLanguage.toLowerCase()}`]),
-          design: normalizePriceGroup(config[`design_${adminEditingLanguage.toLowerCase()}`]),
-        });
-      }
-    } catch (error) {
-      console.warn('Failed to load calculator config from API:', error);
-    }
-  };
-
-  const saveCalculatorConfig = async () => {
-    try {
-      const configData = {
-        language: adminEditingLanguage,
-        websiteType: Object.fromEntries(
-          calcOptions.websiteType.map(opt => [String(opt.id), { label: opt.name, price: Number(opt.price || 0) }])
-        ),
-        complexity: Object.fromEntries(
-          calcOptions.complexity.map(opt => [String(opt.id), { label: opt.name, multiplier: Number(opt.multiplier || 1) }])
-        ),
-        timeline: Object.fromEntries(
-          calcOptions.timeline.map(opt => [String(opt.id), { label: opt.name, multiplier: Number(opt.multiplier || 1) }])
-        ),
-        features: Object.fromEntries(
-          calcOptions.features.map(opt => [String(opt.id), { label: opt.name, price: Number(opt.price || 0) }])
-        ),
-        design: Object.fromEntries(
-          calcOptions.design.map(opt => [String(opt.id), { label: opt.name, price: Number(opt.price || 0) }])
-        )
-      };
-
-      const response = await fetch('/api/calculator', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(configData)
-      });
-
-      if (response.ok) {
-        toast({
-          title: t.common.success,
-          description: "Конфигурация калькулятора сохранена",
-        });
-      } else {
-        throw new Error('Failed to save calculator config');
-      }
-    } catch (error) {
-      toast({
-        title: t.common.error,
-        description: "Не удалось сохранить конфигурацию калькулятора",
-        variant: "destructive",
-      });
-    }
-  };
+  // const saveCalculatorConfig = async () => { /* disabled */ };
 
   const saveTemplates = async (updatedTemplates: Template[]) => {
     try {
@@ -309,44 +187,8 @@ const Admin = () => {
     }
   };
 
-  // Автосохранение калькулятора с небольшой задержкой
-  useEffect(() => {
-    if (!isAuthenticated) return;
-    const timer = setTimeout(async () => {
-      try {
-        const r = await fetch('/api/calculator', { 
-          method: 'POST', 
-          headers: { 'Content-Type': 'application/json' }, 
-          body: JSON.stringify({ 
-            language: adminEditingLanguage,
-            websiteType: Object.fromEntries(
-              calcOptions.websiteType.map(opt => [String(opt.id), { label: opt.name, price: Number(opt.price || 0) }])
-            ),
-            complexity: Object.fromEntries(
-              calcOptions.complexity.map(opt => [String(opt.id), { label: opt.name, multiplier: Number(opt.multiplier || 1) }])
-            ),
-            timeline: Object.fromEntries(
-              calcOptions.timeline.map(opt => [String(opt.id), { label: opt.name, multiplier: Number(opt.multiplier || 1) }])
-            ),
-            features: Object.fromEntries(
-              calcOptions.features.map(opt => [String(opt.id), { label: opt.name, price: Number(opt.price || 0) }])
-            ),
-            design: Object.fromEntries(
-              calcOptions.design.map(opt => [String(opt.id), { label: opt.name, price: Number(opt.price || 0) }])
-            ),
-          }) 
-        });
-        if (!r.ok) {
-          const j = await r.json().catch(()=>({}));
-          throw new Error(j?.error || `Ошибка сохранения (${r.status})`);
-        }
-      } catch (e:any) {
-        // Тихо логируем, чтобы не спамить тостами при наборе
-        console.warn('Auto-save calculator failed:', e?.message||e);
-      }
-    }, 600);
-    return () => clearTimeout(timer);
-  }, [calcOptions, isAuthenticated, adminEditingLanguage]);
+  // Auto-save disabled
+  // useEffect(() => {}, []);
 
   const handleLogin = (e: React.FormEvent) => {
     e.preventDefault();
@@ -661,7 +503,7 @@ const Admin = () => {
 
           <div className="flex gap-2 mb-10">
             <button onClick={() => setActiveTab('templates')} className={`px-4 py-2 rounded-xl border ${activeTab==='templates' ? 'border-white/30 bg-white/10' : 'border-white/10 hover:border-white/20'}`}>{t.admin.tabs.templates}</button>
-            <button onClick={() => setActiveTab('calculator')} className={`px-4 py-2 rounded-xl border ${activeTab==='calculator' ? 'border-white/30 bg-white/10' : 'border-white/10 hover:border-white/20'}`}>{t.admin.tabs.calculator}</button>
+            {/* Calculator tab disabled */}
             <button onClick={() => setActiveTab('telegram')} className={`px-4 py-2 rounded-xl border ${activeTab==='telegram' ? 'border-white/30 bg-white/10' : 'border-white/10 hover:border-white/20'}`}>{t.admin.tabs.telegram}</button>
           </div>
 
@@ -849,7 +691,8 @@ const Admin = () => {
             )}
           </motion.div>
 
-          {activeTab==='calculator' && (
+          {/* Calculator editing UI disabled */}
+          {false && (
             <motion.div initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }} className="glass-card p-8">
               <div className="flex items-center justify-between mb-6">
                 <h2 className="text-2xl font-bold text-gradient">{t.admin.calculator.title}</h2>
