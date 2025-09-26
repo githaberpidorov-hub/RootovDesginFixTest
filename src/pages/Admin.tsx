@@ -28,7 +28,7 @@ const Admin = () => {
   const navigate = useNavigate();
   const { t, language: currentLanguage } = useLanguage();
   const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [activeTab, setActiveTab] = useState<'templates' | 'calculator' | 'telegram'>('templates');
+  const [activeTab, setActiveTab] = useState<'templates' | 'calculator' | 'telegram' | 'security'>('templates');
   const [loginForm, setLoginForm] = useState<LoginForm>({ username: "", password: "" });
   const [templates, setTemplates] = useState<Template[]>([]);
   const [isAddingTemplate, setIsAddingTemplate] = useState(false);
@@ -45,6 +45,7 @@ const Admin = () => {
   const [techInput, setTechInput] = useState("");
   const { toast } = useToast();
   const [tgConfig, setTgConfig] = useState({ botToken: '', username: '', chatId: '' });
+  const [adminCreds, setAdminCreds] = useState<{ username: string; password: string; confirm: string }>({ username: 'admin', password: '', confirm: '' });
   
   // Language selector for admin editing
   const [adminEditingLanguage, setAdminEditingLanguage] = useState<LanguageCode>('RU');
@@ -127,6 +128,9 @@ const Admin = () => {
               username: settingsData.telegram.username || '', 
               chatId: settingsData.telegram.chatId || '' 
             });
+          }
+          if (settingsData?.admin) {
+            setAdminCreds(c => ({ ...c, username: settingsData.admin.username || c.username }));
           }
         })
         .catch(() => {
@@ -349,10 +353,12 @@ const Admin = () => {
     return () => clearTimeout(timer);
   }, [calcOptions, isAuthenticated, adminEditingLanguage]);
 
-  const handleLogin = (e: React.FormEvent) => {
+  const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
-    
-    if (loginForm.username === "admin" && loginForm.password === "admin") {
+    try {
+      const r = await fetch('/api/auth', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(loginForm) });
+      const j = await r.json().catch(()=>({ ok:false }));
+      if (!r.ok || !j?.ok) throw new Error(j?.error || 'Invalid credentials');
       setIsAuthenticated(true);
       localStorage.setItem('admin-auth', 'true');
       // После успешного входа – подтягиваем все настройки с сервера
@@ -379,21 +385,17 @@ const Admin = () => {
               chatId: settingsData.telegram.chatId || '',
             });
           }
+          if (settingsData?.admin) {
+            setAdminCreds(c => ({ ...c, username: settingsData.admin.username || c.username }));
+          }
         })
         .catch(() => {
           // Фолбэк на загрузку только шаблонов
           loadTemplates();
         });
-      toast({
-        title: t.common.success,
-        description: t.admin.login.success,
-      });
-    } else {
-      toast({
-        title: t.common.error,
-        description: t.admin.login.error,
-        variant: "destructive",
-      });
+      toast({ title: t.common.success, description: t.admin.login.success });
+    } catch (err:any) {
+      toast({ title: t.common.error, description: t.admin.login.error, variant: 'destructive' });
     }
   };
 
@@ -664,6 +666,7 @@ const Admin = () => {
             <button onClick={() => setActiveTab('templates')} className={`px-4 py-2 rounded-xl border ${activeTab==='templates' ? 'border-white/30 bg-white/10' : 'border-white/10 hover:border-white/20'}`}>{t.admin.tabs.templates}</button>
             <button onClick={() => setActiveTab('calculator')} className={`px-4 py-2 rounded-xl border ${activeTab==='calculator' ? 'border-white/30 bg-white/10' : 'border-white/10 hover:border-white/20'}`}>{t.admin.tabs.calculator}</button>
             <button onClick={() => setActiveTab('telegram')} className={`px-4 py-2 rounded-xl border ${activeTab==='telegram' ? 'border-white/30 bg-white/10' : 'border-white/10 hover:border-white/20'}`}>{t.admin.tabs.telegram}</button>
+            <button onClick={() => setActiveTab('security')} className={`px-4 py-2 rounded-xl border ${activeTab==='security' ? 'border-white/30 bg-white/10' : 'border-white/10 hover:border-white/20'}`}>{(t as any)?.admin?.tabs?.security || 'Безопасность'}</button>
           </div>
 
           {/* Add/Edit Template Form */}
@@ -953,6 +956,40 @@ const Admin = () => {
                 <GlassButton variant="secondary" onClick={async ()=>{ setTgConfig({ botToken: '', username: '', chatId: '' }); await fetch('/api/settings', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ telegram: { botToken: '', username: '', chatId: '' } }) }); toast({ title: 'Сброшено' }); }}>{t.admin.telegram.reset}</GlassButton>
               </div>
               <div className="text-sm text-foreground/60 mt-4">Данные хранятся в общей базе (сервер).</div>
+            </motion.div>
+          )}
+
+          {activeTab==='security' && (
+            <motion.div initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }} className="glass-card p-8">
+              <h2 className="text-2xl font-bold text-gradient mb-6">Безопасность — Доступ к админке</h2>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                  <label className="block text-foreground/80 mb-2 font-medium">Логин (username)</label>
+                  <input className="w-full px-4 py-3 rounded-xl bg-white/5 border border-white/10 text-foreground" value={adminCreds.username} onChange={(e)=> setAdminCreds(prev=> ({...prev, username: e.target.value}))} placeholder="admin" />
+                </div>
+                <div>
+                  <label className="block text-foreground/80 mb-2 font-medium">Новый пароль</label>
+                  <input type="password" className="w-full px-4 py-3 rounded-xl bg-white/5 border border-white/10 text-foreground" value={adminCreds.password} onChange={(e)=> setAdminCreds(prev=> ({...prev, password: e.target.value}))} placeholder="••••••••" />
+                </div>
+                <div>
+                  <label className="block text-foreground/80 mb-2 font-medium">Подтверждение пароля</label>
+                  <input type="password" className="w-full px-4 py-3 rounded-xl bg-white/5 border border-white/10 text-foreground" value={adminCreds.confirm} onChange={(e)=> setAdminCreds(prev=> ({...prev, confirm: e.target.value}))} placeholder="••••••••" />
+                </div>
+              </div>
+              <div className="flex gap-3 mt-6">
+                <GlassButton glow onClick={async ()=>{
+                  if (adminCreds.password && adminCreds.password !== adminCreds.confirm) { toast({ title: t.common.error, description: 'Пароли не совпадают', variant: 'destructive' }); return; }
+                  const payload: any = { admin: { username: adminCreds.username } };
+                  if (adminCreds.password) payload.admin.password = adminCreds.password;
+                  const r = await fetch('/api/settings', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
+                  const j = await r.json().catch(()=>({}));
+                  if (!r.ok || !j?.ok) { toast({ title: t.common.error, description: j?.error || 'Не удалось сохранить', variant:'destructive' }); return; }
+                  setAdminCreds(prev=> ({ ...prev, password: '', confirm: '' }));
+                  toast({ title: t.common.success, description: 'Данные доступа обновлены' });
+                }}>Сохранить доступ</GlassButton>
+                <GlassButton variant="secondary" onClick={()=> setAdminCreds(prev=> ({ ...prev, password: '', confirm: '' }))}>Сбросить поля</GlassButton>
+              </div>
+              <div className="text-sm text-foreground/60 mt-4">Логин хранится открыто, пароль — как SHA‑256 хэш в таблице настроек.</div>
             </motion.div>
           )}
         </div>

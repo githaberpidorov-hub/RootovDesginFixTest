@@ -22,7 +22,7 @@ export default async function handler(req: any, res: any) {
         .select('key, value');
       if (error) throw error;
       const map = Object.fromEntries((data || []).map((r: any) => [r.key, r.value]));
-      return res.status(200).json({ ok: true, templates: map.templates || [], calculator: map.calculator || {}, telegram: map.telegram || {} });
+      return res.status(200).json({ ok: true, templates: map.templates || [], calculator: map.calculator || {}, telegram: map.telegram || {}, admin: map.admin || null });
     }
 
     if (req.method === "POST") {
@@ -38,6 +38,36 @@ export default async function handler(req: any, res: any) {
       if (body.templates !== undefined) upserts.push({ key: 'templates', value: body.templates });
       if (body.calculator !== undefined) upserts.push({ key: 'calculator', value: body.calculator });
       if (body.telegram !== undefined) upserts.push({ key: 'telegram', value: body.telegram });
+      if (body.admin !== undefined) {
+        // Normalize payload: { username?: string, password?: string }
+        const adminUpdate = body.admin || {};
+
+        // Read current admin to preserve passwordHash when password not provided
+        const { data: existingRows, error: readErr } = await supabase
+          .from('settings')
+          .select('key, value')
+          .eq('key', 'admin')
+          .maybeSingle();
+        if (readErr && readErr.code !== 'PGRST116') { // ignore not found
+          return res.status(500).json({ ok: false, error: readErr.message });
+        }
+        const existing = existingRows?.value || {};
+
+        // Hash password server-side if provided
+        let passwordHash = existing.passwordHash || undefined;
+        if (typeof adminUpdate.password === 'string' && adminUpdate.password.length > 0) {
+          // Lightweight SHA-256 instead of bcrypt to avoid dependencies
+          const { createHash } = await import('crypto');
+          passwordHash = createHash('sha256').update(String(adminUpdate.password)).digest('hex');
+        }
+
+        const toStore = {
+          username: typeof adminUpdate.username === 'string' && adminUpdate.username.length > 0 ? adminUpdate.username : (existing.username || 'admin'),
+          ...(passwordHash ? { passwordHash } : {}),
+          updatedAt: new Date().toISOString(),
+        };
+        upserts.push({ key: 'admin', value: toStore });
+      }
 
       if (upserts.length) {
         const { data, error } = await supabase

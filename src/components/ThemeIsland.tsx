@@ -94,7 +94,7 @@ const ThemeIsland = () => {
           role="group"
           aria-label="Color theme switcher"
           onClick={() => !open && setOpen(true)}
-          className="rounded-2xl border border-white/10 px-2.5 py-2 sm:px-3 sm:py-2.5 backdrop-blur-2xl text-foreground/90 overflow-hidden"
+          className="relative rounded-2xl border border-white/10 px-2.5 py-2 sm:px-3 sm:py-2.5 backdrop-blur-2xl text-foreground/90 overflow-hidden"
           style={{
             background: "var(--gradient-glass)",
             boxShadow: "var(--shadow-glass)",
@@ -104,14 +104,27 @@ const ThemeIsland = () => {
           transition={{ duration: 0.7, ease: [0.2, 0.8, 0.2, 1] }}
           layout
         >
+          {/* Persistent overlay border to avoid disappearing border due to blur/compositing */}
+          <div
+            aria-hidden
+            className="pointer-events-none absolute inset-0 rounded-2xl"
+            style={{ boxShadow: "inset 0 0 0 1px hsl(var(--border) / 0.8)" }}
+          />
           <motion.div layout className={`h-full flex items-center ${isMobile ? "flex-col-reverse" : ""}`}>
             <button
               type="button"
               aria-label={open ? "Свернуть палитру" : "Показать палитру"}
               aria-expanded={open}
               onClick={(e) => { if (open) { e.stopPropagation(); setOpen(false); } else { setOpen(true); } }}
-              className="h-10 w-10 shrink-0 grid place-items-center rounded-xl border border-white/10 hover:bg-white/10 transition-colors"
+              className="relative h-10 w-10 shrink-0 grid place-items-center rounded-xl border border-white/10 hover:bg-white/10 transition-colors"
+              style={{ transform: "translateX(-1px)" }}
             >
+              {/* Inner ring */}
+              <div
+                aria-hidden
+                className="pointer-events-none absolute inset-px rounded-[inherit]"
+                style={{ boxShadow: "inset 0 0 0 1px hsl(var(--border) / 0.9)" }}
+              />
               <AnimatePresence mode="wait">{icon}</AnimatePresence>
             </button>
             <AnimatePresence>
