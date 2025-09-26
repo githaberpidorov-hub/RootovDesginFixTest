@@ -89,6 +89,14 @@
     --border: 220 10% 25%;
     --input: 220 10% 25%;
     --ring: 0 0% 100%;
+
+    /* Language buttons */
+    --theme-active-bg: rgba(255, 255, 255, 0.2);
+    --theme-active-text: white;
+    --theme-active-border: rgba(255, 255, 255, 0.3);
+    --theme-inactive-bg: rgba(255, 255, 255, 0.05);
+    --theme-inactive-text: rgba(255, 255, 255, 0.7);
+    --theme-inactive-border: rgba(255, 255, 255, 0.1);
   }
 }
 
@@ -147,6 +155,14 @@
     --card: 220 8% 3%;
     --card-foreground: 0 0% 98%;
     --border: 220 8% 10%;
+
+    /* Language buttons */
+    --theme-active-bg: rgba(255, 255, 255, 0.2);
+    --theme-active-text: white;
+    --theme-active-border: rgba(255, 255, 255, 0.3);
+    --theme-inactive-bg: rgba(255, 255, 255, 0.05);
+    --theme-inactive-text: rgba(255, 255, 255, 0.7);
+    --theme-inactive-border: rgba(255, 255, 255, 0.1);
     --input: 220 8% 10%;
     --ring: 0 0% 100%;
   }
@@ -391,6 +407,14 @@
     --card: 0 0% 100%;
     --card-foreground: 220 15% 12%;
     --border: 220 14% 78%;
+
+    /* Language buttons */
+    --theme-active-bg: #374151;
+    --theme-active-text: white;
+    --theme-active-border: #4b5563;
+    --theme-inactive-bg: #f3f4f6;
+    --theme-inactive-text: #374151;
+    --theme-inactive-border: #d1d5db;
     --input: 220 14% 78%;
     --ring: 220 15% 12%;
   }
@@ -443,6 +467,14 @@
     --border: 340 35% 80%;
     --input: 340 35% 80%;
     --ring: 338 65% 50%;
+
+    /* Language buttons */
+    --theme-active-bg: #be185d;
+    --theme-active-text: white;
+    --theme-active-border: #9d174d;
+    --theme-inactive-bg: #fce7f3;
+    --theme-inactive-text: #be185d;
+    --theme-inactive-border: #f9a8d4;
   }
 }
 
@@ -493,6 +525,14 @@
     --border: 160 28% 78%;
     --input: 160 28% 78%;
     --ring: 160 55% 40%;
+
+    /* Language buttons */
+    --theme-active-bg: #065f46;
+    --theme-active-text: white;
+    --theme-active-border: #047857;
+    --theme-inactive-bg: #d1fae5;
+    --theme-inactive-text: #065f46;
+    --theme-inactive-border: #a7f3d0;
   }
 }
 
@@ -593,6 +633,14 @@
     --border: 22 48% 78%;
     --input: 22 48% 78%;
     --ring: 18 80% 55%;
+
+    /* Language buttons */
+    --theme-active-bg: #c2410c;
+    --theme-active-text: white;
+    --theme-active-border: #ea580c;
+    --theme-inactive-bg: #fed7aa;
+    --theme-inactive-text: #c2410c;
+    --theme-inactive-border: #fdba74;
   }
 }
 

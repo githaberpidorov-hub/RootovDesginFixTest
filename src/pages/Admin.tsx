@@ -642,9 +642,28 @@ const Admin = () => {
                       onClick={() => setAdminEditingLanguage(lang.code)}
                       className={`px-3 py-1 rounded-lg text-sm transition-colors ${
                         adminEditingLanguage === lang.code
-                          ? 'theme-black:bg-white/20 theme-black:text-white theme-black:border-white/30 theme-white:bg-gray-800 theme-white:text-white theme-white:border-gray-600 theme-pink:bg-pink-600 theme-pink:text-white theme-pink:border-pink-500 theme-mint:bg-emerald-600 theme-mint:text-white theme-mint:border-emerald-500 theme-peach:bg-orange-600 theme-peach:text-white theme-peach:border-orange-500'
-                          : 'theme-black:bg-white/5 theme-black:text-foreground/70 theme-black:border-white/10 theme-black:hover:bg-white/10 theme-white:bg-gray-100 theme-white:text-gray-700 theme-white:border-gray-300 theme-white:hover:bg-gray-200 theme-pink:bg-pink-100 theme-pink:text-pink-700 theme-pink:border-pink-300 theme-pink:hover:bg-pink-200 theme-mint:bg-emerald-100 theme-mint:text-emerald-700 theme-mint:border-emerald-300 theme-mint:hover:bg-emerald-200 theme-peach:bg-orange-100 theme-peach:text-orange-700 theme-peach:border-orange-300 theme-peach:hover:bg-orange-200'
+                          ? 'bg-white/20 text-white border-white/30'
+                          : 'bg-white/5 text-foreground/70 border-white/10 hover:bg-white/10'
                       }`}
+                      style={{
+                        ...(adminEditingLanguage === lang.code ? {
+                          // Активная кнопка - темная на светлых темах
+                          '--active-bg': 'var(--theme-active-bg, rgba(255, 255, 255, 0.2))',
+                          '--active-text': 'var(--theme-active-text, white)',
+                          '--active-border': 'var(--theme-active-border, rgba(255, 255, 255, 0.3))',
+                          backgroundColor: 'var(--active-bg)',
+                          color: 'var(--active-text)',
+                          borderColor: 'var(--active-border)'
+                        } : {
+                          // Неактивная кнопка
+                          '--inactive-bg': 'var(--theme-inactive-bg, rgba(255, 255, 255, 0.05))',
+                          '--inactive-text': 'var(--theme-inactive-text, rgba(255, 255, 255, 0.7))',
+                          '--inactive-border': 'var(--theme-inactive-border, rgba(255, 255, 255, 0.1))',
+                          backgroundColor: 'var(--inactive-bg)',
+                          color: 'var(--inactive-text)',
+                          borderColor: 'var(--inactive-border)'
+                        })
+                      }}
                     >
                       {lang.label}
                     </button>
