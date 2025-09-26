@@ -94,11 +94,10 @@ const ThemeIsland = () => {
           role="group"
           aria-label="Color theme switcher"
           onClick={() => !open && setOpen(true)}
-          className="rounded-2xl border px-2.5 py-2 sm:px-3 sm:py-2.5 backdrop-blur-2xl text-foreground/90 overflow-hidden"
+          className="rounded-2xl border border-white/10 px-2.5 py-2 sm:px-3 sm:py-2.5 backdrop-blur-2xl text-foreground/90 overflow-hidden"
           style={{
             background: "var(--gradient-glass)",
             boxShadow: "var(--shadow-glass)",
-            borderColor: "hsl(var(--border))",
           }}
           initial={false}
           animate={isMobile ? { width: 60, height: open ? 252 : 60, opacity: 1, y: 0 } : { width: open ? 280 : 64, opacity: 1, y: 0 }}
@@ -111,8 +110,7 @@ const ThemeIsland = () => {
               aria-label={open ? "Свернуть палитру" : "Показать палитру"}
               aria-expanded={open}
               onClick={(e) => { if (open) { e.stopPropagation(); setOpen(false); } else { setOpen(true); } }}
-              className="h-10 w-10 shrink-0 grid place-items-center rounded-xl border hover:bg-white/10 transition-colors"
-              style={{ borderColor: "hsl(var(--border))" }}
+              className="h-10 w-10 shrink-0 grid place-items-center rounded-xl border border-white/10 hover:bg-white/10 transition-colors"
             >
               <AnimatePresence mode="wait">{icon}</AnimatePresence>
             </button>

@@ -897,6 +897,20 @@
   .text-glow {
     text-shadow: 0 0 20px hsla(0, 0%, 100%, 0.3);
   }
+
+  /* Mobile fix: prevent iOS translucent rectangle artifacts for fixed, blurred element */
+  @media (max-width: 768px) {
+    .language-switcher {
+      /* Lighter blur to avoid Safari repaint bug */
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+      /* Create its own compositing layer */
+      transform: translateZ(0);
+      will-change: transform;
+      /* Avoid scroll-chase artifacts */
+      contain: paint layout style;
+    }
+  }
 }
 
 /* Calculator light-theme contrast tweaks (all themes except black) */
