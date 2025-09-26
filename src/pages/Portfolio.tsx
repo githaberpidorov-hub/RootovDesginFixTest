@@ -19,7 +19,7 @@ interface Template {
 }
 
 const Portfolio = () => {
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
   const [templates, setTemplates] = useState<Template[]>([]);
   const [selectedCategory, setSelectedCategory] = useState("all");
   const [filteredTemplates, setFilteredTemplates] = useState<Template[]>([]);
@@ -132,7 +132,7 @@ const Portfolio = () => {
     // Загружаем шаблоны с учетом текущего языка
     const loadTemplates = async () => {
       try {
-        const response = await fetch(`/api/templates?language=${t.language}`);
+        const response = await fetch(`/api/templates?language=${language}`);
         const data = await response.json();
         
         if (data.ok && Array.isArray(data.templates)) {
@@ -161,7 +161,7 @@ const Portfolio = () => {
     };
 
     loadTemplates();
-  }, [t.language]);
+  }, [language]);
 
   // Подтянуть OG-изображение с сайта (если он его предоставляет),
   // иначе fallback на скриншот

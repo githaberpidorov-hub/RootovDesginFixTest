@@ -52,7 +52,7 @@ const readTelegramConfig = (): TelegramConfig => {
 
 const Request = () => {
   const { toast } = useToast();
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
   const navigate = useNavigate();
   const location = useLocation();
   const [templates, setTemplates] = useState<Template[]>([]);
@@ -82,7 +82,7 @@ const Request = () => {
     // Загружаем шаблоны с учетом текущего языка
     const loadTemplates = async () => {
       try {
-        const response = await fetch(`/api/templates?language=${t.language}`);
+        const response = await fetch(`/api/templates?language=${language}`);
         const data = await response.json();
         
         if (data.ok && Array.isArray(data.templates)) {
@@ -110,7 +110,7 @@ const Request = () => {
     };
 
     loadTemplates();
-  }, [t.language]);
+  }, [language]);
 
   // helpers for previews (OG image cache like in portfolio)
   const normalizeUrl = (url?: string) => {

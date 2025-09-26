@@ -42,13 +42,41 @@ export default async function handler(req: any, res: any) {
     }
 
     if (req.method === "POST") {
-      const { language = "RU" } = req.query;
+      const { language = "RU" } = req.query as { language?: string };
       const body = typeof req.body === 'string' ? JSON.parse(req.body) : req.body;
 
       console.log('Template POST - Language:', language);
       console.log('Template POST - Body:', body);
 
-      // Создаем записи для всех языков с одинаковыми данными
+      // Валидация обязательных полей
+      if (!body?.category || !body?.price) {
+        return res.status(400).json({ ok: false, error: 'Missing required fields: category, price' });
+      }
+
+      // Разрешаем два формата:
+      // 1) Переданы per-language поля (title_ru/eng/uk и description_ru/eng/uk)
+      // 2) Переданы универсальные title/description + language — тогда заполняем только соответствующие колонки
+      const lang = String(language || 'RU').toUpperCase();
+
+      const resolvedTitles = {
+        title_ru: body.title_ru ?? (lang === 'RU' ? body.title : ''),
+        title_eng: body.title_eng ?? (lang === 'ENG' ? body.title : ''),
+        title_uk: body.title_uk ?? (lang === 'UK' ? body.title : ''),
+      } as Record<string, string>;
+
+      const resolvedDescriptions = {
+        description_ru: body.description_ru ?? (lang === 'RU' ? body.description : ''),
+        description_eng: body.description_eng ?? (lang === 'ENG' ? body.description : ''),
+        description_uk: body.description_uk ?? (lang === 'UK' ? body.description : ''),
+      } as Record<string, string>;
+
+      // Проверим: хотя бы одна языковая колонка должна быть непустой
+      const hasAnyTitle = Object.values(resolvedTitles).some(v => typeof v === 'string' && v.length > 0);
+      const hasAnyDescription = Object.values(resolvedDescriptions).some(v => typeof v === 'string' && v.length > 0);
+      if (!hasAnyTitle || !hasAnyDescription) {
+        return res.status(400).json({ ok: false, error: 'Missing required fields: title/description (at least for one language)' });
+      }
+
       const baseData = {
         category: body.category,
         image: body.image || "/api/placeholder/600/400",
@@ -57,26 +85,15 @@ export default async function handler(req: any, res: any) {
         price: body.price,
       };
 
-      // Валидация обязательных полей
-      if (!body.title || !body.description || !body.category || !body.price) {
-        return res.status(400).json({ ok: false, error: 'Missing required fields: title, description, category, price' });
-      }
-
-      const templatesToInsert = [
-        {
-          ...baseData,
-          title_ru: body.title,
-          title_eng: body.title,
-          title_uk: body.title,
-          description_ru: body.description,
-          description_eng: body.description,
-          description_uk: body.description,
-        }
-      ];
+      const rowToInsert = {
+        ...baseData,
+        ...resolvedTitles,
+        ...resolvedDescriptions,
+      };
 
       const { data, error } = await supabase
         .from('templates')
-        .insert(templatesToInsert)
+        .insert([rowToInsert])
         .select()
         .single();
 
@@ -89,19 +106,26 @@ export default async function handler(req: any, res: any) {
     }
 
     if (req.method === "PUT") {
-      const { id } = req.query;
-      const { language = "RU" } = req.query;
+      const { id } = req.query as { id?: string };
+      const { language = "RU" } = req.query as { language?: string };
       const body = typeof req.body === 'string' ? JSON.parse(req.body) : req.body;
       
+      if (!id) return res.status(400).json({ ok: false, error: 'Missing id' });
+
       const updateData: any = {};
 
-      // Обновляем только переданные поля
-      if (body.title) {
-        updateData[`title_${language.toLowerCase()}`] = body.title;
-      }
-      if (body.description) {
-        updateData[`description_${language.toLowerCase()}`] = body.description;
-      }
+      // 1) Поддержка универсальных полей title/description: меняем только колонку выбранного языка
+      if (body.title) updateData[`title_${String(language).toLowerCase()}`] = body.title;
+      if (body.description) updateData[`description_${String(language).toLowerCase()}`] = body.description;
+
+      // 2) Поддержка пер-языковых полей (если переданы) — обновляем их напрямую
+      if (typeof body.title_ru === 'string') updateData.title_ru = body.title_ru;
+      if (typeof body.title_eng === 'string') updateData.title_eng = body.title_eng;
+      if (typeof body.title_uk === 'string') updateData.title_uk = body.title_uk;
+      if (typeof body.description_ru === 'string') updateData.description_ru = body.description_ru;
+      if (typeof body.description_eng === 'string') updateData.description_eng = body.description_eng;
+      if (typeof body.description_uk === 'string') updateData.description_uk = body.description_uk;
+
       if (body.category) updateData.category = body.category;
       if (body.image) updateData.image = body.image;
       if (body.technologies) updateData.technologies = body.technologies;
