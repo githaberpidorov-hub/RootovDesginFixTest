@@ -168,7 +168,7 @@ const Home = () => {
             viewport={{ once: true }}
             className="text-center mb-16"
           >
-            <h2 className="text-4xl md:text-5xl font-bold text-gradient mb-6">
+            <h2 className="text-4xl md:text-5xl font-bold text-gradient mb-6 leading-tight pb-1">
               {t.home.advantages.title}
             </h2>
           </motion.div>
