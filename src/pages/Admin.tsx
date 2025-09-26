@@ -114,11 +114,11 @@ const Admin = () => {
           if (calculatorData?.ok && calculatorData.config) {
             const config = calculatorData.config;
             setCalcOptions({
-              websiteType: config[`website_type_${adminEditingLanguage.toLowerCase()}`] || [],
-              complexity: config[`complexity_${adminEditingLanguage.toLowerCase()}`] || [],
-              timeline: config[`timeline_${adminEditingLanguage.toLowerCase()}`] || [],
-              features: config[`features_${adminEditingLanguage.toLowerCase()}`] || [],
-              design: config[`design_${adminEditingLanguage.toLowerCase()}`] || []
+              websiteType: Object.entries(config[`website_type_${adminEditingLanguage.toLowerCase()}`] || {}).map(([id, value]: [string, any]) => ({ id, name: (value as any).label || id, price: (value as any).price || 0 })),
+              complexity: Object.entries(config[`complexity_${adminEditingLanguage.toLowerCase()}`] || {}).map(([id, value]: [string, any]) => ({ id, name: (value as any).label || id, multiplier: (value as any).multiplier || 1 })),
+              timeline: Object.entries(config[`timeline_${adminEditingLanguage.toLowerCase()}`] || {}).map(([id, value]: [string, any]) => ({ id, name: (value as any).label || id, multiplier: (value as any).multiplier || 1 })),
+              features: Object.entries(config[`features_${adminEditingLanguage.toLowerCase()}`] || {}).map(([id, value]: [string, any]) => ({ id, name: (value as any).label || id, price: (value as any).price || 0 })),
+              design: Object.entries(config[`design_${adminEditingLanguage.toLowerCase()}`] || {}).map(([id, value]: [string, any]) => ({ id, name: (value as any).label || id, price: (value as any).price || 0 })),
             });
           }
           if (settingsData?.telegram) {
@@ -317,14 +317,14 @@ const Admin = () => {
   // Автосохранение калькулятора с небольшой задержкой
   useEffect(() => {
     if (!isAuthenticated) return;
-    const t = setTimeout(async () => {
+    const timer = setTimeout(async () => {
       try {
         const r = await fetch('/api/calculator', { 
           method: 'POST', 
           headers: { 'Content-Type': 'application/json' }, 
           body: JSON.stringify({ 
             ...calcOptions, 
-            language: t.language 
+            language: adminEditingLanguage,
           }) 
         });
         if (!r.ok) {
@@ -336,8 +336,8 @@ const Admin = () => {
         console.warn('Auto-save calculator failed:', e?.message||e);
       }
     }, 600);
-    return () => clearTimeout(t);
-  }, [calcOptions, isAuthenticated, t.language]);
+    return () => clearTimeout(timer);
+  }, [calcOptions, isAuthenticated, adminEditingLanguage]);
 
   const handleLogin = (e: React.FormEvent) => {
     e.preventDefault();
@@ -355,11 +355,11 @@ const Admin = () => {
           if (calculatorData?.ok && calculatorData.config) {
             const config = calculatorData.config;
             setCalcOptions({
-              websiteType: config[`website_type_${adminEditingLanguage.toLowerCase()}`] || [],
-              complexity: config[`complexity_${adminEditingLanguage.toLowerCase()}`] || [],
-              timeline: config[`timeline_${adminEditingLanguage.toLowerCase()}`] || [],
-              features: config[`features_${adminEditingLanguage.toLowerCase()}`] || [],
-              design: config[`design_${adminEditingLanguage.toLowerCase()}`] || []
+              websiteType: Object.entries(config[`website_type_${adminEditingLanguage.toLowerCase()}`] || {}).map(([id, value]: [string, any]) => ({ id, name: (value as any).label || id, price: (value as any).price || 0 })),
+              complexity: Object.entries(config[`complexity_${adminEditingLanguage.toLowerCase()}`] || {}).map(([id, value]: [string, any]) => ({ id, name: (value as any).label || id, multiplier: (value as any).multiplier || 1 })),
+              timeline: Object.entries(config[`timeline_${adminEditingLanguage.toLowerCase()}`] || {}).map(([id, value]: [string, any]) => ({ id, name: (value as any).label || id, multiplier: (value as any).multiplier || 1 })),
+              features: Object.entries(config[`features_${adminEditingLanguage.toLowerCase()}`] || {}).map(([id, value]: [string, any]) => ({ id, name: (value as any).label || id, price: (value as any).price || 0 })),
+              design: Object.entries(config[`design_${adminEditingLanguage.toLowerCase()}`] || {}).map(([id, value]: [string, any]) => ({ id, name: (value as any).label || id, price: (value as any).price || 0 })),
             });
           }
           if (settingsData?.telegram) {
