@@ -60,40 +60,60 @@ const PriceCalculator = () => {
   type CalculatorOptions = typeof defaultOptions;
 
   const [options, setOptions] = useState<CalculatorOptions>(defaultOptions);
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
 
   useEffect(() => {
-    // 1) Пытаемся загрузить серверные опции калькулятора
-    fetch('/api/settings')
-      .then(r => r.json())
-      .then(data => {
-        const server = data?.calculator;
-        if (server && typeof server === 'object' && Object.keys(server).length) {
-          setOptions(prev => ({ ...prev, ...server }));
-          try { localStorage.setItem('calculator-options', JSON.stringify(server)); } catch {}
+    // Загружаем конфиг калькулятора по выбранному языку
+    const load = async () => {
+      try {
+        const res = await fetch(`/api/calculator?language=${language}`);
+        const j = await res.json();
+        if (res.ok && j?.ok && j.config) {
+          const cfg = j.config as Record<string, any>;
+
+          const normalizePrice = (group: any) => {
+            if (!group) return [] as Array<{ id: string; name: string; price: number }>;
+            const entries = Array.isArray(group)
+              ? (group as any[]).map((val, idx) => [String(val?.id ?? idx), val] as const)
+              : Object.entries(group as Record<string, any>);
+            return entries.map(([id, value]) => ({ id, name: value?.label || value?.name || id, price: Number(value?.price || 0) }));
+          };
+          const normalizeMult = (group: any) => {
+            if (!group) return [] as Array<{ id: string; name: string; multiplier: number }>;
+            const entries = Array.isArray(group)
+              ? (group as any[]).map((val, idx) => [String(val?.id ?? idx), val] as const)
+              : Object.entries(group as Record<string, any>);
+            return entries.map(([id, value]) => ({ id, name: value?.label || value?.name || id, multiplier: Number(value?.multiplier || 1) }));
+          };
+
+          const next: CalculatorOptions = {
+            websiteType: normalizePrice(cfg[`website_type_${String(language).toLowerCase()}`]).map(o => ({ ...o, icon: '⚡' })) as any,
+            complexity: normalizeMult(cfg[`complexity_${String(language).toLowerCase()}`]).map(o => ({ ...o, icon: '🤓' })) as any,
+            timeline: normalizeMult(cfg[`timeline_${String(language).toLowerCase()}`]).map(o => ({ ...o, icon: '📆' })) as any,
+            features: normalizePrice(cfg[`features_${String(language).toLowerCase()}`]).map(o => ({ ...o, icon: '🔗' })) as any,
+            design: normalizeMult(cfg[`design_${String(language).toLowerCase()}`]).map(o => ({ ...o, icon: '🧩' })) as any,
+          };
+
+          setOptions(next);
+          try { localStorage.setItem('calculator-options', JSON.stringify(next)); } catch {}
           return;
         }
-        // 2) Фолбэк: локальные сохраненные опции
-        const saved = localStorage.getItem('calculator-options');
-        if (saved) {
-          try {
-            const parsed = JSON.parse(saved);
-            setOptions({ ...defaultOptions, ...parsed });
-            return;
-          } catch {}
-        }
-        // 3) Если ничего нет — остаемся на дефолтных
-      })
-      .catch(() => {
-        const saved = localStorage.getItem('calculator-options');
-        if (saved) {
-          try {
-            const parsed = JSON.parse(saved);
-            setOptions({ ...defaultOptions, ...parsed });
-          } catch {}
-        }
-      });
-  }, []);
+      } catch {}
+
+      // Фолбэк на локальное хранилище
+      const saved = localStorage.getItem('calculator-options');
+      if (saved) {
+        try {
+          const parsed = JSON.parse(saved);
+          setOptions({ ...defaultOptions, ...parsed });
+          return;
+        } catch {}
+      }
+      // Иначе дефолт
+      setOptions(defaultOptions);
+    };
+    load();
+  }, [language]);
 
   useEffect(() => {
     calculatePrice();
