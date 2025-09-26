@@ -99,7 +99,7 @@ const Home = () => {
             viewport={{ once: true }}
             className="text-center mb-16"
           >
-            <h2 className="text-4xl md:text-5xl font-bold text-gradient mb-6">
+            <h2 className="text-4xl md:text-5xl font-bold text-gradient mb-6 leading-[1.15] pb-2">
               {t.home.services.title}
             </h2>
             <p className="text-xl text-foreground/70 max-w-2xl mx-auto">
@@ -168,7 +168,7 @@ const Home = () => {
             viewport={{ once: true }}
             className="text-center mb-16"
           >
-            <h2 className="text-4xl md:text-5xl font-bold text-gradient mb-6 leading-tight pb-1">
+            <h2 className="text-4xl md:text-5xl font-bold text-gradient mb-6 leading-[1.15] pb-2">
               {t.home.advantages.title}
             </h2>
           </motion.div>
@@ -213,7 +213,7 @@ const Home = () => {
             viewport={{ once: true }}
             className="glass-card p-12"
           >
-            <h2 className="text-4xl md:text-5xl font-bold text-gradient mb-6">
+            <h2 className="text-4xl md:text-5xl font-bold text-gradient mb-6 leading-[1.15] pb-2">
               {t.home.cta.title}
             </h2>
             <p className="text-xl text-foreground/70 mb-8 max-w-2xl mx-auto">
