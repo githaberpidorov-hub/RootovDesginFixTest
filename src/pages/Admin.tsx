@@ -103,7 +103,7 @@ const Admin = () => {
     const authStatus = localStorage.getItem('admin-auth');
     if (authStatus === 'true') {
       setIsAuthenticated(true);
-      // Загружаем шаблоны с учетом текущего языка
+      // Загружаем шаблоны с учетом выбранного языка редактирования в админке
       loadTemplates();
       // Загружаем остальные настройки
       Promise.all([
@@ -133,11 +133,12 @@ const Admin = () => {
           console.warn('Failed to load settings from API');
         });
     }
-  }, [t.language]);
+  }, [t.language, adminEditingLanguage]);
 
   const loadTemplates = async () => {
     try {
-      const response = await fetch(`/api/templates?language=${t.language}`);
+      // Загружаем список шаблонов для выбранного языка редактирования
+      const response = await fetch(`/api/templates?language=${adminEditingLanguage}`);
       const data = await response.json();
       
       if (data.ok && Array.isArray(data.templates)) {
@@ -147,6 +148,12 @@ const Admin = () => {
       console.warn('Failed to load templates from API:', error);
     }
   };
+
+  // Перезагружаем шаблоны при смене языка редактирования в админке
+  useEffect(() => {
+    if (!isAuthenticated) return;
+    loadTemplates();
+  }, [adminEditingLanguage, isAuthenticated]);
 
   const loadCalculatorConfig = async () => {
     try {
