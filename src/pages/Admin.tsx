@@ -642,9 +642,28 @@ const Admin = () => {
                       onClick={() => setAdminEditingLanguage(lang.code)}
                       className={`px-3 py-1 rounded-lg text-sm transition-colors ${
                         adminEditingLanguage === lang.code
-                          ? 'bg-white/20 text-white border border-white/30'
-                          : 'bg-white/5 text-foreground/70 border border-white/10 hover:bg-white/10'
+                          ? 'bg-white/20 text-white border-white/30'
+                          : 'bg-white/5 text-foreground/70 border-white/10 hover:bg-white/10'
                       }`}
+                      style={{
+                        ...(adminEditingLanguage === lang.code ? {
+                          // Активная кнопка - темная на светлых темах
+                          '--active-bg': 'var(--theme-active-bg, rgba(255, 255, 255, 0.2))',
+                          '--active-text': 'var(--theme-active-text, white)',
+                          '--active-border': 'var(--theme-active-border, rgba(255, 255, 255, 0.3))',
+                          backgroundColor: 'var(--active-bg)',
+                          color: 'var(--active-text)',
+                          borderColor: 'var(--active-border)'
+                        } : {
+                          // Неактивная кнопка
+                          '--inactive-bg': 'var(--theme-inactive-bg, rgba(255, 255, 255, 0.05))',
+                          '--inactive-text': 'var(--theme-inactive-text, rgba(255, 255, 255, 0.7))',
+                          '--inactive-border': 'var(--theme-inactive-border, rgba(255, 255, 255, 0.1))',
+                          backgroundColor: 'var(--inactive-bg)',
+                          color: 'var(--inactive-text)',
+                          borderColor: 'var(--inactive-border)'
+                        })
+                      }}
                     >
                       {lang.label}
                     </button>
