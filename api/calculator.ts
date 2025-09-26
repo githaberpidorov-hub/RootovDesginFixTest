@@ -13,13 +13,13 @@ export default async function handler(req: any, res: any) {
   try {
     const supabase = getSupabase();
     if (req.method === 'GET') {
-      const { language = 'RU' } = req.query;
+      const { language = 'RU' } = req.query as { language?: string };
       
       const { data, error } = await supabase
         .from('calculator_config')
         .select('*')
         .eq('language', language)
-        .single();
+        .maybeSingle();
 
       if (error) {
         console.error('Error fetching calculator config:', error);
@@ -36,36 +36,41 @@ export default async function handler(req: any, res: any) {
       console.log('Calculator API - Language:', language);
       console.log('Calculator API - Body:', body);
 
-      // Создаем конфигурацию для всех языков с одинаковыми данными
-      const configData = {
+      // Создаем конфигурацию: заполняем только соответствующие текущему языку поля,
+      // остальные оставляем значениями по умолчанию
+      const configData: any = {
         language,
-        website_type_ru: body.websiteType || {},
-        complexity_ru: body.complexity || {},
-        timeline_ru: body.timeline || {},
-        features_ru: body.features || {},
-        design_ru: body.design || {},
-        website_type_eng: body.websiteType || {},
-        complexity_eng: body.complexity || {},
-        timeline_eng: body.timeline || {},
-        features_eng: body.features || {},
-        design_eng: body.design || {},
-        website_type_uk: body.websiteType || {},
-        complexity_uk: body.complexity || {},
-        timeline_uk: body.timeline || {},
-        features_uk: body.features || {},
-        design_uk: body.design || {},
+        website_type_ru: {},
+        complexity_ru: {},
+        timeline_ru: {},
+        features_ru: {},
+        design_ru: {},
+        website_type_eng: {},
+        complexity_eng: {},
+        timeline_eng: {},
+        features_eng: {},
+        design_eng: {},
+        website_type_uk: {},
+        complexity_uk: {},
+        timeline_uk: {},
+        features_uk: {},
+        design_uk: {},
         updated_at: new Date().toISOString(),
       };
+      configData[`website_type_${String(language).toLowerCase()}`] = body.websiteType || {};
+      configData[`complexity_${String(language).toLowerCase()}`] = body.complexity || {};
+      configData[`timeline_${String(language).toLowerCase()}`] = body.timeline || {};
+      configData[`features_${String(language).toLowerCase()}`] = body.features || {};
+      configData[`design_${String(language).toLowerCase()}`] = body.design || {};
 
       // Проверяем, существует ли запись для этого языка
       const { data: existingData, error: fetchError } = await supabase
         .from('calculator_config')
         .select('*')
         .eq('language', language)
-        .single();
+        .maybeSingle();
 
-      // В разных версиях postgrest коды могут отличаться. Если просто нет строки — existingData будет null
-      if (fetchError && fetchError.message && !String(fetchError.message).toLowerCase().includes('row not found')) {
+      if (fetchError) {
         console.error('Error fetching existing config:', fetchError);
         return res.status(500).json({ ok: false, error: fetchError.message });
       }
