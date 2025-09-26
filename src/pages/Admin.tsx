@@ -162,32 +162,27 @@ const Admin = () => {
 
       if (data.ok && data.config) {
         const config = data.config;
+        const normalizePriceGroup = (group: any) => {
+          if (!group) return [] as Array<{ id: string; name: string; price: number }>;
+          const entries = Array.isArray(group)
+            ? (group as any[]).map((val, idx) => [String(val?.id ?? idx), val] as const)
+            : Object.entries(group as Record<string, any>);
+          return entries.map(([id, value]) => ({ id, name: value?.label || value?.name || id, price: Number(value?.price || 0) }));
+        };
+        const normalizeMultGroup = (group: any) => {
+          if (!group) return [] as Array<{ id: string; name: string; multiplier: number }>;
+          const entries = Array.isArray(group)
+            ? (group as any[]).map((val, idx) => [String(val?.id ?? idx), val] as const)
+            : Object.entries(group as Record<string, any>);
+          return entries.map(([id, value]) => ({ id, name: value?.label || value?.name || id, multiplier: Number(value?.multiplier || 1) }));
+        };
+
         setCalcOptions({
-          websiteType: Object.entries(config[`website_type_${adminEditingLanguage.toLowerCase()}`] || {}).map(([id, value]: [string, any]) => ({
-            id,
-            name: value.label || id,
-            price: value.price || 0
-          })),
-          complexity: Object.entries(config[`complexity_${adminEditingLanguage.toLowerCase()}`] || {}).map(([id, value]: [string, any]) => ({
-            id,
-            name: value.label || id,
-            multiplier: value.multiplier || 1
-          })),
-          timeline: Object.entries(config[`timeline_${adminEditingLanguage.toLowerCase()}`] || {}).map(([id, value]: [string, any]) => ({
-            id,
-            name: value.label || id,
-            multiplier: value.multiplier || 1
-          })),
-          features: Object.entries(config[`features_${adminEditingLanguage.toLowerCase()}`] || {}).map(([id, value]: [string, any]) => ({
-            id,
-            name: value.label || id,
-            price: value.price || 0
-          })),
-          design: Object.entries(config[`design_${adminEditingLanguage.toLowerCase()}`] || {}).map(([id, value]: [string, any]) => ({
-            id,
-            name: value.label || id,
-            price: value.price || 0
-          }))
+          websiteType: normalizePriceGroup(config[`website_type_${adminEditingLanguage.toLowerCase()}`]),
+          complexity: normalizeMultGroup(config[`complexity_${adminEditingLanguage.toLowerCase()}`]),
+          timeline: normalizeMultGroup(config[`timeline_${adminEditingLanguage.toLowerCase()}`]),
+          features: normalizePriceGroup(config[`features_${adminEditingLanguage.toLowerCase()}`]),
+          design: normalizePriceGroup(config[`design_${adminEditingLanguage.toLowerCase()}`]),
         });
       }
     } catch (error) {
@@ -200,19 +195,19 @@ const Admin = () => {
       const configData = {
         language: adminEditingLanguage,
         websiteType: Object.fromEntries(
-          calcOptions.websiteType.map(opt => [opt.id, { label: opt.name, price: opt.price }])
+          calcOptions.websiteType.map(opt => [String(opt.id), { label: opt.name, price: Number(opt.price || 0) }])
         ),
         complexity: Object.fromEntries(
-          calcOptions.complexity.map(opt => [opt.id, { label: opt.name, multiplier: opt.multiplier }])
+          calcOptions.complexity.map(opt => [String(opt.id), { label: opt.name, multiplier: Number(opt.multiplier || 1) }])
         ),
         timeline: Object.fromEntries(
-          calcOptions.timeline.map(opt => [opt.id, { label: opt.name, multiplier: opt.multiplier }])
+          calcOptions.timeline.map(opt => [String(opt.id), { label: opt.name, multiplier: Number(opt.multiplier || 1) }])
         ),
         features: Object.fromEntries(
-          calcOptions.features.map(opt => [opt.id, { label: opt.name, price: opt.price }])
+          calcOptions.features.map(opt => [String(opt.id), { label: opt.name, price: Number(opt.price || 0) }])
         ),
         design: Object.fromEntries(
-          calcOptions.design.map(opt => [opt.id, { label: opt.name, price: opt.price }])
+          calcOptions.design.map(opt => [String(opt.id), { label: opt.name, price: Number(opt.price || 0) }])
         )
       };
 
@@ -323,8 +318,22 @@ const Admin = () => {
           method: 'POST', 
           headers: { 'Content-Type': 'application/json' }, 
           body: JSON.stringify({ 
-            ...calcOptions, 
             language: adminEditingLanguage,
+            websiteType: Object.fromEntries(
+              calcOptions.websiteType.map(opt => [String(opt.id), { label: opt.name, price: Number(opt.price || 0) }])
+            ),
+            complexity: Object.fromEntries(
+              calcOptions.complexity.map(opt => [String(opt.id), { label: opt.name, multiplier: Number(opt.multiplier || 1) }])
+            ),
+            timeline: Object.fromEntries(
+              calcOptions.timeline.map(opt => [String(opt.id), { label: opt.name, multiplier: Number(opt.multiplier || 1) }])
+            ),
+            features: Object.fromEntries(
+              calcOptions.features.map(opt => [String(opt.id), { label: opt.name, price: Number(opt.price || 0) }])
+            ),
+            design: Object.fromEntries(
+              calcOptions.design.map(opt => [String(opt.id), { label: opt.name, price: Number(opt.price || 0) }])
+            ),
           }) 
         });
         if (!r.ok) {
