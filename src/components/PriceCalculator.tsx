@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from "react";
-import { motion, AnimatePresence, LayoutGroup, useAnimation } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import GlassButton from "./GlassButton";
+import OptionCard from "./OptionCard";
 import { useLanguage } from "@/hooks/use-language";
 
 interface CalculatorState {
@@ -46,34 +47,34 @@ const PriceCalculator = () => {
 
   const defaultOptions = {
     websiteType: [
-      { id: "landing", name: "Лендинг", price: 500, icon: "⚡" },
-      { id: "corporate", name: "Корпоративный сайт", price: 1200, icon: "🏢" },
-      { id: "ecommerce", name: "Интернет-магазин", price: 2500, icon: "🛒" },
-      { id: "portfolio", name: "Портфолио", price: 800, icon: "🎨" },
-      { id: "blog", name: "Блог/СМИ", price: 1000, icon: "📰" },
+      { id: "landing", name: "Лендинг", price: 500 },
+      { id: "corporate", name: "Корпоративный сайт", price: 1200 },
+      { id: "ecommerce", name: "Интернет-магазин", price: 2500 },
+      { id: "portfolio", name: "Портфолио", price: 800 },
+      { id: "blog", name: "Блог/СМИ", price: 1000 },
     ],
     complexity: [
-      { id: "simple", name: "Простой", multiplier: 1, icon: "🙂" },
-      { id: "medium", name: "Средний", multiplier: 1.5, icon: "🤓" },
-      { id: "complex", name: "Сложный", multiplier: 2.2, icon: "🧠" },
+      { id: "simple", name: "Простой", multiplier: 1 },
+      { id: "medium", name: "Средний", multiplier: 1.5 },
+      { id: "complex", name: "Сложный", multiplier: 2.2 },
     ],
     timeline: [
-      { id: "urgent", name: "Срочно (1-2 недели)", multiplier: 1.8, icon: "🚀" },
-      { id: "normal", name: "Обычно (3-4 недели)", multiplier: 1, icon: "📆" },
-      { id: "flexible", name: "Не горит (1-2 месяца)", multiplier: 0.8, icon: "🧘" },
+      { id: "urgent", name: "Срочно (1-2 недели)", multiplier: 1.8 },
+      { id: "normal", name: "Обычно (3-4 недели)", multiplier: 1 },
+      { id: "flexible", name: "Не горит (1-2 месяца)", multiplier: 0.8 },
     ],
     features: [
-      { id: "cms", name: "Система управления", price: 300, icon: "⚙️" },
-      { id: "seo", name: "SEO оптимизация", price: 400, icon: "🔍" },
-      { id: "analytics", name: "Аналитика", price: 200, icon: "📈" },
-      { id: "mobile", name: "Мобильная версия", price: 500, icon: "📱" },
-      { id: "multilang", name: "Многоязычность", price: 600, icon: "🌍" },
-      { id: "integration", name: "Интеграции", price: 800, icon: "🔗" },
+      { id: "cms", name: "Система управления", price: 300 },
+      { id: "seo", name: "SEO оптимизация", price: 400 },
+      { id: "analytics", name: "Аналитика", price: 200 },
+      { id: "mobile", name: "Мобильная версия", price: 500 },
+      { id: "multilang", name: "Многоязычность", price: 600 },
+      { id: "integration", name: "Интеграции", price: 800 },
     ],
     design: [
-      { id: "template", name: "На основе шаблона", multiplier: 0.7, icon: "🧩" },
-      { id: "custom", name: "Индивидуальный дизайн", multiplier: 1, icon: "✏️" },
-      { id: "premium", name: "Premium дизайн", multiplier: 1.4, icon: "💎" },
+      { id: "template", name: "На основе шаблона", multiplier: 0.7 },
+      { id: "custom", name: "Индивидуальный дизайн", multiplier: 1 },
+      { id: "premium", name: "Premium дизайн", multiplier: 1.4 },
     ],
   } as const;
 
@@ -243,121 +244,6 @@ const PriceCalculator = () => {
     </motion.div>
   );
 
-  const OptionCard = ({
-    active,
-    headline,
-    subline,
-    icon,
-    onClick,
-    category,
-    enableSharedActiveBg = false,
-  }: {
-    active: boolean;
-    headline: string;
-    subline?: string;
-    icon?: string;
-    onClick: () => void;
-    category: keyof CalculatorState;
-    enableSharedActiveBg?: boolean;
-  }) => {
-    return (
-    <motion.button
-      initial={false}
-      onClick={onClick}
-      animate={{ 
-        scale: active ? 1.01 : 1,
-        opacity: active ? 1 : 0.9 
-      }}
-      transition={{ 
-        duration: 0.3,
-        ease: [0.25, 0.8, 0.25, 1]
-      }}
-      className={`option-card relative p-4 rounded-2xl border overflow-hidden group transition-colors transition-shadow duration-500 ease-out ${
-        active
-          ? 'option-card--active border-white/30 bg-white/10 shadow-[0_12px_40px_rgba(0,0,0,0.35)]'
-          : 'border-white/10 hover:border-white/20 hover:bg-white/5'
-      }`}
-      style={{ willChange: 'transform, background, box-shadow' }}
-    >
-      {/* Removed shared moving background to prevent sweeping stripe */}
-      {/* Shared moving highlight for active card (state-driven, no remount) */}
-      <motion.div
-        className="absolute inset-0 rounded-2xl"
-        initial={false}
-        animate={{ opacity: active ? 1 : 0 }}
-        transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1], type: 'tween' }}
-        style={{
-          background:
-            'radial-gradient(120% 120% at 50% 50%, rgba(255,255,255,0.06) 0%, rgba(255,255,255,0.03) 55%, rgba(255,255,255,0.00) 80%)'
-        }}
-      />
-
-      {/* Accent gradient ring */}
-      <div
-        className={`option-card__ring pointer-events-none absolute inset-0 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity ${
-          active ? 'opacity-100' : ''
-        }`}
-        style={{
-          background:
-            'radial-gradient(60% 60% at 20% 0%, rgba(255,255,255,0.10) 0%, rgba(255,255,255,0) 60%)'
-        }}
-      />
-
-      <div className="relative z-10 flex items-center gap-3 text-left">
-        <motion.div
-          className={`option-card__icon w-10 h-10 rounded-xl flex items-center justify-center shrink-0 transition-colors transition-shadow duration-500 ease-out ${
-            active ? 'bg-white/15' : 'bg-white/5'
-          }`}
-          initial={false}
-          animate={{ 
-            scale: active ? 1.05 : 1, 
-            opacity: active ? 1 : 0.7 
-          }}
-          transition={{ 
-            duration: 0.8,
-            ease: [0.25, 0.8, 0.25, 1]
-          }}
-        >
-          {icon && (
-            <motion.span
-              aria-hidden="true"
-              initial={false}
-              animate={{ scale: active ? 1.1 : 1 }}
-              transition={{ 
-                duration: 0.8,
-                ease: [0.25, 0.8, 0.25, 1]
-              }}
-            >
-              {icon}
-            </motion.span>
-          )}
-        </motion.div>
-            <div>
-          <motion.div
-            className="font-medium text-foreground"
-            initial={false}
-                animate={{ y: active ? -0.2 : 0, opacity: 1 }}
-                transition={{ duration: 0.18, ease: [0.22, 1, 0.36, 1] }}
-          >
-            {headline}
-          </motion.div>
-          {subline && (
-            <motion.div
-              className="text-sm text-foreground/60"
-              initial={{ opacity: 0.85 }}
-              animate={{ opacity: active ? 1 : 0.85 }}
-              transition={{ duration: 0.25 }}
-            >
-              {subline}
-            </motion.div>
-          )}
-        </div>
-      </div>
-
-      {/* Removed shine overlay to avoid occasional sweeping stripe */}
-    </motion.button>
-  );
-  }
 
   return (
     <section className="calculator-section py-32 px-6">
@@ -402,102 +288,91 @@ const PriceCalculator = () => {
             {/* Website Type */}
             <div>
               <h3 className="text-2xl font-semibold mb-6 text-foreground">{t.calculatorUi.websiteType}</h3>
-              <LayoutGroup id="websiteType">
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                  {options.websiteType.map((option) => (
-                    <OptionCard
-                      key={option.id}
-                      active={calculator.websiteType === option.id}
-                      onClick={() => handleOptionSelect('websiteType', option.id)}
-                      icon={(option as any).icon}
-                      headline={option.name as string}
-                      subline={`${t.calculatorUi.fromPrefix}${(option as any).price}`}
-                      category={'websiteType'}
-                    />
-                  ))}
-                </div>
-              </LayoutGroup>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                {options.websiteType.map((option) => (
+                  <OptionCard
+                    key={`websiteType-${option.id}`}
+                    optionId={option.id}
+                    category="websiteType"
+                    isActive={calculator.websiteType === option.id}
+                    onClick={() => handleOptionSelect('websiteType', option.id)}
+                    headline={option.name as string}
+                    subline={`${t.calculatorUi.fromPrefix}${(option as any).price}`}
+                  />
+                ))}
+              </div>
             </div>
 
             {/* Complexity */}
             <div>
               <h3 className="text-2xl font-semibold mb-6 text-foreground">{t.calculatorUi.complexity}</h3>
-              <LayoutGroup id="complexity">
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                  {options.complexity.map((option) => (
-                    <OptionCard
-                      key={option.id}
-                      active={calculator.complexity === option.id}
-                      onClick={() => handleOptionSelect('complexity', option.id)}
-                      icon={(option as any).icon}
-                      headline={option.name as string}
-                      subline={`${t.calculatorUi.multiplyPrefix}${(option as any).multiplier}`}
-                      category={'complexity'}
-                    />
-                  ))}
-                </div>
-              </LayoutGroup>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                {options.complexity.map((option) => (
+                  <OptionCard
+                    key={`complexity-${option.id}`}
+                    optionId={option.id}
+                    category="complexity"
+                    isActive={calculator.complexity === option.id}
+                    onClick={() => handleOptionSelect('complexity', option.id)}
+                    headline={option.name as string}
+                    subline={`${t.calculatorUi.multiplyPrefix}${(option as any).multiplier}`}
+                  />
+                ))}
+              </div>
             </div>
 
             {/* Timeline */}
             <div>
               <h3 className="text-2xl font-semibold mb-6 text-foreground">{t.calculatorUi.timeline}</h3>
-              <LayoutGroup id="timeline">
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                  {options.timeline.map((option) => (
-                    <OptionCard
-                      key={option.id}
-                      active={calculator.timeline === option.id}
-                      onClick={() => handleOptionSelect('timeline', option.id)}
-                      icon={(option as any).icon}
-                      headline={option.name as string}
-                      subline={`${t.calculatorUi.multiplyPrefix}${(option as any).multiplier}`}
-                      category={'timeline'}
-                    />
-                  ))}
-                </div>
-              </LayoutGroup>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                {options.timeline.map((option) => (
+                  <OptionCard
+                    key={`timeline-${option.id}`}
+                    optionId={option.id}
+                    category="timeline"
+                    isActive={calculator.timeline === option.id}
+                    onClick={() => handleOptionSelect('timeline', option.id)}
+                    headline={option.name as string}
+                    subline={`${t.calculatorUi.multiplyPrefix}${(option as any).multiplier}`}
+                  />
+                ))}
+              </div>
             </div>
 
             {/* Features */}
             <div>
               <h3 className="text-2xl font-semibold mb-6 text-foreground">{t.calculatorUi.features}</h3>
-              <LayoutGroup id="features">
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                  {options.features.map((option) => (
-                    <OptionCard
-                      key={option.id}
-                      active={calculator.features.includes(option.id)}
-                      onClick={() => handleOptionSelect('features', option.id)}
-                      icon={(option as any).icon}
-                      headline={option.name as string}
-                      subline={`${t.calculatorUi.plusPrefix}${(option as any).price}`}
-                      category={'features'}
-                      enableSharedActiveBg={false}
-                    />
-                  ))}
-                </div>
-              </LayoutGroup>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                {options.features.map((option) => (
+                  <OptionCard
+                    key={`features-${option.id}`}
+                    optionId={option.id}
+                    category="features"
+                    isActive={calculator.features.includes(option.id)}
+                    onClick={() => handleOptionSelect('features', option.id)}
+                    headline={option.name as string}
+                    subline={`${t.calculatorUi.plusPrefix}${(option as any).price}`}
+                  />
+                ))}
+              </div>
             </div>
 
             {/* Design */}
             <div>
               <h3 className="text-2xl font-semibold mb-6 text-foreground">{t.calculatorUi.design}</h3>
-              <LayoutGroup id="design">
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                  {options.design.map((option) => (
-                    <OptionCard
-                      key={option.id}
-                      active={calculator.design === option.id}
-                      onClick={() => handleOptionSelect('design', option.id)}
-                      icon={(option as any).icon}
-                      headline={option.name as string}
-                      subline={`${t.calculatorUi.multiplyPrefix}${(option as any).multiplier}`}
-                      category={'design'}
-                    />
-                  ))}
-                </div>
-              </LayoutGroup>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                {options.design.map((option) => (
+                  <OptionCard
+                    key={`design-${option.id}`}
+                    optionId={option.id}
+                    category="design"
+                    isActive={calculator.design === option.id}
+                    onClick={() => handleOptionSelect('design', option.id)}
+                    headline={option.name as string}
+                    subline={`${t.calculatorUi.multiplyPrefix}${(option as any).multiplier}`}
+                  />
+                ))}
+              </div>
             </div>
           </div>
 

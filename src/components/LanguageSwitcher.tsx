@@ -35,9 +35,9 @@ export default function LanguageSwitcher() {
         }
         transition={{ duration: 0.7, ease: [0.2, 0.8, 0.2, 1] }}
       >
-        <motion.div layout className={`h-full flex items-center ${isMobile && !isOpen ? "justify-center" : ""} px-2`}>
+        <motion.div layout className={`h-full flex items-center ${isMobile && !isOpen ? "justify-center" : ""} pl-2 pr-0.5`}>
           {/* Left cluster: icon + current label always present, moves with layout */}
-          <motion.div layout className={`flex items-center ${isMobile && !isOpen ? "gap-0" : "gap-1"} w-full`}>
+          <motion.div layout className={`flex items-center ${isMobile && !isOpen ? "gap-0" : "gap-1"} w-full ml-0.5`}>
             <motion.button
               layout
               type="button"

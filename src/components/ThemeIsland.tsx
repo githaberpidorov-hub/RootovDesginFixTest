@@ -117,7 +117,7 @@ const ThemeIsland = () => {
               aria-expanded={open}
               onClick={(e) => { if (open) { e.stopPropagation(); setOpen(false); } else { setOpen(true); } }}
               className="relative h-10 w-10 shrink-0 grid place-items-center rounded-xl border border-white/10 hover:bg-white/10 transition-colors"
-              style={{ transform: "translateX(-1px)" }}
+              style={{ transform: `translateX(${isMobile ? "-0.5px" : "-1px"}) translateY(${isMobile ? "-1px" : "-1px"})` }}
             >
               {/* Inner ring */}
               <div

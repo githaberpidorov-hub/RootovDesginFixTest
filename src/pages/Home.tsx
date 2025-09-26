@@ -73,14 +73,14 @@ const Home = () => {
               {t.home.hero.description}
             </p>
             
-            <div className="flex flex-col sm:flex-row gap-6 justify-center items-center">
-              <a href="/request">
-                <GlassButton size="lg" glow>
+            <div className="flex flex-col sm:flex-row gap-6 justify-center items-center w-full max-w-sm mx-auto sm:max-w-none">
+              <a href="/request" className="w-4/5 sm:w-auto">
+                <GlassButton size="lg" glow className="w-full sm:w-auto">
                   {t.home.hero.orderProject}
                 </GlassButton>
               </a>
-              <Link to="/portfolio">
-                <GlassButton variant="secondary" size="lg">
+              <Link to="/portfolio" className="w-4/5 sm:w-auto">
+                <GlassButton variant="secondary" size="lg" className="w-full sm:w-auto">
                   {t.home.hero.viewWorks}
                 </GlassButton>
               </Link>
@@ -219,17 +219,18 @@ const Home = () => {
             <p className="text-xl text-foreground/70 mb-8 max-w-2xl mx-auto">
               {t.home.cta.description}
             </p>
-            <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <a href="/request">
-                <GlassButton size="lg" glow>
+            <div className="flex flex-col sm:flex-row gap-4 justify-center items-center w-full max-w-sm mx-auto sm:max-w-none">
+              <a href="/request" className="w-4/5 sm:w-auto">
+                <GlassButton size="lg" glow className="w-full sm:w-auto">
                   {t.home.cta.contactUs}
                 </GlassButton>
               </a>
               <Link 
                 to="/portfolio" 
                 onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
+                className="w-4/5 sm:w-auto"
               >
-                <GlassButton variant="secondary" size="lg">
+                <GlassButton variant="secondary" size="lg" className="w-full sm:w-auto">
                   {t.home.cta.viewPortfolio}
                 </GlassButton>
               </Link>
