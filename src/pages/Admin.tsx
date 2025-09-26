@@ -657,7 +657,7 @@ const Admin = () => {
                 {t.admin.templates.add}
               </GlassButton>
               <GlassButton variant="secondary" onClick={handleLogout}>
-                {t.common.back}
+                Выйти
               </GlassButton>
             </div>
           </motion.div>
