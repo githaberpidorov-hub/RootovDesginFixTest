@@ -583,6 +583,14 @@
     --border: 255 32% 78%;
     --input: 255 32% 78%;
     --ring: 258 60% 54%;
+
+    /* Language buttons */
+    --theme-active-bg: #7c3aed;
+    --theme-active-text: white;
+    --theme-active-border: #6d28d9;
+    --theme-inactive-bg: #ede9fe;
+    --theme-inactive-text: #7c3aed;
+    --theme-inactive-border: #c4b5fd;
   }
 }
 
