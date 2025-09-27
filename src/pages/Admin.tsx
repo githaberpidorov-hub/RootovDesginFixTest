@@ -698,9 +698,16 @@ const Admin = () => {
                 transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
                 className="glass-card p-8 mb-12"
               >
-                <h2 className="text-2xl font-bold text-gradient mb-6">
-                  {editingTemplate ? t.admin.templates.edit : t.admin.templates.add}
-                </h2>
+                <div className="flex items-center justify-between mb-6">
+                  <h2 className="text-2xl font-bold text-gradient">
+                    {editingTemplate ? t.admin.templates.edit : t.admin.templates.add}
+                  </h2>
+                  {editingTemplate && (
+                    <GlassButton variant="ghost" onClick={cancelEdit}>
+                      {t.admin.templates.form.back}
+                    </GlassButton>
+                  )}
+                </div>
                 <div className="text-sm text-foreground/60 bg-white/5 px-3 py-1 rounded-lg inline-block mb-4">
                   {t.admin.templates.form.currentLanguage}: {getLanguageLabel(adminEditingLanguage)}
                 </div>

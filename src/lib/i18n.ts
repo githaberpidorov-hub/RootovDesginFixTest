@@ -380,6 +380,7 @@ const translations: Record<LanguageCode, Translations> = {
           addTech: "Добавить технологию",
           save: "Сохранить",
           cancel: "Отмена",
+          back: "Назад",
           currentLanguage: "Редактируете на языке",
         },
         categories: {
@@ -586,6 +587,7 @@ const translations: Record<LanguageCode, Translations> = {
           addTech: "Add Technology",
           save: "Save",
           cancel: "Cancel",
+          back: "Back",
           currentLanguage: "Editing in language",
         },
         categories: {
@@ -792,6 +794,7 @@ const translations: Record<LanguageCode, Translations> = {
           addTech: "Додати технологію",
           save: "Зберегти",
           cancel: "Скасувати",
+          back: "Назад",
           currentLanguage: "Редагуєте мовою",
         },
         categories: {
