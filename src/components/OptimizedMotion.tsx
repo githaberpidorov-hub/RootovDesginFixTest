@@ -24,7 +24,7 @@ const OptimizedMotion = ({
   const optimizedProps = shouldReduceMotion ? {
     ...motionProps,
     transition: {
-      duration: 0.2,
+      duration: 0.15,
       ease: "easeOut",
       ...motionProps.transition
     },
@@ -37,7 +37,7 @@ const OptimizedMotion = ({
     ...motionProps,
     // Ensure fast hover transitions
     transition: {
-      duration: 0.2,
+      duration: 0.15,
       ease: "easeOut",
       ...motionProps.transition
     }

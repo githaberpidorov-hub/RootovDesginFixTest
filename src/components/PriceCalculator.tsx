@@ -496,7 +496,7 @@ const PriceCalculator = () => {
                     <motion.div 
                       initial={{ opacity: 0, y: 20 }}
                       animate={{ opacity: 1, y: 0 }}
-                      transition={{ duration: 0.5, delay: 0.1 }}
+                      transition={{ duration: 0.3, delay: 0.05 }}
                       className="text-2xl text-foreground/70 mb-2"
                     >
                       {t.calculatorUi.estimatedPrice}
@@ -530,7 +530,7 @@ const PriceCalculator = () => {
                     <motion.div 
                       initial={{ opacity: 0, y: 20 }}
                       animate={{ opacity: 1, y: 0 }}
-                      transition={{ duration: 0.5, delay: 0.6 }}
+                      transition={{ duration: 0.3, delay: 0.1 }}
                       className="flex justify-center"
                     >
                       <a href={buildRequestHref()}>

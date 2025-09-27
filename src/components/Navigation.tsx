@@ -96,7 +96,7 @@ const Navigation = () => {
             transition={{ 
               duration: 0.6, 
               ease: [0.16, 1, 0.3, 1],
-              delay: index * 0.1 + 0.3
+              delay: index * 0.02
             }}
           >
             <motion.div
