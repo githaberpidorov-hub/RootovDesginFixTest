@@ -262,10 +262,10 @@ const Portfolio = () => {
               <button
                 key={category.id}
                 onClick={() => setSelectedCategory(category.id)}
-                className={`px-6 py-3 rounded-2xl border transition-all duration-300 ${
+                className={`px-6 py-3 rounded-2xl border transition-all duration-300 portfolio-filter-button ${
                   selectedCategory === category.id
-                    ? 'border-white/30 bg-white/10 text-foreground'
-                    : 'border-white/10 hover:border-white/20 hover:bg-white/5 text-foreground/70'
+                    ? 'portfolio-filter-button-active'
+                    : ''
                 }`}
               >
                 {category.name}
