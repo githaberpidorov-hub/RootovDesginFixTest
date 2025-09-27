@@ -8,32 +8,27 @@ export function cn(...inputs: ClassValue[]) {
 /**
  * Добавляет cache-busting параметр к URL для предотвращения кэширования
  */
-export function addCacheBusting(url: string, forceRefresh = false): string {
+export function addCacheBusting(url: string): string {
   if (!url) return url;
   
   try {
     const urlObj = new URL(url);
     const now = Date.now();
     
-    if (forceRefresh) {
-      // Принудительное обновление - используем текущее время
+    // Используем время из localStorage или текущее время
+    const cacheKey = `preview-cache-time-${urlObj.hostname}`;
+    const lastUpdate = localStorage.getItem(cacheKey);
+    const cacheTime = lastUpdate ? parseInt(lastUpdate) : now;
+    
+    // Обновляем каждые 24 часа
+    if (now - cacheTime > 24 * 60 * 60 * 1000) {
       urlObj.searchParams.set('_cb', now.toString());
+      localStorage.setItem(cacheKey, now.toString());
+    } else if (urlObj.searchParams.has('_cb')) {
+      // Если параметр уже есть, оставляем его
+      return url;
     } else {
-      // Обычное обновление - используем время из localStorage или текущее время
-      const cacheKey = `preview-cache-time-${urlObj.hostname}`;
-      const lastUpdate = localStorage.getItem(cacheKey);
-      const cacheTime = lastUpdate ? parseInt(lastUpdate) : now;
-      
-      // Обновляем каждые 24 часа
-      if (now - cacheTime > 24 * 60 * 60 * 1000) {
-        urlObj.searchParams.set('_cb', now.toString());
-        localStorage.setItem(cacheKey, now.toString());
-      } else if (urlObj.searchParams.has('_cb')) {
-        // Если параметр уже есть, оставляем его
-        return url;
-      } else {
-        urlObj.searchParams.set('_cb', cacheTime.toString());
-      }
+      urlObj.searchParams.set('_cb', cacheTime.toString());
     }
     
     return urlObj.toString();

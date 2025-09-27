@@ -114,12 +114,13 @@ const Request = () => {
   }, [language]);
 
   // helpers for previews (OG image cache like in portfolio)
-  const getPreviewImageUrl = (url?: string, forceRefresh = false) => {
+  const getPreviewImageUrl = (url?: string) => {
     if (!url) return "";
     try {
       const encoded = encodeURIComponent(normalizeUrl(url));
-      const previewUrl = `https://v1.screenshot.11ty.dev/${encoded}/opengraph/`;
-      return addCacheBusting(previewUrl, forceRefresh);
+      // Используем microlink API для получения OG-изображения
+      const previewUrl = `https://api.microlink.io?url=${encoded}&meta=true&filter=image.url`;
+      return previewUrl;
     } catch {
       return "";
     }
@@ -155,6 +156,7 @@ const Request = () => {
       const norm = normalizeUrl(demoUrl);
       if (validCached[norm]) return validCached[norm];
       
+      // Используем microlink API для получения OG-изображения
       try {
         const api = `https://api.microlink.io?url=${encodeURIComponent(norm)}&meta=true&filter=image.url`;
         const res = await fetch(api, { signal: controller.signal });
@@ -165,11 +167,14 @@ const Request = () => {
         }
       } catch {}
       
+      // Если OG-изображение не найдено, используем fallback на скриншот
       try {
         const encoded = encodeURIComponent(norm);
         const screenshotUrl = `https://v1.screenshot.11ty.dev/${encoded}/opengraph/`;
         return addCacheBusting(screenshotUrl);
-      } catch { return ""; }
+      } catch {
+        return "";
+      }
     };
 
     (async () => {

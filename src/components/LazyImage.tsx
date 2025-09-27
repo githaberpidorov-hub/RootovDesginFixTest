@@ -8,10 +8,9 @@ interface LazyImageProps {
   className?: string;
   placeholder?: string;
   blur?: boolean;
-  forceRefresh?: boolean;
 }
 
-const LazyImage = ({ src, alt, className = "", placeholder, blur = true, forceRefresh = false }: LazyImageProps) => {
+const LazyImage = ({ src, alt, className = "", placeholder, blur = true }: LazyImageProps) => {
   const [isLoaded, setIsLoaded] = useState(false);
   const [isInView, setIsInView] = useState(false);
   const [imageSrc, setImageSrc] = useState(src);
@@ -19,10 +18,10 @@ const LazyImage = ({ src, alt, className = "", placeholder, blur = true, forceRe
 
   // Обновляем src при изменении пропсов
   useEffect(() => {
-    const newSrc = addCacheBusting(src, forceRefresh);
+    const newSrc = addCacheBusting(src);
     setImageSrc(newSrc);
     setIsLoaded(false); // Сбрасываем состояние загрузки при смене изображения
-  }, [src, forceRefresh]);
+  }, [src]);
 
   useEffect(() => {
     const observer = new IntersectionObserver(

@@ -25,7 +25,6 @@ const Portfolio = () => {
   const [selectedCategory, setSelectedCategory] = useState("all");
   const [filteredTemplates, setFilteredTemplates] = useState<Template[]>([]);
   const [previewByUrl, setPreviewByUrl] = useState<Record<string, string>>({});
-  const [forceRefresh, setForceRefresh] = useState(false);
 
   // Variants to stagger children on mount without affecting hover animations
   const gridVariants = {
@@ -47,35 +46,17 @@ const Portfolio = () => {
     },
   } as const;
 
-  const getPreviewImageUrl = (url?: string, forceRefresh = false) => {
+  const getPreviewImageUrl = (url?: string) => {
     if (!url) return "";
     try {
       const withProtocol = /^(https?:)?\/\//i.test(url) ? url : `https://${url}`;
       const encoded = encodeURIComponent(withProtocol);
-      const previewUrl = `https://v1.screenshot.11ty.dev/${encoded}/opengraph/`;
-      return addCacheBusting(previewUrl, forceRefresh);
+      // Используем microlink API для получения OG-изображения
+      const previewUrl = `https://api.microlink.io?url=${encoded}&meta=true&filter=image.url`;
+      return previewUrl;
     } catch {
       return "";
     }
-  };
-
-  const handleRefreshPreviews = () => {
-    // Очищаем кэш
-    localStorage.removeItem('portfolio-preview-cache');
-    
-    // Очищаем время кэширования для всех URL
-    const urls = Array.from(new Set(templates.map(t => t.demoUrl).filter(Boolean) as string[]));
-    urls.forEach(url => {
-      const norm = normalizeUrl(url);
-      localStorage.removeItem(`preview-cache-time-${norm}`);
-    });
-    
-    // Сбрасываем состояние превью
-    setPreviewByUrl({});
-    setForceRefresh(true);
-    
-    // Через небольшую задержку сбрасываем флаг принудительного обновления
-    setTimeout(() => setForceRefresh(false), 1000);
   };
 
   const categories = [
@@ -218,6 +199,7 @@ const Portfolio = () => {
       const norm = normalizeUrl(demoUrl);
       if (validCached[norm]) return validCached[norm];
       
+      // Используем microlink API для получения OG-изображения
       try {
         const api = `https://api.microlink.io?url=${encodeURIComponent(norm)}&meta=true&filter=image.url`;
         const res = await fetch(api, { signal: controller.signal });
@@ -228,7 +210,7 @@ const Portfolio = () => {
         }
       } catch {}
       
-      // fallback на скриншот сервиса
+      // Если OG-изображение не найдено, используем fallback на скриншот
       try {
         const encoded = encodeURIComponent(norm);
         const screenshotUrl = `https://v1.screenshot.11ty.dev/${encoded}/opengraph/`;
@@ -289,23 +271,9 @@ const Portfolio = () => {
             <h1 className="text-5xl md:text-7xl font-bold text-gradient text-glow mb-6">
               {t.portfolio.title}
             </h1>
-            <p className="text-xl text-foreground/70 max-w-3xl mx-auto mb-8">
+            <p className="text-xl text-foreground/70 max-w-3xl mx-auto">
               {t.portfolio.description}
             </p>
-            <GlassButton
-              onClick={handleRefreshPreviews}
-              className="inline-flex items-center gap-2 px-6 py-3 text-sm font-medium"
-            >
-              <svg 
-                className={`w-4 h-4 transition-transform duration-300 ${forceRefresh ? 'animate-spin' : ''}`} 
-                fill="none" 
-                stroke="currentColor" 
-                viewBox="0 0 24 24"
-              >
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-              </svg>
-              Обновить превью
-            </GlassButton>
           </motion.div>
         </div>
       </section>
@@ -362,13 +330,12 @@ const Portfolio = () => {
                       <LazyImage
                         src={
                           previewByUrl[normalizeUrl(template.demoUrl)]
-                          || getPreviewImageUrl(template.demoUrl, forceRefresh)
+                          || getPreviewImageUrl(template.demoUrl)
                           || template.image
                           || "/placeholder.svg"
                         }
                         alt={template.title}
                         className="w-full h-full"
-                        forceRefresh={forceRefresh}
                       />
                     </div>
                     <div className="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent" />
