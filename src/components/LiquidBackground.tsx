@@ -124,16 +124,18 @@ const LiquidBackground = () => {
       overscrollBehavior: 'none',
       WebkitOverscrollBehavior: 'none',
       /* Force hardware acceleration */
-      WebkitTransform: 'translateZ(0)',
-      transform: 'translateZ(0)',
+      WebkitTransform: 'translate3d(0, 0, 0)',
+      transform: 'translate3d(0, 0, 0)',
       WebkitBackfaceVisibility: 'hidden',
-      backfaceVisibility: 'hidden'
+      backfaceVisibility: 'hidden',
+      /* Additional iOS fixes */
+      WebkitOverflowScrolling: 'touch'
     }}>
       {/* Gradient mesh background */}
       <div className="absolute inset-0 opacity-90 liquid-mesh" style={{
         /* Fix for mobile scroll artifacts */
-        WebkitTransform: 'translateZ(0)',
-        transform: 'translateZ(0)',
+        WebkitTransform: 'translate3d(0, 0, 0)',
+        transform: 'translate3d(0, 0, 0)',
         WebkitBackfaceVisibility: 'hidden',
         backfaceVisibility: 'hidden',
         willChange: 'transform',
@@ -141,7 +143,9 @@ const LiquidBackground = () => {
         isolation: 'isolate',
         /* Prevent overscroll artifacts */
         overscrollBehavior: 'none',
-        WebkitOverscrollBehavior: 'none'
+        WebkitOverscrollBehavior: 'none',
+        /* Additional iOS fixes */
+        WebkitOverflowScrolling: 'touch'
       }} />
 
       {/* Floating liquid shapes */}

@@ -19,6 +19,14 @@ html, body {
     -webkit-overflow-scrolling: touch;
     /* Prevent scroll artifacts at top */
     overflow-x: hidden;
+    /* More aggressive fixes for iOS scroll artifacts */
+    -webkit-transform: translate3d(0, 0, 0);
+    transform: translate3d(0, 0, 0);
+    -webkit-backface-visibility: hidden;
+    backface-visibility: hidden;
+    /* Prevent elastic scrolling */
+    overscroll-behavior-x: none;
+    overscroll-behavior-y: none;
   }
   
   /* Fix for liquid-mesh background scroll artifacts on iOS */
@@ -32,6 +40,9 @@ html, body {
     isolation: isolate;
     /* Reduce opacity on iOS to prevent scroll artifacts */
     opacity: 0.6;
+    /* Additional iOS fixes */
+    -webkit-transform: translate3d(0, 0, 0);
+    transform: translate3d(0, 0, 0);
   }
   
   /* Fix for fixed positioned elements on iOS - ensure proper viewport positioning */
@@ -43,6 +54,21 @@ html, body {
   * {
     overscroll-behavior: none;
     overscroll-behavior-y: none;
+    overscroll-behavior-x: none;
+  }
+  
+  /* Additional iOS Safari fixes */
+  body {
+    /* Prevent iOS Safari scroll artifacts */
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior: none;
+    overscroll-behavior-y: none;
+    overscroll-behavior-x: none;
+    /* Force hardware acceleration without affecting fixed positioning */
+    -webkit-transform: translate3d(0, 0, 0);
+    transform: translate3d(0, 0, 0);
+    -webkit-backface-visibility: hidden;
+    backface-visibility: hidden;
   }
 }
 
@@ -768,12 +794,19 @@ html, body {
       -webkit-overflow-scrolling: touch;
       overscroll-behavior: none;
       overscroll-behavior-y: none;
+      overscroll-behavior-x: none;
+      /* Additional mobile fixes */
+      -webkit-transform: translate3d(0, 0, 0);
+      transform: translate3d(0, 0, 0);
+      -webkit-backface-visibility: hidden;
+      backface-visibility: hidden;
     }
     
     /* Prevent overscroll for all elements on mobile */
     * {
       overscroll-behavior: none;
       overscroll-behavior-y: none;
+      overscroll-behavior-x: none;
     }
     
     /* Fix for fixed positioned elements on mobile */
