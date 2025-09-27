@@ -67,27 +67,32 @@ const Navigation = () => {
   };
 
   return (
-    <motion.nav
-      initial={{ y: -100, opacity: 0, scale: 0.9 }}
-      animate={{ 
-        y: isVisible ? 0 : -100, 
-        opacity: isVisible ? 1 : 0,
-        scale: isVisible ? 1 : 0.9
-      }}
-      transition={{ 
-        duration: 0.8, 
-        ease: [0.16, 1, 0.3, 1],
-        type: "spring",
-        damping: 25,
-        stiffness: 300
-      }}
-      className="fixed top-4 md:top-8 left-0 right-0 mx-auto w-fit z-50 rounded-2xl border-[0.5px] md:border border-white/10 backdrop-blur-3xl px-3 sm:px-4 md:px-6 py-3 md:py-5 max-w-[92vw] overflow-visible"
-      style={{
-        background: "linear-gradient(135deg, hsla(0, 0%, 100%, 0.03) 0%, hsla(220, 15%, 15%, 0.05) 100%)",
-        boxShadow: "0 20px 40px hsla(220, 50%, 2%, 0.4), inset 0 1px 0 hsla(0, 0%, 100%, 0.05)",
-      }}
+        <motion.nav
+          initial={{ y: -100, scale: 0.9 }}
+          animate={{ 
+            y: isVisible ? 0 : -100, 
+            scale: isVisible ? 1 : 0.9
+          }}
+          transition={{ 
+            duration: 0.8, 
+            ease: [0.16, 1, 0.3, 1],
+            type: "spring",
+            damping: 25,
+            stiffness: 300
+          }}
+      className="fixed top-4 md:top-6 left-0 right-0 mx-auto w-fit z-50 rounded-2xl max-w-[92vw] overflow-visible"
     >
-      <div className="flex items-center justify-center gap-3 sm:gap-5 md:gap-8">
+      <div 
+        className="flex items-center justify-center gap-3 sm:gap-5 md:gap-8 rounded-2xl px-4 sm:px-6 md:px-8 py-4 md:py-6"
+        style={{
+          background: "linear-gradient(135deg, hsla(0, 0%, 100%, 0.12) 0%, hsla(220, 15%, 25%, 0.08) 100%)",
+          backdropFilter: "blur(16px)",
+          boxShadow: "0 8px 25px hsla(0, 0%, 100%, 0.1), inset 0 1px 0 hsla(0, 0%, 100%, 0.2)",
+          border: "1px solid hsla(0, 0%, 100%, 0.15)",
+          opacity: isVisible ? 1 : 0,
+          transition: "opacity 0.1s ease-out",
+        }}
+      >
         {navItems.map((item, index) => (
           <motion.div
             key={item.path}

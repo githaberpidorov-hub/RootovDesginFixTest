@@ -73,13 +73,24 @@ html, body {
   .backdrop-blur-2xl,
   .backdrop-blur-3xl,
   .language-switcher,
-  nav,
   .glass-card,
   .glass-button {
     /* Disable backdrop-blur on iOS to prevent scroll artifacts */
     -webkit-backdrop-filter: none !important;
     backdrop-filter: none !important;
     /* Keep other fixes */
+    -webkit-transform: translate3d(0, 0, 0);
+    transform: translate3d(0, 0, 0);
+    -webkit-backface-visibility: hidden;
+    backface-visibility: hidden;
+    will-change: transform;
+    contain: layout style paint;
+    isolation: isolate;
+  }
+  
+  /* Allow backdrop-filter for navigation */
+  nav {
+    /* Keep other fixes but allow backdrop-filter */
     -webkit-transform: translate3d(0, 0, 0);
     transform: translate3d(0, 0, 0);
     -webkit-backface-visibility: hidden;
