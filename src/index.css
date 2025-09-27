@@ -54,8 +54,10 @@ html, body {
   .backdrop-blur-2xl,
   .backdrop-blur-3xl,
   .language-switcher {
-    -webkit-backdrop-filter: blur(8px);
-    backdrop-filter: blur(8px);
+    /* Disable backdrop-blur on iOS to prevent scroll artifacts */
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
+    /* Keep other fixes */
     -webkit-transform: translate3d(0, 0, 0);
     transform: translate3d(0, 0, 0);
     -webkit-backface-visibility: hidden;
@@ -767,8 +769,10 @@ html, body {
   .backdrop-blur-2xl,
   .backdrop-blur-3xl,
   .language-switcher {
-    -webkit-backdrop-filter: blur(8px);
-    backdrop-filter: blur(8px);
+    /* Disable backdrop-blur to prevent scroll artifacts */
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
+    /* Keep other fixes */
     -webkit-transform: translate3d(0, 0, 0);
     transform: translate3d(0, 0, 0);
     -webkit-backface-visibility: hidden;
@@ -848,8 +852,10 @@ html, body {
     .backdrop-blur-2xl,
     .backdrop-blur-3xl,
     .language-switcher {
-      -webkit-backdrop-filter: blur(8px);
-      backdrop-filter: blur(8px);
+      /* Disable backdrop-blur on mobile to prevent scroll artifacts */
+      -webkit-backdrop-filter: none;
+      backdrop-filter: none;
+      /* Keep other fixes */
       -webkit-transform: translate3d(0, 0, 0);
       transform: translate3d(0, 0, 0);
       -webkit-backface-visibility: hidden;
