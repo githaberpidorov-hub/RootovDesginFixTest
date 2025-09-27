@@ -94,27 +94,38 @@ const Navigation = () => {
         }}
       >
         {navItems.map((item, index) => (
-          <motion.div
-            key={item.path}
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ 
-              duration: 0.6, 
-              ease: [0.16, 1, 0.3, 1],
-              delay: index * 0.02
-            }}
-          >
+          activePath === item.path ? (
+            <div key={item.path}>
+          ) : (
             <motion.div
-              initial="idle"
-              whileHover="hover"
-              className="relative"
-              transition={{ scale: { duration: 0.55, ease: [0.16, 1, 0.3, 1] } }}
-              style={{ willChange: "transform" }}
-              variants={{
-                idle: { scale: 1 },
-                hover: { scale: 1.06 }
+              key={item.path}
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ 
+                opacity: isVisible ? 1 : 0, 
+                y: isVisible ? 0 : 20 
+              }}
+              transition={{ 
+                duration: 0.6, 
+                ease: [0.16, 1, 0.3, 1],
+                delay: isVisible ? index * 0.02 : 0
               }}
             >
+          )
+            {activePath === item.path ? (
+              <div className="relative">
+            ) : (
+              <motion.div
+                initial="idle"
+                whileHover="hover"
+                className="relative"
+                transition={{ scale: { duration: 0.55, ease: [0.16, 1, 0.3, 1] } }}
+                style={{ willChange: "transform" }}
+                variants={{
+                  idle: { scale: 1 },
+                  hover: { scale: 1.06 }
+                }}
+              >
+            )}
               <Link
                 to={item.path}
                 className="relative px-4 py-2.5 sm:px-5 sm:py-3 md:px-8 md:py-4 rounded-2xl text-foreground/85 hover:text-foreground transition-all duration-500 group overflow-visible isolate"
@@ -166,8 +177,16 @@ const Navigation = () => {
                 />
               )}
               </Link>
+            {activePath === item.path ? (
+              </div>
+            ) : (
+              </motion.div>
+            )}
+          {activePath === item.path ? (
+            </div>
+          ) : (
             </motion.div>
-          </motion.div>
+          )}
         ))}
       </div>
 
