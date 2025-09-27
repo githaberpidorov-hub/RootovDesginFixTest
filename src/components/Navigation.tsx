@@ -83,12 +83,8 @@ const Navigation = () => {
       className="fixed top-4 md:top-6 left-0 right-0 mx-auto w-fit z-50 rounded-2xl max-w-[92vw] overflow-visible"
     >
       <div 
-        className="flex items-center justify-center gap-3 sm:gap-5 md:gap-8 rounded-2xl px-4 sm:px-6 md:px-8 py-4 md:py-6"
+        className="navigation-container flex items-center justify-center gap-3 sm:gap-5 md:gap-8 rounded-2xl px-4 sm:px-6 md:px-8 py-4 md:py-6"
         style={{
-          background: "linear-gradient(135deg, hsla(0, 0%, 100%, 0.12) 0%, hsla(220, 15%, 25%, 0.08) 100%)",
-          backdropFilter: "blur(16px)",
-          boxShadow: "0 8px 25px hsla(0, 0%, 100%, 0.1), inset 0 1px 0 hsla(0, 0%, 100%, 0.2)",
-          border: "1px solid hsla(0, 0%, 100%, 0.15)",
           opacity: isVisible ? 1 : 0,
           transition: "opacity 0.1s ease-out",
         }}
@@ -120,7 +116,7 @@ const Navigation = () => {
             >
               <Link
                 to={item.path}
-                className="relative px-4 py-2.5 sm:px-5 sm:py-3 md:px-8 md:py-4 rounded-2xl text-foreground/85 hover:text-foreground transition-all duration-500 group overflow-visible isolate"
+                className="navigation-item relative px-4 py-2.5 sm:px-5 sm:py-3 md:px-8 md:py-4 rounded-2xl transition-all duration-500 group overflow-visible isolate"
                 onMouseEnter={() => setHoveredPath(item.path)}
                 onMouseLeave={() => setHoveredPath(null)}
                 onClick={() => handleNavClick(item.path)}
@@ -143,12 +139,7 @@ const Navigation = () => {
                         damping: 32,
                         mass: 0.9
                       }}
-                      className="absolute inset-0 rounded-2xl"
-                      style={{
-                        background: "linear-gradient(135deg, hsla(0, 0%, 100%, 0.12) 0%, hsla(220, 15%, 25%, 0.08) 100%)",
-                        backdropFilter: "blur(16px)",
-                        boxShadow: "0 8px 25px hsla(0, 0%, 100%, 0.1), inset 0 1px 0 hsla(0, 0%, 100%, 0.2)",
-                      }}
+                      className="navigation-active absolute inset-0 rounded-2xl"
                     />
                   )}
                 </AnimatePresence>

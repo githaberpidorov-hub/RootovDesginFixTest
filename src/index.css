@@ -1384,3 +1384,161 @@ html, body {
     transform: none;
   }
 }
+
+/* Navigation styles for different themes */
+@layer components {
+  /* White theme navigation */
+  .theme-white .navigation-container {
+    background: linear-gradient(135deg, 
+      hsla(220, 18%, 14%, 0.08) 0%, 
+      hsla(0, 0%, 100%, 0.65) 100%);
+    backdrop-filter: blur(16px);
+    box-shadow: 
+      0 8px 25px hsla(220, 20%, 70%, 0.15), 
+      inset 0 1px 0 hsla(0, 0%, 100%, 0.3);
+    border: 1px solid hsla(220, 12%, 80%, 0.3);
+  }
+
+  .theme-white .navigation-item {
+    color: hsl(220, 20%, 12%);
+  }
+
+  .theme-white .navigation-item:hover {
+    color: hsl(220, 15%, 12%);
+  }
+
+  .theme-white .navigation-active {
+    background: linear-gradient(135deg, 
+      hsla(220, 18%, 14%, 0.12) 0%, 
+      hsla(0, 0%, 100%, 0.45) 100%);
+    backdrop-filter: blur(16px);
+    box-shadow: 
+      0 8px 25px hsla(220, 20%, 70%, 0.2), 
+      inset 0 1px 0 hsla(0, 0%, 100%, 0.4);
+    border: 1px solid hsla(220, 12%, 80%, 0.4);
+  }
+
+  /* Pink theme navigation */
+  .theme-pink .navigation-container {
+    background: linear-gradient(135deg, 
+      hsla(338, 75%, 60%, 0.18) 0%, 
+      hsla(340, 55%, 97%, 0.78) 100%);
+    backdrop-filter: blur(16px);
+    box-shadow: 
+      0 8px 25px hsla(340, 35%, 72%, 0.2), 
+      inset 0 1px 0 hsla(340, 60%, 98%, 0.4);
+    border: 1px solid hsla(340, 35%, 80%, 0.3);
+  }
+
+  .theme-pink .navigation-item {
+    color: hsl(330, 30%, 16%);
+  }
+
+  .theme-pink .navigation-item:hover {
+    color: hsl(338, 65%, 50%);
+  }
+
+  .theme-pink .navigation-active {
+    background: linear-gradient(135deg, 
+      hsla(338, 75%, 60%, 0.25) 0%, 
+      hsla(340, 55%, 97%, 0.65) 100%);
+    backdrop-filter: blur(16px);
+    box-shadow: 
+      0 8px 25px hsla(340, 35%, 72%, 0.25), 
+      inset 0 1px 0 hsla(340, 60%, 98%, 0.5);
+    border: 1px solid hsla(340, 35%, 80%, 0.4);
+  }
+
+  /* Mint theme navigation */
+  .theme-mint .navigation-container {
+    background: linear-gradient(135deg, 
+      hsla(160, 60%, 58%, 0.18) 0%, 
+      hsla(160, 45%, 97%, 0.78) 100%);
+    backdrop-filter: blur(16px);
+    box-shadow: 
+      0 8px 25px hsla(160, 30%, 74%, 0.2), 
+      inset 0 1px 0 hsla(160, 50%, 97%, 0.4);
+    border: 1px solid hsla(160, 28%, 78%, 0.3);
+  }
+
+  .theme-mint .navigation-item {
+    color: hsl(160, 24%, 16%);
+  }
+
+  .theme-mint .navigation-item:hover {
+    color: hsl(160, 55%, 40%);
+  }
+
+  .theme-mint .navigation-active {
+    background: linear-gradient(135deg, 
+      hsla(160, 60%, 58%, 0.25) 0%, 
+      hsla(160, 45%, 97%, 0.65) 100%);
+    backdrop-filter: blur(16px);
+    box-shadow: 
+      0 8px 25px hsla(160, 30%, 74%, 0.25), 
+      inset 0 1px 0 hsla(160, 50%, 97%, 0.5);
+    border: 1px solid hsla(160, 28%, 78%, 0.4);
+  }
+
+  /* Peach theme navigation */
+  .theme-peach .navigation-container {
+    background: linear-gradient(135deg, 
+      hsla(18, 75%, 62%, 0.18) 0%, 
+      hsla(22, 75%, 97%, 0.78) 100%);
+    backdrop-filter: blur(16px);
+    box-shadow: 
+      0 8px 25px hsla(22, 45%, 70%, 0.2), 
+      inset 0 1px 0 hsla(22, 85%, 98%, 0.4);
+    border: 1px solid hsla(22, 48%, 78%, 0.3);
+  }
+
+  .theme-peach .navigation-item {
+    color: hsl(18, 30%, 16%);
+  }
+
+  .theme-peach .navigation-item:hover {
+    color: hsl(18, 80%, 55%);
+  }
+
+  .theme-peach .navigation-active {
+    background: linear-gradient(135deg, 
+      hsla(18, 75%, 62%, 0.25) 0%, 
+      hsla(22, 75%, 97%, 0.65) 100%);
+    backdrop-filter: blur(16px);
+    box-shadow: 
+      0 8px 25px hsla(22, 45%, 70%, 0.25), 
+      inset 0 1px 0 hsla(22, 85%, 98%, 0.5);
+    border: 1px solid hsla(22, 48%, 78%, 0.4);
+  }
+
+  /* Dark theme navigation (already exists, but let's make sure it's consistent) */
+  .theme-black .navigation-container {
+    background: linear-gradient(135deg, 
+      hsla(0, 0%, 100%, 0.03) 0%, 
+      hsla(220, 8%, 4%, 0.05) 100%);
+    backdrop-filter: blur(16px);
+    box-shadow: 
+      0 8px 25px hsla(220, 60%, 1%, 0.6), 
+      inset 0 1px 0 hsla(0, 0%, 100%, 0.1);
+    border: 1px solid hsla(0, 0%, 100%, 0.15);
+  }
+
+  .theme-black .navigation-item {
+    color: hsl(0, 0%, 98%);
+  }
+
+  .theme-black .navigation-item:hover {
+    color: hsl(0, 0%, 100%);
+  }
+
+  .theme-black .navigation-active {
+    background: linear-gradient(135deg, 
+      hsla(0, 0%, 100%, 0.06) 0%, 
+      hsla(220, 8%, 6%, 0.08) 100%);
+    backdrop-filter: blur(16px);
+    box-shadow: 
+      0 8px 25px hsla(220, 60%, 1%, 0.7), 
+      inset 0 1px 0 hsla(0, 0%, 100%, 0.15);
+    border: 1px solid hsla(0, 0%, 100%, 0.2);
+  }
+}
