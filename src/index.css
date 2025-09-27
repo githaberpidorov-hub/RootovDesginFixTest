@@ -19,11 +19,6 @@ html, body {
     -webkit-overflow-scrolling: touch;
     /* Prevent scroll artifacts at top */
     overflow-x: hidden;
-    /* More aggressive fixes for iOS scroll artifacts */
-    -webkit-transform: translate3d(0, 0, 0);
-    transform: translate3d(0, 0, 0);
-    -webkit-backface-visibility: hidden;
-    backface-visibility: hidden;
     /* Prevent elastic scrolling */
     overscroll-behavior-x: none;
     overscroll-behavior-y: none;
@@ -50,6 +45,26 @@ html, body {
     position: fixed !important;
   }
   
+  /* Fix for backdrop-blur elements that cause scroll artifacts */
+  [class*="backdrop-blur"],
+  .backdrop-blur-sm,
+  .backdrop-blur-md,
+  .backdrop-blur-lg,
+  .backdrop-blur-xl,
+  .backdrop-blur-2xl,
+  .backdrop-blur-3xl,
+  .language-switcher {
+    -webkit-backdrop-filter: blur(8px);
+    backdrop-filter: blur(8px);
+    -webkit-transform: translate3d(0, 0, 0);
+    transform: translate3d(0, 0, 0);
+    -webkit-backface-visibility: hidden;
+    backface-visibility: hidden;
+    will-change: transform;
+    contain: layout style paint;
+    isolation: isolate;
+  }
+  
   /* Prevent overscroll at document level */
   * {
     overscroll-behavior: none;
@@ -64,11 +79,6 @@ html, body {
     overscroll-behavior: none;
     overscroll-behavior-y: none;
     overscroll-behavior-x: none;
-    /* Force hardware acceleration without affecting fixed positioning */
-    -webkit-transform: translate3d(0, 0, 0);
-    transform: translate3d(0, 0, 0);
-    -webkit-backface-visibility: hidden;
-    backface-visibility: hidden;
   }
 }
 
@@ -747,6 +757,26 @@ html, body {
   .fixed {
     position: fixed !important;
   }
+  
+  /* Fix for backdrop-blur elements */
+  [class*="backdrop-blur"],
+  .backdrop-blur-sm,
+  .backdrop-blur-md,
+  .backdrop-blur-lg,
+  .backdrop-blur-xl,
+  .backdrop-blur-2xl,
+  .backdrop-blur-3xl,
+  .language-switcher {
+    -webkit-backdrop-filter: blur(8px);
+    backdrop-filter: blur(8px);
+    -webkit-transform: translate3d(0, 0, 0);
+    transform: translate3d(0, 0, 0);
+    -webkit-backface-visibility: hidden;
+    backface-visibility: hidden;
+    will-change: transform;
+    contain: layout style paint;
+    isolation: isolate;
+  }
 
   /* Smooth cross-theme transitions for colors/borders/backgrounds */
   .theme-transition * {
@@ -795,11 +825,6 @@ html, body {
       overscroll-behavior: none;
       overscroll-behavior-y: none;
       overscroll-behavior-x: none;
-      /* Additional mobile fixes */
-      -webkit-transform: translate3d(0, 0, 0);
-      transform: translate3d(0, 0, 0);
-      -webkit-backface-visibility: hidden;
-      backface-visibility: hidden;
     }
     
     /* Prevent overscroll for all elements on mobile */
@@ -812,6 +837,26 @@ html, body {
     /* Fix for fixed positioned elements on mobile */
     .fixed {
       position: fixed !important;
+    }
+    
+    /* Fix for backdrop-blur elements on mobile */
+    [class*="backdrop-blur"],
+    .backdrop-blur-sm,
+    .backdrop-blur-md,
+    .backdrop-blur-lg,
+    .backdrop-blur-xl,
+    .backdrop-blur-2xl,
+    .backdrop-blur-3xl,
+    .language-switcher {
+      -webkit-backdrop-filter: blur(8px);
+      backdrop-filter: blur(8px);
+      -webkit-transform: translate3d(0, 0, 0);
+      transform: translate3d(0, 0, 0);
+      -webkit-backface-visibility: hidden;
+      backface-visibility: hidden;
+      will-change: transform;
+      contain: layout style paint;
+      isolation: isolate;
     }
 
     /* Reduce visual effects on mobile for better performance */
