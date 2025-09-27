@@ -45,6 +45,17 @@ html, body {
     position: fixed !important;
   }
   
+  /* Fix for elements with semi-transparent backgrounds */
+  nav,
+  .glass-card,
+  .glass-button,
+  .language-switcher {
+    /* Reduce background opacity on iOS to prevent scroll artifacts */
+    background: rgba(0, 0, 0, 0.1) !important;
+    /* Remove box-shadow that might cause artifacts */
+    box-shadow: none !important;
+  }
+  
   /* Fix for backdrop-blur elements that cause scroll artifacts */
   [class*="backdrop-blur"],
   .backdrop-blur-sm,
@@ -53,7 +64,10 @@ html, body {
   .backdrop-blur-xl,
   .backdrop-blur-2xl,
   .backdrop-blur-3xl,
-  .language-switcher {
+  .language-switcher,
+  nav,
+  .glass-card,
+  .glass-button {
     /* Disable backdrop-blur on iOS to prevent scroll artifacts */
     -webkit-backdrop-filter: none;
     backdrop-filter: none;
@@ -768,7 +782,10 @@ html, body {
   .backdrop-blur-xl,
   .backdrop-blur-2xl,
   .backdrop-blur-3xl,
-  .language-switcher {
+  .language-switcher,
+  nav,
+  .glass-card,
+  .glass-button {
     /* Disable backdrop-blur to prevent scroll artifacts */
     -webkit-backdrop-filter: none;
     backdrop-filter: none;
@@ -851,7 +868,10 @@ html, body {
     .backdrop-blur-xl,
     .backdrop-blur-2xl,
     .backdrop-blur-3xl,
-    .language-switcher {
+    .language-switcher,
+    nav,
+    .glass-card,
+    .glass-button {
       /* Disable backdrop-blur on mobile to prevent scroll artifacts */
       -webkit-backdrop-filter: none;
       backdrop-filter: none;
