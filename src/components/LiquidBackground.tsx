@@ -119,7 +119,16 @@ const LiquidBackground = () => {
   }, []);
 
   return (
-    <div className="fixed inset-0 pointer-events-none overflow-hidden -z-10">
+    <div className="fixed inset-0 pointer-events-none overflow-hidden -z-10" style={{
+      /* Prevent overscroll artifacts */
+      overscrollBehavior: 'none',
+      WebkitOverscrollBehavior: 'none',
+      /* Force hardware acceleration */
+      WebkitTransform: 'translateZ(0)',
+      transform: 'translateZ(0)',
+      WebkitBackfaceVisibility: 'hidden',
+      backfaceVisibility: 'hidden'
+    }}>
       {/* Gradient mesh background */}
       <div className="absolute inset-0 opacity-90 liquid-mesh" style={{
         /* Fix for mobile scroll artifacts */
@@ -129,7 +138,10 @@ const LiquidBackground = () => {
         backfaceVisibility: 'hidden',
         willChange: 'transform',
         contain: 'layout style paint',
-        isolation: 'isolate'
+        isolation: 'isolate',
+        /* Prevent overscroll artifacts */
+        overscrollBehavior: 'none',
+        WebkitOverscrollBehavior: 'none'
       }} />
 
       {/* Floating liquid shapes */}

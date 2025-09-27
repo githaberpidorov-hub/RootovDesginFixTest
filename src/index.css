@@ -6,10 +6,21 @@
 html, body {
   overscroll-behavior: none;
   -webkit-overflow-scrolling: touch;
+  /* Prevent iOS Safari rubber band effect */
+  overscroll-behavior-y: none;
 }
 
 /* iOS Safari specific fixes for scroll artifacts */
 @supports (-webkit-touch-callout: none) {
+  /* Prevent rubber band effect and scroll artifacts at top */
+  html, body {
+    overscroll-behavior: none;
+    overscroll-behavior-y: none;
+    -webkit-overflow-scrolling: touch;
+    /* Prevent scroll artifacts at top */
+    overflow-x: hidden;
+  }
+  
   /* Fix for liquid-mesh background scroll artifacts on iOS */
   .liquid-mesh {
     -webkit-transform: translateZ(0);
@@ -23,12 +34,15 @@ html, body {
     opacity: 0.6;
   }
   
-  /* Fix for fixed positioned elements on iOS */
+  /* Fix for fixed positioned elements on iOS - ensure proper viewport positioning */
   .fixed {
-    -webkit-transform: translateZ(0);
-    transform: translateZ(0);
-    -webkit-backface-visibility: hidden;
-    backface-visibility: hidden;
+    position: fixed !important;
+  }
+  
+  /* Prevent overscroll at document level */
+  * {
+    overscroll-behavior: none;
+    overscroll-behavior-y: none;
   }
 }
 
@@ -702,6 +716,11 @@ html, body {
     -webkit-text-size-adjust: 100%;
     -ms-text-size-adjust: 100%;
   }
+  
+  /* Ensure fixed elements work correctly */
+  .fixed {
+    position: fixed !important;
+  }
 
   /* Smooth cross-theme transitions for colors/borders/backgrounds */
   .theme-transition * {
@@ -748,6 +767,18 @@ html, body {
     body {
       -webkit-overflow-scrolling: touch;
       overscroll-behavior: none;
+      overscroll-behavior-y: none;
+    }
+    
+    /* Prevent overscroll for all elements on mobile */
+    * {
+      overscroll-behavior: none;
+      overscroll-behavior-y: none;
+    }
+    
+    /* Fix for fixed positioned elements on mobile */
+    .fixed {
+      position: fixed !important;
     }
 
     /* Reduce visual effects on mobile for better performance */
