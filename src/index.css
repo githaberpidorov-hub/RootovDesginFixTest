@@ -8,6 +8,10 @@ html, body {
   -webkit-overflow-scrolling: touch;
   /* Prevent iOS Safari rubber band effect */
   overscroll-behavior-y: none;
+  /* More aggressive fixes for iOS */
+  overscroll-behavior-x: none;
+  /* Prevent elastic scrolling completely */
+  -webkit-overflow-scrolling: auto;
 }
 
 /* iOS Safari specific fixes for scroll artifacts */
@@ -22,6 +26,10 @@ html, body {
     /* Prevent elastic scrolling */
     overscroll-behavior-x: none;
     overscroll-behavior-y: none;
+    /* More aggressive rubber band prevention */
+    -webkit-overflow-scrolling: auto;
+    /* Prevent overscroll completely */
+    overscroll-behavior: contain;
   }
   
   /* Fix for liquid-mesh background scroll artifacts on iOS */
@@ -86,6 +94,8 @@ html, body {
     overscroll-behavior: none;
     overscroll-behavior-y: none;
     overscroll-behavior-x: none;
+    /* Prevent overscroll completely */
+    overscroll-behavior: contain;
   }
   
   /* Additional iOS Safari fixes */
@@ -846,6 +856,10 @@ html, body {
       overscroll-behavior: none;
       overscroll-behavior-y: none;
       overscroll-behavior-x: none;
+      /* More aggressive rubber band prevention */
+      -webkit-overflow-scrolling: auto;
+      /* Prevent overscroll completely */
+      overscroll-behavior: contain;
     }
     
     /* Prevent overscroll for all elements on mobile */
@@ -853,6 +867,8 @@ html, body {
       overscroll-behavior: none;
       overscroll-behavior-y: none;
       overscroll-behavior-x: none;
+      /* Prevent overscroll completely */
+      overscroll-behavior: contain;
     }
     
     /* Fix for fixed positioned elements on mobile */
