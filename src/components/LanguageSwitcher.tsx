@@ -28,13 +28,19 @@ export default function LanguageSwitcher() {
           // desktop structure kept; mobile remains a circle when closed via animate below
         }}
         initial={false}
-        animate={
-          isMobile
-            ? { width: isOpen ? 266 : 60, height: 60, borderRadius: 9999 }
-            : { width: isOpen ? 270 : 132 }
-        }
+         animate={
+           isMobile
+             ? { width: isOpen ? 240 : 60, height: 60, borderRadius: 9999 }
+             : { width: isOpen ? 270 : 132 }
+         }
         transition={{ duration: 0.7, ease: [0.2, 0.8, 0.2, 1] }}
       >
+        {/* Persistent overlay border to avoid disappearing border due to blur/compositing */}
+        <div
+          aria-hidden
+          className="pointer-events-none absolute inset-0 rounded-2xl"
+          style={{ boxShadow: "inset 0 0 0 1px hsl(var(--border) / 0.8)" }}
+        />
         <motion.div layout className={`h-full flex items-center ${isMobile && !isOpen ? "justify-center" : ""} pl-2 pr-0.5`}>
           {/* Left cluster: icon + current label always present, moves with layout */}
           <motion.div layout className={`flex items-center ${isMobile && !isOpen ? "gap-0" : "gap-1"} w-full ml-0.5`}>
@@ -56,7 +62,7 @@ export default function LanguageSwitcher() {
             ) : (
               <motion.span
                 layout
-                className="text-sm font-medium"
+                className="text-sm font-medium -ml-px"
                 initial={false}
                 animate={{ opacity: 1, x: 0 }}
                 transition={{ duration: 0.25, ease: [0.2, 0.8, 0.2, 1] }}
@@ -81,7 +87,7 @@ export default function LanguageSwitcher() {
                         key={lang.code}
                         type="button"
                         onClick={(e) => { e.stopPropagation(); setLanguage(lang.code); setIsOpen(false); }}
-                        className={`h-8 px-2 rounded-xl border text-sm transition-colors ${active ? "bg-white/10 border-white/10" : "border-white/10 hover:bg-white/10"}`}
+                        className={`h-8 px-2 rounded-xl border text-sm transition-colors ${active ? "bg-foreground/10 border-foreground/20" : "border-white/10 hover:bg-white/10"}`}
                         initial={{ opacity: 0, x: 12, y: 4, scale: 0.96 }}
                         animate={{ opacity: 1, x: 0, y: 0, scale: 1 }}
                         exit={{ opacity: 0, x: 12, y: 4, scale: 0.96 }}
