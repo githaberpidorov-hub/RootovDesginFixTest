@@ -121,7 +121,16 @@ const LiquidBackground = () => {
   return (
     <div className="fixed inset-0 pointer-events-none overflow-hidden -z-10">
       {/* Gradient mesh background */}
-      <div className="absolute inset-0 opacity-90 liquid-mesh" />
+      <div className="absolute inset-0 opacity-90 liquid-mesh" style={{
+        /* Fix for mobile scroll artifacts */
+        WebkitTransform: 'translateZ(0)',
+        transform: 'translateZ(0)',
+        WebkitBackfaceVisibility: 'hidden',
+        backfaceVisibility: 'hidden',
+        willChange: 'transform',
+        contain: 'layout style paint',
+        isolation: 'isolate'
+      }} />
 
       {/* Floating liquid shapes */}
       {shouldShowParticles && shapes.map((shape) => {

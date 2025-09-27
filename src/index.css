@@ -8,6 +8,30 @@ html, body {
   -webkit-overflow-scrolling: touch;
 }
 
+/* iOS Safari specific fixes for scroll artifacts */
+@supports (-webkit-touch-callout: none) {
+  /* Fix for liquid-mesh background scroll artifacts on iOS */
+  .liquid-mesh {
+    -webkit-transform: translateZ(0);
+    transform: translateZ(0);
+    -webkit-backface-visibility: hidden;
+    backface-visibility: hidden;
+    will-change: transform;
+    contain: layout style paint;
+    isolation: isolate;
+    /* Reduce opacity on iOS to prevent scroll artifacts */
+    opacity: 0.6;
+  }
+  
+  /* Fix for fixed positioned elements on iOS */
+  .fixed {
+    -webkit-transform: translateZ(0);
+    transform: translateZ(0);
+    -webkit-backface-visibility: hidden;
+    backface-visibility: hidden;
+  }
+}
+
 /* Custom scrollbar for template picker */
 .custom-scroll::-webkit-scrollbar {
   width: 10px;
@@ -849,6 +873,14 @@ html, body {
       radial-gradient(ellipse at 80% 80%, hsla(220, 8%, 2%, 0.24) 0%, transparent 60%),
       radial-gradient(ellipse at 40% 60%, hsla(220, 6%, 1.5%, 0.16) 0%, transparent 60%),
       radial-gradient(ellipse at 60% 30%, hsla(220, 10%, 4%, 0.12) 0%, transparent 50%));
+    /* Fix for mobile scroll artifacts */
+    -webkit-transform: translateZ(0);
+    transform: translateZ(0);
+    -webkit-backface-visibility: hidden;
+    backface-visibility: hidden;
+    will-change: transform;
+    /* Prevent scroll artifacts on mobile */
+    contain: layout style paint;
   }
 
   /* Theme-aware glass orbs */
@@ -907,6 +939,21 @@ html, body {
         hsla(0, 0%, 100%, 0.08) 0%,
         hsla(220, 50%, 85%, 0.03) 40%,
         transparent 70%);
+    }
+    
+    /* Fix for liquid-mesh mobile scroll artifacts */
+    .liquid-mesh {
+      /* Reduce opacity on mobile to prevent scroll artifacts */
+      opacity: 0.7;
+      /* Force hardware acceleration */
+      -webkit-transform: translateZ(0);
+      transform: translateZ(0);
+      -webkit-backface-visibility: hidden;
+      backface-visibility: hidden;
+      /* Prevent scroll artifacts */
+      contain: layout style paint;
+      /* Create isolated stacking context */
+      isolation: isolate;
     }
   }
 
