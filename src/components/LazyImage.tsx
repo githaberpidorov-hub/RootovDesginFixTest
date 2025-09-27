@@ -1,5 +1,6 @@
 import { useState, useRef, useEffect } from "react";
 import { motion } from "framer-motion";
+import { addCacheBusting } from "../lib/utils";
 
 interface LazyImageProps {
   src: string;
@@ -7,12 +8,21 @@ interface LazyImageProps {
   className?: string;
   placeholder?: string;
   blur?: boolean;
+  forceRefresh?: boolean;
 }
 
-const LazyImage = ({ src, alt, className = "", placeholder, blur = true }: LazyImageProps) => {
+const LazyImage = ({ src, alt, className = "", placeholder, blur = true, forceRefresh = false }: LazyImageProps) => {
   const [isLoaded, setIsLoaded] = useState(false);
   const [isInView, setIsInView] = useState(false);
+  const [imageSrc, setImageSrc] = useState(src);
   const imgRef = useRef<HTMLDivElement>(null);
+
+  // Обновляем src при изменении пропсов
+  useEffect(() => {
+    const newSrc = addCacheBusting(src, forceRefresh);
+    setImageSrc(newSrc);
+    setIsLoaded(false); // Сбрасываем состояние загрузки при смене изображения
+  }, [src, forceRefresh]);
 
   useEffect(() => {
     const observer = new IntersectionObserver(
@@ -57,7 +67,7 @@ const LazyImage = ({ src, alt, className = "", placeholder, blur = true }: LazyI
       {/* Actual Image */}
       {isInView && (
         <motion.img
-          src={src}
+          src={imageSrc}
           alt={alt}
           onLoad={handleLoad}
           className={`w-full h-full object-cover transition-opacity duration-300 ${

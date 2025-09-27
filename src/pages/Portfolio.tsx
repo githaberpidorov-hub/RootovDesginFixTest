@@ -6,6 +6,7 @@ import GlassButton from "@/components/GlassButton";
 import OptimizedMotion from "@/components/OptimizedMotion";
 import LazyImage from "@/components/LazyImage";
 import { useLanguage } from "@/hooks/use-language";
+import { normalizeUrl, addCacheBusting } from "@/lib/utils";
 
 interface Template {
   id: string;
@@ -24,6 +25,7 @@ const Portfolio = () => {
   const [selectedCategory, setSelectedCategory] = useState("all");
   const [filteredTemplates, setFilteredTemplates] = useState<Template[]>([]);
   const [previewByUrl, setPreviewByUrl] = useState<Record<string, string>>({});
+  const [forceRefresh, setForceRefresh] = useState(false);
 
   // Variants to stagger children on mount without affecting hover animations
   const gridVariants = {
@@ -45,15 +47,35 @@ const Portfolio = () => {
     },
   } as const;
 
-  const getPreviewImageUrl = (url?: string) => {
+  const getPreviewImageUrl = (url?: string, forceRefresh = false) => {
     if (!url) return "";
     try {
       const withProtocol = /^(https?:)?\/\//i.test(url) ? url : `https://${url}`;
       const encoded = encodeURIComponent(withProtocol);
-      return `https://v1.screenshot.11ty.dev/${encoded}/opengraph/`;
+      const previewUrl = `https://v1.screenshot.11ty.dev/${encoded}/opengraph/`;
+      return addCacheBusting(previewUrl, forceRefresh);
     } catch {
       return "";
     }
+  };
+
+  const handleRefreshPreviews = () => {
+    // Очищаем кэш
+    localStorage.removeItem('portfolio-preview-cache');
+    
+    // Очищаем время кэширования для всех URL
+    const urls = Array.from(new Set(templates.map(t => t.demoUrl).filter(Boolean) as string[]));
+    urls.forEach(url => {
+      const norm = normalizeUrl(url);
+      localStorage.removeItem(`preview-cache-time-${norm}`);
+    });
+    
+    // Сбрасываем состояние превью
+    setPreviewByUrl({});
+    setForceRefresh(true);
+    
+    // Через небольшую задержку сбрасываем флаг принудительного обновления
+    setTimeout(() => setForceRefresh(false), 1000);
   };
 
   const categories = [
@@ -165,47 +187,72 @@ const Portfolio = () => {
 
   // Подтянуть OG-изображение с сайта (если он его предоставляет),
   // иначе fallback на скриншот
-  const normalizeUrl = (url?: string) => {
-    if (!url) return "";
-    return /^(https?:)?\/\//i.test(url) ? url : `https://${url}`;
-  };
 
   useEffect(() => {
     const controller = new AbortController();
     const urls = Array.from(new Set(templates.map(t => t.demoUrl).filter(Boolean) as string[]));
 
-    // восстановить кэш из localStorage
+    // восстановить кэш из localStorage с проверкой времени
     const cachedRaw = localStorage.getItem('portfolio-preview-cache');
     const cached: Record<string, string> = cachedRaw ? (()=>{ try { return JSON.parse(cachedRaw); } catch { return {}; } })() : {};
-    if (Object.keys(cached).length) {
-      setPreviewByUrl(prev => ({ ...cached, ...prev }));
+    
+    // Проверяем время кэша для каждого URL
+    const now = Date.now();
+    const validCached: Record<string, string> = {};
+    
+    for (const [url, previewUrl] of Object.entries(cached)) {
+      const cacheTimeKey = `preview-cache-time-${url}`;
+      const cacheTime = localStorage.getItem(cacheTimeKey);
+      
+      // Кэш действителен 24 часа
+      if (cacheTime && (now - parseInt(cacheTime)) < 24 * 60 * 60 * 1000) {
+        validCached[url] = previewUrl;
+      }
+    }
+    
+    if (Object.keys(validCached).length) {
+      setPreviewByUrl(prev => ({ ...validCached, ...prev }));
     }
 
     const fetchPreview = async (demoUrl: string) => {
       const norm = normalizeUrl(demoUrl);
-      if (cached[norm]) return cached[norm];
+      if (validCached[norm]) return validCached[norm];
+      
       try {
         const api = `https://api.microlink.io?url=${encodeURIComponent(norm)}&meta=true&filter=image.url`;
         const res = await fetch(api, { signal: controller.signal });
         const json = await res.json();
         const img = json?.data?.image?.url as string | undefined;
         if (img) {
-          return img;
+          return addCacheBusting(img);
         }
       } catch {}
+      
       // fallback на скриншот сервиса
       try {
         const encoded = encodeURIComponent(norm);
-        return `https://v1.screenshot.11ty.dev/${encoded}/opengraph/`;
+        const screenshotUrl = `https://v1.screenshot.11ty.dev/${encoded}/opengraph/`;
+        return addCacheBusting(screenshotUrl);
       } catch {
         return "";
       }
     };
 
     (async () => {
+      if (!urls.length) return;
+      
       const entries = await Promise.all(urls.map(async (u) => [normalizeUrl(u), await fetchPreview(u)] as const));
       const map: Record<string, string> = {};
-      for (const [u, v] of entries) { if (v) map[u] = v; }
+      const now = Date.now();
+      
+      for (const [u, v] of entries) { 
+        if (v) {
+          map[u] = v;
+          // Сохраняем время кэширования
+          localStorage.setItem(`preview-cache-time-${u}`, now.toString());
+        }
+      }
+      
       if (Object.keys(map).length) {
         setPreviewByUrl(prev => {
           const next = { ...prev, ...map };
@@ -242,9 +289,23 @@ const Portfolio = () => {
             <h1 className="text-5xl md:text-7xl font-bold text-gradient text-glow mb-6">
               {t.portfolio.title}
             </h1>
-            <p className="text-xl text-foreground/70 max-w-3xl mx-auto">
+            <p className="text-xl text-foreground/70 max-w-3xl mx-auto mb-8">
               {t.portfolio.description}
             </p>
+            <GlassButton
+              onClick={handleRefreshPreviews}
+              className="inline-flex items-center gap-2 px-6 py-3 text-sm font-medium"
+            >
+              <svg 
+                className={`w-4 h-4 transition-transform duration-300 ${forceRefresh ? 'animate-spin' : ''}`} 
+                fill="none" 
+                stroke="currentColor" 
+                viewBox="0 0 24 24"
+              >
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+              </svg>
+              Обновить превью
+            </GlassButton>
           </motion.div>
         </div>
       </section>
@@ -301,12 +362,13 @@ const Portfolio = () => {
                       <LazyImage
                         src={
                           previewByUrl[normalizeUrl(template.demoUrl)]
-                          || getPreviewImageUrl(template.demoUrl)
+                          || getPreviewImageUrl(template.demoUrl, forceRefresh)
                           || template.image
                           || "/placeholder.svg"
                         }
                         alt={template.title}
                         className="w-full h-full"
+                        forceRefresh={forceRefresh}
                       />
                     </div>
                     <div className="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent" />

@@ -7,6 +7,7 @@ import GlassButton from "@/components/GlassButton";
 import { useToast } from "@/hooks/use-toast";
 import LazyImage from "@/components/LazyImage";
 import { useLanguage } from "@/hooks/use-language";
+import { normalizeUrl, addCacheBusting } from "@/lib/utils";
 
 type Template = {
   id: string;
@@ -113,15 +114,12 @@ const Request = () => {
   }, [language]);
 
   // helpers for previews (OG image cache like in portfolio)
-  const normalizeUrl = (url?: string) => {
-    if (!url) return "";
-    return /^(https?:)?\/\//i.test(url) ? url : `https://${url}`;
-  };
-  const getPreviewImageUrl = (url?: string) => {
+  const getPreviewImageUrl = (url?: string, forceRefresh = false) => {
     if (!url) return "";
     try {
       const encoded = encodeURIComponent(normalizeUrl(url));
-      return `https://v1.screenshot.11ty.dev/${encoded}/opengraph/`;
+      const previewUrl = `https://v1.screenshot.11ty.dev/${encoded}/opengraph/`;
+      return addCacheBusting(previewUrl, forceRefresh);
     } catch {
       return "";
     }
@@ -130,31 +128,65 @@ const Request = () => {
   useEffect(() => {
     const controller = new AbortController();
     const urls = Array.from(new Set(templates.map(t => t.demoUrl).filter(Boolean) as string[]));
+    
+    // восстановить кэш из localStorage с проверкой времени
     const cachedRaw = localStorage.getItem('portfolio-preview-cache');
     const cached: Record<string, string> = cachedRaw ? (()=>{ try { return JSON.parse(cachedRaw); } catch { return {}; } })() : {};
-    if (Object.keys(cached).length) setPreviewByUrl(prev => ({ ...cached, ...prev }));
+    
+    // Проверяем время кэша для каждого URL
+    const now = Date.now();
+    const validCached: Record<string, string> = {};
+    
+    for (const [url, previewUrl] of Object.entries(cached)) {
+      const cacheTimeKey = `preview-cache-time-${url}`;
+      const cacheTime = localStorage.getItem(cacheTimeKey);
+      
+      // Кэш действителен 24 часа
+      if (cacheTime && (now - parseInt(cacheTime)) < 24 * 60 * 60 * 1000) {
+        validCached[url] = previewUrl;
+      }
+    }
+    
+    if (Object.keys(validCached).length) {
+      setPreviewByUrl(prev => ({ ...validCached, ...prev }));
+    }
 
     const fetchPreview = async (demoUrl: string) => {
       const norm = normalizeUrl(demoUrl);
-      if (cached[norm]) return cached[norm];
+      if (validCached[norm]) return validCached[norm];
+      
       try {
         const api = `https://api.microlink.io?url=${encodeURIComponent(norm)}&meta=true&filter=image.url`;
         const res = await fetch(api, { signal: controller.signal });
         const json = await res.json();
         const img = json?.data?.image?.url as string | undefined;
-        if (img) return img;
+        if (img) {
+          return addCacheBusting(img);
+        }
       } catch {}
+      
       try {
         const encoded = encodeURIComponent(norm);
-        return `https://v1.screenshot.11ty.dev/${encoded}/opengraph/`;
+        const screenshotUrl = `https://v1.screenshot.11ty.dev/${encoded}/opengraph/`;
+        return addCacheBusting(screenshotUrl);
       } catch { return ""; }
     };
 
     (async () => {
       if (!urls.length) return;
+      
       const entries = await Promise.all(urls.map(async (u) => [normalizeUrl(u), await fetchPreview(u)] as const));
       const map: Record<string, string> = {};
-      for (const [u, v] of entries) { if (v) map[u] = v; }
+      const now = Date.now();
+      
+      for (const [u, v] of entries) { 
+        if (v) {
+          map[u] = v;
+          // Сохраняем время кэширования
+          localStorage.setItem(`preview-cache-time-${u}`, now.toString());
+        }
+      }
+      
       if (Object.keys(map).length) {
         setPreviewByUrl(prev => {
           const next = { ...prev, ...map };
