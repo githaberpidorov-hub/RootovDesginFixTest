@@ -444,7 +444,7 @@ const translations: Record<LanguageCode, Translations> = {
     },
     home: {
       hero: {
-        title: "Website Development",
+        title: "Website Design",
         subtitle: "Turnkey Solutions",
         description: "We develop modern websites with unique design and flawless functionality",
         orderProject: "Order Project",

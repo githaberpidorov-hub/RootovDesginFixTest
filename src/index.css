@@ -991,19 +991,36 @@ html, body {
     text-shadow: 0 0 20px hsla(0, 0%, 100%, 0.3);
   }
 
-  /* Mobile fix: prevent iOS translucent rectangle artifacts for fixed, blurred element */
-  @media (max-width: 768px) {
-    .language-switcher {
-      /* Lighter blur to avoid Safari repaint bug */
-      backdrop-filter: blur(8px);
-      -webkit-backdrop-filter: blur(8px);
-      /* Create its own compositing layer */
-      transform: translateZ(0);
-      will-change: transform;
-      /* Avoid scroll-chase artifacts */
-      contain: paint layout style;
-    }
-  }
+   /* Mobile fix: prevent iOS translucent rectangle artifacts for fixed, blurred element */
+   @media (max-width: 768px) {
+     .language-switcher {
+       /* Lighter blur to avoid Safari repaint bug */
+       backdrop-filter: blur(8px);
+       -webkit-backdrop-filter: blur(8px);
+       /* Create its own compositing layer */
+       transform: translateZ(0);
+       will-change: transform;
+       /* Avoid scroll-chase artifacts */
+       contain: paint layout style;
+     }
+     
+     /* Fix for iOS Safari translucent rectangle bug during scroll - more targeted approach */
+     .glass-card,
+     .glass-button {
+       -webkit-backface-visibility: hidden;
+       -webkit-transform: translateZ(0);
+       transform: translateZ(0);
+       will-change: transform;
+     }
+     
+     /* Fix for navigation bar scroll artifacts */
+     nav {
+       -webkit-backface-visibility: hidden;
+       -webkit-transform: translateZ(0);
+       transform: translateZ(0);
+       will-change: transform;
+     }
+   }
 }
 
 /* Calculator light-theme contrast tweaks (all themes except black) */
@@ -1107,5 +1124,16 @@ html, body {
       hsl(var(--accent-secondary) / 0.55) 0%,
       hsl(var(--accent-glow) / 0.65) 100%);
     box-shadow: 0 6px 18px hsl(var(--accent-secondary) / 0.35);
+  }
+}
+
+/* Mobile spacing fix for hero subtitle */
+@media (max-width: 768px) {
+  h1 span {
+    margin-top: -0.125rem !important;
+    line-height: 0.98 !important;
+    -webkit-backface-visibility: visible;
+    -webkit-transform: none;
+    transform: none;
   }
 }

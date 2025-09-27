@@ -61,6 +61,11 @@ const Navigation = () => {
     { name: t.nav.portfolio, path: "/portfolio" },
   ];
 
+  const handleNavClick = (path: string) => {
+    // Scroll to top when navigating
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
   return (
     <motion.nav
       initial={{ y: -100, opacity: 0, scale: 0.9 }}
@@ -110,6 +115,7 @@ const Navigation = () => {
                 className="relative px-4 py-2.5 sm:px-5 sm:py-3 md:px-8 md:py-4 rounded-2xl text-foreground/85 hover:text-foreground transition-all duration-500 group overflow-visible isolate"
                 onMouseEnter={() => setHoveredPath(item.path)}
                 onMouseLeave={() => setHoveredPath(null)}
+                onClick={() => handleNavClick(item.path)}
               >
               <span className="relative z-10 font-medium text-sm sm:text-base md:text-lg tracking-wide">
                 {item.name}

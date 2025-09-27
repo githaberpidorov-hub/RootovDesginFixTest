@@ -63,10 +63,10 @@ const Home = () => {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 1, ease: [0.16, 1, 0.3, 1] }}
           >
-            <h1 className="text-6xl md:text-8xl font-bold mb-8 text-gradient text-glow">
+            <h1 className={`text-7xl md:text-8xl font-bold mb-12 text-gradient text-glow ${t.home.hero.title.includes('Website') ? 'leading-none' : 'leading-tight'}`}>
               {t.home.hero.title}
               <br />
-              <span className="text-5xl md:text-7xl">{t.home.hero.subtitle}</span>
+              <span className={`text-6xl md:text-7xl block pb-2 ${t.home.hero.title.includes('Website') ? 'mt-2 md:mt-6' : 'mt-1 md:mt-6'}`}>{t.home.hero.subtitle}</span>
             </h1>
             
             <p className="text-xl md:text-2xl text-foreground/70 mb-12 max-w-3xl mx-auto leading-relaxed">
