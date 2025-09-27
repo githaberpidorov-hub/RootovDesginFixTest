@@ -77,8 +77,8 @@ html, body {
   .glass-card,
   .glass-button {
     /* Disable backdrop-blur on iOS to prevent scroll artifacts */
-    -webkit-backdrop-filter: none;
-    backdrop-filter: none;
+    -webkit-backdrop-filter: none !important;
+    backdrop-filter: none !important;
     /* Keep other fixes */
     -webkit-transform: translate3d(0, 0, 0);
     transform: translate3d(0, 0, 0);
@@ -797,8 +797,8 @@ html, body {
   .glass-card,
   .glass-button {
     /* Disable backdrop-blur to prevent scroll artifacts */
-    -webkit-backdrop-filter: none;
-    backdrop-filter: none;
+    -webkit-backdrop-filter: none !important;
+    backdrop-filter: none !important;
     /* Keep other fixes */
     -webkit-transform: translate3d(0, 0, 0);
     transform: translate3d(0, 0, 0);
@@ -889,8 +889,8 @@ html, body {
     .glass-card,
     .glass-button {
       /* Disable backdrop-blur on mobile to prevent scroll artifacts */
-      -webkit-backdrop-filter: none;
-      backdrop-filter: none;
+      -webkit-backdrop-filter: none !important;
+      backdrop-filter: none !important;
       /* Keep other fixes */
       -webkit-transform: translate3d(0, 0, 0);
       transform: translate3d(0, 0, 0);
@@ -1188,37 +1188,6 @@ html, body {
   .text-glow {
     text-shadow: 0 0 20px hsla(0, 0%, 100%, 0.3);
   }
-
-   /* Mobile fix: prevent iOS translucent rectangle artifacts for fixed, blurred element */
-   @media (max-width: 768px) {
-     .language-switcher {
-       /* Lighter blur to avoid Safari repaint bug */
-       backdrop-filter: blur(8px);
-       -webkit-backdrop-filter: blur(8px);
-       /* Create its own compositing layer */
-       transform: translateZ(0);
-       will-change: transform;
-       /* Avoid scroll-chase artifacts */
-       contain: paint layout style;
-     }
-     
-     /* Fix for iOS Safari translucent rectangle bug during scroll - more targeted approach */
-     .glass-card,
-     .glass-button {
-       -webkit-backface-visibility: hidden;
-       -webkit-transform: translateZ(0);
-       transform: translateZ(0);
-       will-change: transform;
-     }
-     
-     /* Fix for navigation bar scroll artifacts */
-     nav {
-       -webkit-backface-visibility: hidden;
-       -webkit-transform: translateZ(0);
-       transform: translateZ(0);
-       will-change: transform;
-     }
-   }
 }
 
 /* Calculator light-theme contrast tweaks (all themes except black) */
