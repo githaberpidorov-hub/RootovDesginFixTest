@@ -246,7 +246,7 @@ const PriceCalculator = () => {
 
 
   return (
-    <section className="calculator-section py-32 px-6">
+    <section className="calculator-section py-12 px-6">
       <div className="max-w-5xl mx-auto">
         <motion.div
           initial={{ opacity: 0, y: 50 }}

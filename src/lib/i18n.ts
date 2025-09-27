@@ -214,6 +214,12 @@ export interface Translations {
     multiplyPrefix: string; // e.g., "×"
     plusPrefix: string; // e.g., "+$"
   };
+
+  // Footer
+  footer: {
+    company: string;
+    rights: string;
+  };
 }
 
 const translations: Record<LanguageCode, Translations> = {
@@ -418,6 +424,10 @@ const translations: Record<LanguageCode, Translations> = {
       multiplyPrefix: "×",
       plusPrefix: "+$",
     },
+    footer: {
+      company: "© 2025 Rootov Design LLC.",
+      rights: "Все права защищены.",
+    },
   },
   ENG: {
     nav: {
@@ -620,6 +630,10 @@ const translations: Record<LanguageCode, Translations> = {
       multiplyPrefix: "×",
       plusPrefix: "+$",
     },
+    footer: {
+      company: "© 2025 Rootov Design LLC.",
+      rights: "All rights reserved.",
+    },
   },
   UK: {
     nav: {
@@ -821,6 +835,10 @@ const translations: Record<LanguageCode, Translations> = {
       fromPrefix: "від $",
       multiplyPrefix: "×",
       plusPrefix: "+$",
+    },
+    footer: {
+      company: "© 2025 Rootov Design LLC.",
+      rights: "Всі права захищені.",
     },
   },
 };

@@ -204,7 +204,7 @@ const Home = () => {
       <PriceCalculator />
 
       {/* CTA Section */}
-      <section className="py-20 px-6">
+      <section className="py-12 px-6 -mt-8">
         <div className="max-w-4xl mx-auto text-center">
           <motion.div
             initial={{ opacity: 0, y: 50 }}
@@ -238,6 +238,16 @@ const Home = () => {
           </motion.div>
         </div>
       </section>
+
+      {/* Footer */}
+      <footer className="-mt-4 pb-8 px-6">
+        <div className="max-w-6xl mx-auto text-center">
+          <p className="text-foreground/60 text-sm">
+            <span className="block sm:inline">{t.footer.company}</span>
+            <span className="block sm:inline sm:ml-1">{t.footer.rights}</span>
+          </p>
+        </div>
+      </footer>
     </div>
   );
 };
