@@ -43,7 +43,7 @@ CREATE TABLE IF NOT EXISTS templates (
   category TEXT NOT NULL CHECK (category IN ('landing', 'corporate', 'ecommerce', 'portfolio')),
   image TEXT,
   technologies TEXT[] DEFAULT '{}',
-  site_url TEXT,
+  demo_url TEXT,
   price TEXT NOT NULL,
   created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
   updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()

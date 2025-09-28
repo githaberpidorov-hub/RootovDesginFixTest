@@ -163,7 +163,7 @@ export interface Translations {
         category: string;
         description: string;
         price: string;
-        siteUrl: string;
+        demoUrl: string;
         technologies: string;
         addTech: string;
         save: string;
@@ -242,7 +242,7 @@ const translations: Record<LanguageCode, Translations> = {
       next: "Далее",
       submit: "Отправить",
       order: "Заказать",
-      demo: "Сайт",
+      demo: "Демо",
       more: "Подробнее",
       contact: "Связаться с нами",
     },
@@ -375,7 +375,7 @@ const translations: Record<LanguageCode, Translations> = {
           category: "Категория",
           description: "Описание *",
           price: "Цена *",
-          siteUrl: "Site URL",
+          demoUrl: "Demo URL",
           technologies: "Технологии",
           addTech: "Добавить технологию",
           save: "Сохранить",
@@ -449,7 +449,7 @@ const translations: Record<LanguageCode, Translations> = {
       next: "Next",
       submit: "Submit",
       order: "Order",
-      demo: "Site",
+      demo: "Demo",
       more: "More",
       contact: "Contact Us",
     },
@@ -582,7 +582,7 @@ const translations: Record<LanguageCode, Translations> = {
           category: "Category",
           description: "Description *",
           price: "Price *",
-          siteUrl: "Site URL",
+          demoUrl: "Demo URL",
           technologies: "Technologies",
           addTech: "Add Technology",
           save: "Save",
@@ -656,7 +656,7 @@ const translations: Record<LanguageCode, Translations> = {
       next: "Далі",
       submit: "Відправити",
       order: "Замовити",
-      demo: "Сайт",
+      demo: "Демо",
       more: "Детальніше",
       contact: "Зв'язатися з нами",
     },
@@ -789,7 +789,7 @@ const translations: Record<LanguageCode, Translations> = {
           category: "Категорія",
           description: "Опис *",
           price: "Ціна *",
-          siteUrl: "Site URL",
+          demoUrl: "Demo URL",
           technologies: "Технології",
           addTech: "Додати технологію",
           save: "Зберегти",

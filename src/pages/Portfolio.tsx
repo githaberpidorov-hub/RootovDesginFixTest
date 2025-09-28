@@ -15,7 +15,7 @@ interface Template {
   category: string;
   image: string;
   technologies: string[];
-  siteUrl?: string;
+  demoUrl?: string;
   price: string;
 }
 
@@ -76,7 +76,7 @@ const Portfolio = () => {
       category: "landing",
       image: "/api/placeholder/600/400",
       technologies: ["React", "TypeScript", "Tailwind CSS"],
-      siteUrl: "https://example.com/site1",
+      demoUrl: "https://example.com/demo1",
       price: "$1,200",
     },
     {
@@ -86,7 +86,7 @@ const Portfolio = () => {
       category: "corporate",
       image: "/api/placeholder/600/400",
       technologies: ["Next.js", "Prisma", "PostgreSQL"],
-      siteUrl: "https://example.com/site2",
+      demoUrl: "https://example.com/demo2",
       price: "$2,500",
     },
     {
@@ -96,7 +96,7 @@ const Portfolio = () => {
       category: "ecommerce",
       image: "/api/placeholder/600/400",
       technologies: ["React", "Stripe", "Node.js"],
-      siteUrl: "https://example.com/site3",
+      demoUrl: "https://example.com/demo3",
       price: "$3,200",
     },
     {
@@ -106,7 +106,7 @@ const Portfolio = () => {
       category: "portfolio",
       image: "/api/placeholder/600/400",
       technologies: ["Gatsby", "GraphQL", "Styled Components"],
-      siteUrl: "https://example.com/site4",
+      demoUrl: "https://example.com/demo4",
       price: "$800",
     },
     {
@@ -116,7 +116,7 @@ const Portfolio = () => {
       category: "landing",
       image: "/api/placeholder/600/400",
       technologies: ["Vue.js", "Nuxt.js", "Tailwind CSS"],
-      siteUrl: "https://example.com/site5",
+      demoUrl: "https://example.com/demo5",
       price: "$1,500",
     },
     {
@@ -126,7 +126,7 @@ const Portfolio = () => {
       category: "corporate",
       image: "/api/placeholder/600/400",
       technologies: ["React", "Firebase", "Material-UI"],
-      siteUrl: "https://example.com/site6",
+      demoUrl: "https://example.com/demo6",
       price: "$2,100",
     },
   ];
@@ -171,7 +171,7 @@ const Portfolio = () => {
 
   useEffect(() => {
     const controller = new AbortController();
-    const urls = Array.from(new Set(templates.map(t => t.siteUrl).filter(Boolean) as string[]));
+    const urls = Array.from(new Set(templates.map(t => t.demoUrl).filter(Boolean) as string[]));
 
     // восстановить кэш из localStorage с проверкой времени
     const cachedRaw = localStorage.getItem('portfolio-preview-cache');
@@ -195,8 +195,8 @@ const Portfolio = () => {
       setPreviewByUrl(prev => ({ ...validCached, ...prev }));
     }
 
-    const fetchPreview = async (siteUrl: string) => {
-      const norm = normalizeUrl(siteUrl);
+    const fetchPreview = async (demoUrl: string) => {
+      const norm = normalizeUrl(demoUrl);
       if (validCached[norm]) return validCached[norm];
       
       // Используем microlink API для получения OG-изображения
@@ -329,8 +329,8 @@ const Portfolio = () => {
                     <div className="absolute inset-0">
                       <LazyImage
                         src={
-                          previewByUrl[normalizeUrl(template.siteUrl)]
-                          || getPreviewImageUrl(template.siteUrl)
+                          previewByUrl[normalizeUrl(template.demoUrl)]
+                          || getPreviewImageUrl(template.demoUrl)
                           || template.image
                           || "/placeholder.svg"
                         }
@@ -373,8 +373,8 @@ const Portfolio = () => {
                         {template.price}
                       </span>
                       <div className="flex gap-2">
-                        {template.siteUrl && (() => {
-                          const href = /^(https?:)?\/\//i.test(template.siteUrl) ? template.siteUrl : `https://${template.siteUrl}`;
+                        {template.demoUrl && (() => {
+                          const href = /^(https?:)?\/\//i.test(template.demoUrl) ? template.demoUrl : `https://${template.demoUrl}`;
                           return (
                             <GlassButton
                               variant="ghost"
