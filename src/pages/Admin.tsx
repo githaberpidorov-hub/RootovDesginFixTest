@@ -179,6 +179,8 @@ const Admin = () => {
 
       if (data.ok && data.config) {
         const config = data.config;
+        console.log('=== DEBUG: Loading from API ===');
+        console.log('Config:', JSON.stringify(config, null, 2));
         
         // Загружаем разделы, если они есть в конфиге
         let sectionsToUse = calculatorSections;
@@ -188,6 +190,10 @@ const Admin = () => {
         }
 
         const normalizeGroup = (group: any, defaultPriceType: 'fixed' | 'multiplier' = 'fixed') => {
+          console.log('=== DEBUG: normalizeGroup ===');
+          console.log('Input group:', group);
+          console.log('Is array:', Array.isArray(group));
+          
           if (!group) return [] as Array<{ id: string; name: string; price: number; multiplier: number; priceType: 'fixed' | 'multiplier' }>;
           
           let entries: Array<[string, any]>;
@@ -198,18 +204,22 @@ const Admin = () => {
               const orderB = b?.order ?? 0;
               return orderA - orderB;
             });
+            console.log('Sorted group:', sortedGroup);
             entries = sortedGroup.map((val, idx) => [String(val?.id ?? idx), val] as const);
           } else {
             entries = Object.entries(group as Record<string, any>);
           }
         
-          return entries.map(([id, value]) => ({ 
+          const result = entries.map(([id, value]) => ({ 
             id, 
             name: value?.label || value?.name || id, 
             price: Number(value?.price || 0),
             multiplier: Number(value?.multiplier || 1),
             priceType: value?.priceType || defaultPriceType
           }));
+          
+          console.log('Normalize result:', result);
+          return result;
         };
 
         // Загружаем данные для всех разделов
@@ -253,6 +263,10 @@ const Admin = () => {
         }));
       });
 
+      // Временное логирование для отладки
+      console.log('=== DEBUG: Sending to API ===');
+      console.log('configData:', JSON.stringify(configData, null, 2));
+      
       const response = await fetch('/api/calculator', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
