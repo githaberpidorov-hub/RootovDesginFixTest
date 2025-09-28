@@ -47,34 +47,34 @@ const PriceCalculator = () => {
 
   const defaultOptions = {
     websiteType: [
-      { id: "landing", name: "Лендинг", price: 500, priceType: 'fixed' as const },
-      { id: "corporate", name: "Корпоративный сайт", price: 1200, priceType: 'fixed' as const },
-      { id: "ecommerce", name: "Интернет-магазин", price: 2500, priceType: 'fixed' as const },
-      { id: "portfolio", name: "Портфолио", price: 800, priceType: 'fixed' as const },
-      { id: "blog", name: "Блог/СМИ", price: 1000, priceType: 'fixed' as const },
+      { id: "landing", name: "Лендинг", price: 500, multiplier: 1, priceType: 'fixed' as const },
+      { id: "corporate", name: "Корпоративный сайт", price: 1200, multiplier: 1, priceType: 'fixed' as const },
+      { id: "ecommerce", name: "Интернет-магазин", price: 2500, multiplier: 1, priceType: 'fixed' as const },
+      { id: "portfolio", name: "Портфолио", price: 800, multiplier: 1, priceType: 'fixed' as const },
+      { id: "blog", name: "Блог/СМИ", price: 1000, multiplier: 1, priceType: 'fixed' as const },
     ],
     complexity: [
-      { id: "simple", name: "Простой", multiplier: 1, priceType: 'multiplier' as const },
-      { id: "medium", name: "Средний", multiplier: 1.5, priceType: 'multiplier' as const },
-      { id: "complex", name: "Сложный", multiplier: 2.2, priceType: 'multiplier' as const },
+      { id: "simple", name: "Простой", price: 0, multiplier: 1, priceType: 'multiplier' as const },
+      { id: "medium", name: "Средний", price: 0, multiplier: 1.5, priceType: 'multiplier' as const },
+      { id: "complex", name: "Сложный", price: 0, multiplier: 2.2, priceType: 'multiplier' as const },
     ],
     timeline: [
-      { id: "urgent", name: "Срочно (1-2 недели)", multiplier: 1.8, priceType: 'multiplier' as const },
-      { id: "normal", name: "Обычно (3-4 недели)", multiplier: 1, priceType: 'multiplier' as const },
-      { id: "flexible", name: "Не горит (1-2 месяца)", multiplier: 0.8, priceType: 'multiplier' as const },
+      { id: "urgent", name: "Срочно (1-2 недели)", price: 0, multiplier: 1.8, priceType: 'multiplier' as const },
+      { id: "normal", name: "Обычно (3-4 недели)", price: 0, multiplier: 1, priceType: 'multiplier' as const },
+      { id: "flexible", name: "Не горит (1-2 месяца)", price: 0, multiplier: 0.8, priceType: 'multiplier' as const },
     ],
     features: [
-      { id: "cms", name: "Система управления", price: 300, priceType: 'fixed' as const },
-      { id: "seo", name: "SEO оптимизация", price: 400, priceType: 'fixed' as const },
-      { id: "analytics", name: "Аналитика", price: 200, priceType: 'fixed' as const },
-      { id: "mobile", name: "Мобильная версия", price: 500, priceType: 'fixed' as const },
-      { id: "multilang", name: "Многоязычность", price: 600, priceType: 'fixed' as const },
-      { id: "integration", name: "Интеграции", price: 800, priceType: 'fixed' as const },
+      { id: "cms", name: "Система управления", price: 300, multiplier: 1, priceType: 'fixed' as const },
+      { id: "seo", name: "SEO оптимизация", price: 400, multiplier: 1, priceType: 'fixed' as const },
+      { id: "analytics", name: "Аналитика", price: 200, multiplier: 1, priceType: 'fixed' as const },
+      { id: "mobile", name: "Мобильная версия", price: 500, multiplier: 1, priceType: 'fixed' as const },
+      { id: "multilang", name: "Многоязычность", price: 600, multiplier: 1, priceType: 'fixed' as const },
+      { id: "integration", name: "Интеграции", price: 800, multiplier: 1, priceType: 'fixed' as const },
     ],
     design: [
-      { id: "template", name: "На основе шаблона", multiplier: 0.7, priceType: 'multiplier' as const },
-      { id: "custom", name: "Индивидуальный дизайн", multiplier: 1, priceType: 'multiplier' as const },
-      { id: "premium", name: "Premium дизайн", multiplier: 1.4, priceType: 'multiplier' as const },
+      { id: "template", name: "На основе шаблона", price: 0, multiplier: 0.7, priceType: 'multiplier' as const },
+      { id: "custom", name: "Индивидуальный дизайн", price: 0, multiplier: 1, priceType: 'multiplier' as const },
+      { id: "premium", name: "Premium дизайн", price: 0, multiplier: 1.4, priceType: 'multiplier' as const },
     ],
   } as const;
 
@@ -92,8 +92,8 @@ const PriceCalculator = () => {
         if (res.ok && j?.ok && j.config) {
           const cfg = j.config as Record<string, any>;
 
-          const normalizePrice = (group: any) => {
-            if (!group) return [] as Array<{ id: string; name: string; price: number; priceType: 'fixed' | 'multiplier' }>;
+          const normalizeGroup = (group: any, defaultPriceType: 'fixed' | 'multiplier' = 'fixed') => {
+            if (!group) return [] as Array<{ id: string; name: string; price: number; multiplier: number; priceType: 'fixed' | 'multiplier' }>;
             const entries = Array.isArray(group)
               ? (group as any[]).map((val, idx) => [String(val?.id ?? idx), val] as const)
               : Object.entries(group as Record<string, any>);
@@ -101,28 +101,17 @@ const PriceCalculator = () => {
               id, 
               name: value?.label || value?.name || id, 
               price: Number(value?.price || 0),
-              priceType: value?.priceType || 'fixed'
-            }));
-          };
-          const normalizeMult = (group: any) => {
-            if (!group) return [] as Array<{ id: string; name: string; multiplier: number; priceType: 'fixed' | 'multiplier' }>;
-            const entries = Array.isArray(group)
-              ? (group as any[]).map((val, idx) => [String(val?.id ?? idx), val] as const)
-              : Object.entries(group as Record<string, any>);
-            return entries.map(([id, value]) => ({ 
-              id, 
-              name: value?.label || value?.name || id, 
-              multiplier: Number(value?.multiplier || value?.price || 1),
-              priceType: value?.priceType || 'multiplier'
+              multiplier: Number(value?.multiplier || 1),
+              priceType: value?.priceType || defaultPriceType
             }));
           };
 
           const next: CalculatorOptions = {
-            websiteType: normalizePrice(cfg[`website_type_${String(language).toLowerCase()}`]).map(o => ({ ...o, icon: '⚡' })) as any,
-            complexity: normalizeMult(cfg[`complexity_${String(language).toLowerCase()}`]).map(o => ({ ...o, icon: '🤓' })) as any,
-            timeline: normalizeMult(cfg[`timeline_${String(language).toLowerCase()}`]).map(o => ({ ...o, icon: '📆' })) as any,
-            features: normalizePrice(cfg[`features_${String(language).toLowerCase()}`]).map(o => ({ ...o, icon: '🔗' })) as any,
-            design: normalizeMult(cfg[`design_${String(language).toLowerCase()}`]).map(o => ({ ...o, icon: '🧩' })) as any,
+            websiteType: normalizeGroup(cfg[`website_type_${String(language).toLowerCase()}`], 'fixed').map(o => ({ ...o, icon: '⚡' })) as any,
+            complexity: normalizeGroup(cfg[`complexity_${String(language).toLowerCase()}`], 'multiplier').map(o => ({ ...o, icon: '🤓' })) as any,
+            timeline: normalizeGroup(cfg[`timeline_${String(language).toLowerCase()}`], 'multiplier').map(o => ({ ...o, icon: '📆' })) as any,
+            features: normalizeGroup(cfg[`features_${String(language).toLowerCase()}`], 'fixed').map(o => ({ ...o, icon: '🔗' })) as any,
+            design: normalizeGroup(cfg[`design_${String(language).toLowerCase()}`], 'multiplier').map(o => ({ ...o, icon: '🧩' })) as any,
           };
 
           setOptions(next);

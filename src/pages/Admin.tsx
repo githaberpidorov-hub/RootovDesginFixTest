@@ -53,42 +53,42 @@ const Admin = () => {
 
   // Calculator config (editable)
   type CalcOptions = {
-    websiteType: { id: string; name: string; price: number; priceType: 'fixed' | 'multiplier' }[];
-    complexity: { id: string; name: string; multiplier: number; priceType: 'fixed' | 'multiplier' }[];
-    timeline: { id: string; name: string; multiplier: number; priceType: 'fixed' | 'multiplier' }[];
-    features: { id: string; name: string; price: number; priceType: 'fixed' | 'multiplier' }[];
-    design: { id: string; name: string; multiplier: number; priceType: 'fixed' | 'multiplier' }[];
+    websiteType: { id: string; name: string; price: number; multiplier: number; priceType: 'fixed' | 'multiplier' }[];
+    complexity: { id: string; name: string; price: number; multiplier: number; priceType: 'fixed' | 'multiplier' }[];
+    timeline: { id: string; name: string; price: number; multiplier: number; priceType: 'fixed' | 'multiplier' }[];
+    features: { id: string; name: string; price: number; multiplier: number; priceType: 'fixed' | 'multiplier' }[];
+    design: { id: string; name: string; price: number; multiplier: number; priceType: 'fixed' | 'multiplier' }[];
   };
   const [calcOptions, setCalcOptions] = useState<CalcOptions>({
     websiteType: [
-      { id: "landing", name: "Лендинг", price: 500, priceType: 'fixed' },
-      { id: "corporate", name: "Корпоративный сайт", price: 1200, priceType: 'fixed' },
-      { id: "ecommerce", name: "Интернет-магазин", price: 2500, priceType: 'fixed' },
-      { id: "portfolio", name: "Портфолио", price: 800, priceType: 'fixed' },
-      { id: "blog", name: "Блог/СМИ", price: 1000, priceType: 'fixed' },
+      { id: "landing", name: "Лендинг", price: 500, multiplier: 1, priceType: 'fixed' },
+      { id: "corporate", name: "Корпоративный сайт", price: 1200, multiplier: 1, priceType: 'fixed' },
+      { id: "ecommerce", name: "Интернет-магазин", price: 2500, multiplier: 1, priceType: 'fixed' },
+      { id: "portfolio", name: "Портфолио", price: 800, multiplier: 1, priceType: 'fixed' },
+      { id: "blog", name: "Блог/СМИ", price: 1000, multiplier: 1, priceType: 'fixed' },
     ],
     complexity: [
-      { id: "simple", name: "Простой", multiplier: 1, priceType: 'multiplier' },
-      { id: "medium", name: "Средний", multiplier: 1.5, priceType: 'multiplier' },
-      { id: "complex", name: "Сложный", multiplier: 2.2, priceType: 'multiplier' },
+      { id: "simple", name: "Простой", price: 0, multiplier: 1, priceType: 'multiplier' },
+      { id: "medium", name: "Средний", price: 0, multiplier: 1.5, priceType: 'multiplier' },
+      { id: "complex", name: "Сложный", price: 0, multiplier: 2.2, priceType: 'multiplier' },
     ],
     timeline: [
-      { id: "urgent", name: "Срочно (1-2 недели)", multiplier: 1.8, priceType: 'multiplier' },
-      { id: "normal", name: "Обычно (3-4 недели)", multiplier: 1, priceType: 'multiplier' },
-      { id: "flexible", name: "Не горит (1-2 месяца)", multiplier: 0.8, priceType: 'multiplier' },
+      { id: "urgent", name: "Срочно (1-2 недели)", price: 0, multiplier: 1.8, priceType: 'multiplier' },
+      { id: "normal", name: "Обычно (3-4 недели)", price: 0, multiplier: 1, priceType: 'multiplier' },
+      { id: "flexible", name: "Не горит (1-2 месяца)", price: 0, multiplier: 0.8, priceType: 'multiplier' },
     ],
     features: [
-      { id: "cms", name: "Система управления", price: 300, priceType: 'fixed' },
-      { id: "seo", name: "SEO оптимизация", price: 400, priceType: 'fixed' },
-      { id: "analytics", name: "Аналитика", price: 200, priceType: 'fixed' },
-      { id: "mobile", name: "Мобильная версия", price: 500, priceType: 'fixed' },
-      { id: "multilang", name: "Многоязычность", price: 600, priceType: 'fixed' },
-      { id: "integration", name: "Интеграции", price: 800, priceType: 'fixed' },
+      { id: "cms", name: "Система управления", price: 300, multiplier: 1, priceType: 'fixed' },
+      { id: "seo", name: "SEO оптимизация", price: 400, multiplier: 1, priceType: 'fixed' },
+      { id: "analytics", name: "Аналитика", price: 200, multiplier: 1, priceType: 'fixed' },
+      { id: "mobile", name: "Мобильная версия", price: 500, multiplier: 1, priceType: 'fixed' },
+      { id: "multilang", name: "Многоязычность", price: 600, multiplier: 1, priceType: 'fixed' },
+      { id: "integration", name: "Интеграции", price: 800, multiplier: 1, priceType: 'fixed' },
     ],
     design: [
-      { id: "template", name: "На основе шаблона", multiplier: 0.7, priceType: 'multiplier' },
-      { id: "custom", name: "Индивидуальный дизайн", multiplier: 1, priceType: 'multiplier' },
-      { id: "premium", name: "Premium дизайн", multiplier: 1.4, priceType: 'multiplier' },
+      { id: "template", name: "На основе шаблона", price: 0, multiplier: 0.7, priceType: 'multiplier' },
+      { id: "custom", name: "Индивидуальный дизайн", price: 0, multiplier: 1, priceType: 'multiplier' },
+      { id: "premium", name: "Premium дизайн", price: 0, multiplier: 1.4, priceType: 'multiplier' },
     ],
   });
 
@@ -104,40 +104,44 @@ const Admin = () => {
     const authStatus = localStorage.getItem('admin-auth');
     if (authStatus === 'true') {
       setIsAuthenticated(true);
-      // Загружаем шаблоны с учетом выбранного языка редактирования в админке
-      loadTemplates();
-      // Загружаем остальные настройки
-      Promise.all([
-        fetch('/api/settings').then(r => r.json()),
-        fetch(`/api/calculator?language=${adminEditingLanguage}`).then(r => r.json())
-      ])
-        .then(([settingsData, calculatorData]) => {
-          if (calculatorData?.ok && calculatorData.config) {
-            const config = calculatorData.config;
-            setCalcOptions({
-              websiteType: Object.entries(config[`website_type_${adminEditingLanguage.toLowerCase()}`] || {}).map(([id, value]: [string, any]) => ({ id, name: (value as any).label || id, price: (value as any).price || 0 })),
-              complexity: Object.entries(config[`complexity_${adminEditingLanguage.toLowerCase()}`] || {}).map(([id, value]: [string, any]) => ({ id, name: (value as any).label || id, multiplier: (value as any).multiplier || 1 })),
-              timeline: Object.entries(config[`timeline_${adminEditingLanguage.toLowerCase()}`] || {}).map(([id, value]: [string, any]) => ({ id, name: (value as any).label || id, multiplier: (value as any).multiplier || 1 })),
-              features: Object.entries(config[`features_${adminEditingLanguage.toLowerCase()}`] || {}).map(([id, value]: [string, any]) => ({ id, name: (value as any).label || id, price: (value as any).price || 0 })),
-              design: Object.entries(config[`design_${adminEditingLanguage.toLowerCase()}`] || {}).map(([id, value]: [string, any]) => ({ id, name: (value as any).label || id, price: (value as any).price || 0 })),
-            });
-          }
-          if (settingsData?.telegram) {
-            setTgConfig({ 
-              botToken: settingsData.telegram.botToken || '', 
-              username: settingsData.telegram.username || '', 
-              chatId: settingsData.telegram.chatId || '' 
-            });
-          }
-          if (settingsData?.admin) {
-            setAdminCreds(c => ({ ...c, username: settingsData.admin.username || c.username }));
-          }
-        })
-        .catch(() => {
-          console.warn('Failed to load settings from API');
-        });
+      // Загружаем все данные сразу
+      loadAllData();
     }
-  }, [t.language, adminEditingLanguage]);
+  }, []);
+
+  // Отдельный эффект для перезагрузки при смене языка
+  useEffect(() => {
+    if (isAuthenticated) {
+      loadAllData();
+    }
+  }, [adminEditingLanguage, isAuthenticated]);
+
+  const loadAllData = async () => {
+    try {
+      // Загружаем шаблоны
+      await loadTemplates();
+      
+      // Загружаем конфигурацию калькулятора
+      await loadCalculatorConfig();
+      
+      // Загружаем остальные настройки
+      const settingsResponse = await fetch('/api/settings');
+      const settingsData = await settingsResponse.json();
+      
+      if (settingsData?.telegram) {
+        setTgConfig({ 
+          botToken: settingsData.telegram.botToken || '', 
+          username: settingsData.telegram.username || '', 
+          chatId: settingsData.telegram.chatId || '' 
+        });
+      }
+      if (settingsData?.admin) {
+        setAdminCreds(c => ({ ...c, username: settingsData.admin.username || c.username }));
+      }
+    } catch (error) {
+      console.warn('Failed to load data from API:', error);
+    }
+  };
 
   const loadTemplates = async () => {
     try {
@@ -166,8 +170,8 @@ const Admin = () => {
 
       if (data.ok && data.config) {
         const config = data.config;
-        const normalizePriceGroup = (group: any) => {
-          if (!group) return [] as Array<{ id: string; name: string; price: number; priceType: 'fixed' | 'multiplier' }>;
+        const normalizeGroup = (group: any, defaultPriceType: 'fixed' | 'multiplier' = 'fixed') => {
+          if (!group) return [] as Array<{ id: string; name: string; price: number; multiplier: number; priceType: 'fixed' | 'multiplier' }>;
           const entries = Array.isArray(group)
             ? (group as any[]).map((val, idx) => [String(val?.id ?? idx), val] as const)
             : Object.entries(group as Record<string, any>);
@@ -176,28 +180,17 @@ const Admin = () => {
             id, 
             name: value?.label || value?.name || id, 
             price: Number(value?.price || 0),
-            priceType: value?.priceType || 'fixed'
-          }));
-        };
-        const normalizeMultGroup = (group: any) => {
-          if (!group) return [] as Array<{ id: string; name: string; multiplier: number; priceType: 'fixed' | 'multiplier' }>;
-          const entries = Array.isArray(group)
-            ? (group as any[]).map((val, idx) => [String(val?.id ?? idx), val] as const)
-            : Object.entries(group as Record<string, any>);
-          return entries.map(([id, value]) => ({ 
-            id, 
-            name: value?.label || value?.name || id, 
-            multiplier: Number(value?.multiplier || value?.price || 1),
-            priceType: value?.priceType || 'multiplier'
+            multiplier: Number(value?.multiplier || 1),
+            priceType: value?.priceType || defaultPriceType
           }));
         };
 
         setCalcOptions({
-          websiteType: normalizePriceGroup(config[`website_type_${adminEditingLanguage.toLowerCase()}`]),
-          complexity: normalizeMultGroup(config[`complexity_${adminEditingLanguage.toLowerCase()}`]),
-          timeline: normalizeMultGroup(config[`timeline_${adminEditingLanguage.toLowerCase()}`]),
-          features: normalizePriceGroup(config[`features_${adminEditingLanguage.toLowerCase()}`]),
-          design: normalizePriceGroup(config[`design_${adminEditingLanguage.toLowerCase()}`]),
+          websiteType: normalizeGroup(config[`website_type_${adminEditingLanguage.toLowerCase()}`], 'fixed'),
+          complexity: normalizeGroup(config[`complexity_${adminEditingLanguage.toLowerCase()}`], 'multiplier'),
+          timeline: normalizeGroup(config[`timeline_${adminEditingLanguage.toLowerCase()}`], 'multiplier'),
+          features: normalizeGroup(config[`features_${adminEditingLanguage.toLowerCase()}`], 'fixed'),
+          design: normalizeGroup(config[`design_${adminEditingLanguage.toLowerCase()}`], 'multiplier'),
         });
       }
     } catch (error) {
@@ -213,12 +206,14 @@ const Admin = () => {
           calcOptions.websiteType.map(opt => [String(opt.id), { 
             label: opt.name, 
             price: Number(opt.price || 0),
+            multiplier: Number(opt.multiplier || 1),
             priceType: opt.priceType || 'fixed'
           }])
         ),
         complexity: Object.fromEntries(
           calcOptions.complexity.map(opt => [String(opt.id), { 
             label: opt.name, 
+            price: Number(opt.price || 0),
             multiplier: Number(opt.multiplier || 1),
             priceType: opt.priceType || 'multiplier'
           }])
@@ -226,6 +221,7 @@ const Admin = () => {
         timeline: Object.fromEntries(
           calcOptions.timeline.map(opt => [String(opt.id), { 
             label: opt.name, 
+            price: Number(opt.price || 0),
             multiplier: Number(opt.multiplier || 1),
             priceType: opt.priceType || 'multiplier'
           }])
@@ -234,12 +230,14 @@ const Admin = () => {
           calcOptions.features.map(opt => [String(opt.id), { 
             label: opt.name, 
             price: Number(opt.price || 0),
+            multiplier: Number(opt.multiplier || 1),
             priceType: opt.priceType || 'fixed'
           }])
         ),
         design: Object.fromEntries(
           calcOptions.design.map(opt => [String(opt.id), { 
             label: opt.name, 
+            price: Number(opt.price || 0),
             multiplier: Number(opt.multiplier || 1),
             priceType: opt.priceType || 'multiplier'
           }])
@@ -357,19 +355,44 @@ const Admin = () => {
           body: JSON.stringify({ 
             language: adminEditingLanguage,
             websiteType: Object.fromEntries(
-              calcOptions.websiteType.map(opt => [String(opt.id), { label: opt.name, price: Number(opt.price || 0) }])
+              calcOptions.websiteType.map(opt => [String(opt.id), { 
+                label: opt.name, 
+                price: Number(opt.price || 0),
+                multiplier: Number(opt.multiplier || 1),
+                priceType: opt.priceType || 'fixed'
+              }])
             ),
             complexity: Object.fromEntries(
-              calcOptions.complexity.map(opt => [String(opt.id), { label: opt.name, multiplier: Number(opt.multiplier || 1) }])
+              calcOptions.complexity.map(opt => [String(opt.id), { 
+                label: opt.name, 
+                price: Number(opt.price || 0),
+                multiplier: Number(opt.multiplier || 1),
+                priceType: opt.priceType || 'multiplier'
+              }])
             ),
             timeline: Object.fromEntries(
-              calcOptions.timeline.map(opt => [String(opt.id), { label: opt.name, multiplier: Number(opt.multiplier || 1) }])
+              calcOptions.timeline.map(opt => [String(opt.id), { 
+                label: opt.name, 
+                price: Number(opt.price || 0),
+                multiplier: Number(opt.multiplier || 1),
+                priceType: opt.priceType || 'multiplier'
+              }])
             ),
             features: Object.fromEntries(
-              calcOptions.features.map(opt => [String(opt.id), { label: opt.name, price: Number(opt.price || 0) }])
+              calcOptions.features.map(opt => [String(opt.id), { 
+                label: opt.name, 
+                price: Number(opt.price || 0),
+                multiplier: Number(opt.multiplier || 1),
+                priceType: opt.priceType || 'fixed'
+              }])
             ),
             design: Object.fromEntries(
-              calcOptions.design.map(opt => [String(opt.id), { label: opt.name, price: Number(opt.price || 0) }])
+              calcOptions.design.map(opt => [String(opt.id), { 
+                label: opt.name, 
+                price: Number(opt.price || 0),
+                multiplier: Number(opt.multiplier || 1),
+                priceType: opt.priceType || 'multiplier'
+              }])
             ),
           }) 
         });
@@ -393,38 +416,8 @@ const Admin = () => {
       if (!r.ok || !j?.ok) throw new Error(j?.error || 'Invalid credentials');
       setIsAuthenticated(true);
       localStorage.setItem('admin-auth', 'true');
-      // После успешного входа – подтягиваем все настройки с сервера
-      Promise.all([
-        fetch('/api/settings').then(r => r.json()),
-        fetch(`/api/calculator?language=${adminEditingLanguage}`).then(r => r.json())
-      ])
-        .then(([settingsData, calculatorData]) => {
-          if (settingsData?.templates) setTemplates(settingsData.templates);
-          if (calculatorData?.ok && calculatorData.config) {
-            const config = calculatorData.config;
-            setCalcOptions({
-              websiteType: Object.entries(config[`website_type_${adminEditingLanguage.toLowerCase()}`] || {}).map(([id, value]: [string, any]) => ({ id, name: (value as any).label || id, price: (value as any).price || 0 })),
-              complexity: Object.entries(config[`complexity_${adminEditingLanguage.toLowerCase()}`] || {}).map(([id, value]: [string, any]) => ({ id, name: (value as any).label || id, multiplier: (value as any).multiplier || 1 })),
-              timeline: Object.entries(config[`timeline_${adminEditingLanguage.toLowerCase()}`] || {}).map(([id, value]: [string, any]) => ({ id, name: (value as any).label || id, multiplier: (value as any).multiplier || 1 })),
-              features: Object.entries(config[`features_${adminEditingLanguage.toLowerCase()}`] || {}).map(([id, value]: [string, any]) => ({ id, name: (value as any).label || id, price: (value as any).price || 0 })),
-              design: Object.entries(config[`design_${adminEditingLanguage.toLowerCase()}`] || {}).map(([id, value]: [string, any]) => ({ id, name: (value as any).label || id, price: (value as any).price || 0 })),
-            });
-          }
-          if (settingsData?.telegram) {
-            setTgConfig({
-              botToken: settingsData.telegram.botToken || '',
-              username: settingsData.telegram.username || '',
-              chatId: settingsData.telegram.chatId || '',
-            });
-          }
-          if (settingsData?.admin) {
-            setAdminCreds(c => ({ ...c, username: settingsData.admin.username || c.username }));
-          }
-        })
-        .catch(() => {
-          // Фолбэк на загрузку только шаблонов
-          loadTemplates();
-        });
+      // После успешного входа – загружаем все данные
+      await loadAllData();
       toast({ title: t.common.success, description: t.admin.login.success });
     } catch (err:any) {
       toast({ title: t.common.error, description: t.admin.login.error, variant: 'destructive' });
