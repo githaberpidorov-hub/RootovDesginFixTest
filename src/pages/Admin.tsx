@@ -266,8 +266,10 @@ const Admin = () => {
           title: t.common.success,
           description: "Конфигурация калькулятора сохранена",
         });
-        // Перезагружаем конфигурацию после сохранения
-        await loadCalculatorConfig();
+        // Принудительно перезагружаем конфигурацию после сохранения
+        setTimeout(async () => {
+          await loadCalculatorConfig();
+        }, 100);
       } else {
         const errorData = await response.json();
         throw new Error(`Failed to save calculator config: ${errorData.error || 'Unknown error'}`);

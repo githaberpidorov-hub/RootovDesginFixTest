@@ -16,6 +16,11 @@ export default async function handler(req: any, res: any) {
     if (req.method === 'GET') {
       const { language = 'RU' } = req.query as { language?: string };
       
+      // Принудительно обновляем кэш
+      res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
+      res.setHeader('Pragma', 'no-cache');
+      res.setHeader('Expires', '0');
+      
       const { data, error } = await supabase
         .from('calculator_config')
         .select('*')
