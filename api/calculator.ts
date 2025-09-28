@@ -46,16 +46,16 @@ export default async function handler(req: any, res: any) {
         updated_at: new Date().toISOString(),
       };
       
-      // Заполняем данные для всех разделов
-      if (body.sections && Array.isArray(body.sections)) {
-        body.sections.forEach((section: any) => {
-          // Исправляем регистр для websiteType -> websitetype
-          const sectionKey = section.key === 'websiteType' 
-            ? `websitetype_${String(language).toLowerCase()}`
-            : `${section.key}_${String(language).toLowerCase()}`;
-          configData[sectionKey] = body[section.key] || {};
-        });
-      }
+        // Заполняем данные для всех разделов
+        if (body.sections && Array.isArray(body.sections)) {
+          body.sections.forEach((section: any) => {
+            // Исправляем регистр для websiteType -> websitetype
+            const sectionKey = section.key === 'websiteType' 
+              ? `websitetype_${String(language).toLowerCase()}`
+              : `${section.key}_${String(language).toLowerCase()}`;
+            configData[sectionKey] = body[section.key] || [];
+          });
+        }
 
       // Сначала проверим структуру таблицы
       const { data: tableInfo, error: tableError } = await supabase
@@ -91,7 +91,7 @@ export default async function handler(req: any, res: any) {
             const sectionKey = section.key === 'websiteType' 
               ? `websitetype_${String(language).toLowerCase()}`
               : `${section.key}_${String(language).toLowerCase()}`;
-            updateData[sectionKey] = body[section.key] || {};
+            updateData[sectionKey] = body[section.key] || [];
           });
         }
 

@@ -232,14 +232,14 @@ const Admin = () => {
       calculatorSections.forEach(section => {
         const sectionKey = section.key;
         const sectionData = (calcOptions as any)[sectionKey] || [];
-        configData[sectionKey] = Object.fromEntries(
-          sectionData.map((opt: any) => [String(opt.id), { 
-            label: opt.name, 
-            price: Number(opt.price || 0),
-            multiplier: Number(opt.multiplier || 1),
-            priceType: opt.priceType || 'fixed'
-          }])
-        );
+        // Сохраняем как массив, чтобы сохранить порядок
+        configData[sectionKey] = sectionData.map((opt: any) => ({ 
+          id: String(opt.id),
+          label: opt.name, 
+          price: Number(opt.price || 0),
+          multiplier: Number(opt.multiplier || 1),
+          priceType: opt.priceType || 'fixed'
+        }));
       });
 
       const response = await fetch('/api/calculator', {
