@@ -252,12 +252,14 @@ const Admin = () => {
         // Перезагружаем конфигурацию после сохранения
         await loadCalculatorConfig();
       } else {
-        throw new Error('Failed to save calculator config');
+        const errorData = await response.json();
+        throw new Error(`Failed to save calculator config: ${errorData.error || 'Unknown error'}`);
       }
     } catch (error) {
+      console.error('Error saving calculator config:', error);
       toast({
         title: t.common.error,
-        description: "Не удалось сохранить конфигурацию калькулятора",
+        description: `Ошибка при сохранении конфигурации калькулятора: ${error instanceof Error ? error.message : 'Неизвестная ошибка'}`,
         variant: "destructive",
       });
     }

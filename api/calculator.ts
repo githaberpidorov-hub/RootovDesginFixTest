@@ -26,8 +26,8 @@ export default async function handler(req: any, res: any) {
         return res.status(500).json({ ok: false, error: 'Failed to fetch calculator config' });
       }
 
-      // Если sections не существует, создаем дефолтные
-      if (data && !data.sections) {
+      // Временно добавляем sections в ответ, пока поле не добавлено в базу
+      if (data) {
         data.sections = [
           { key: 'websiteType', label: 'Тип сайта', icon: '' },
           { key: 'complexity', label: 'Сложность', icon: '' },
@@ -45,7 +45,7 @@ export default async function handler(req: any, res: any) {
       const { language = 'RU' } = body;
 
       console.log('Calculator API - Language:', language);
-      console.log('Calculator API - Body:', body);
+      console.log('Calculator API - Body:', JSON.stringify(body, null, 2));
 
       // Создаем конфигурацию: заполняем только соответствующие текущему языку поля,
       // остальные оставляем значениями по умолчанию
@@ -69,10 +69,10 @@ export default async function handler(req: any, res: any) {
         updated_at: new Date().toISOString(),
       };
       
-      // Добавляем sections если поле существует в базе данных
-      if (body.sections) {
-        configData.sections = body.sections;
-      }
+      // Временно убираем sections до добавления поля в базу данных
+      // if (body.sections) {
+      //   configData.sections = body.sections;
+      // }
       
       // Динамически заполняем данные для всех разделов
       if (body.sections && Array.isArray(body.sections)) {
@@ -107,10 +107,10 @@ export default async function handler(req: any, res: any) {
           updated_at: new Date().toISOString(),
         };
         
-        // Добавляем sections если поле существует в базе данных
-        if (body.sections) {
-          updateData.sections = body.sections;
-        }
+        // Временно убираем sections до добавления поля в базу данных
+        // if (body.sections) {
+        //   updateData.sections = body.sections;
+        // }
         
         // Динамически заполняем данные для всех разделов
         if (body.sections && Array.isArray(body.sections)) {
@@ -127,6 +127,8 @@ export default async function handler(req: any, res: any) {
           updateData[`design_${language.toLowerCase()}`] = body.design || {};
         }
 
+        console.log('Updating with data:', JSON.stringify(updateData, null, 2));
+        
         const { data, error } = await supabase
           .from('calculator_config')
           .update(updateData)
@@ -136,12 +138,15 @@ export default async function handler(req: any, res: any) {
 
         if (error) {
           console.error('Error updating calculator config:', error);
-          return res.status(500).json({ ok: false, error: error.message });
+          console.error('Update data was:', JSON.stringify(updateData, null, 2));
+          return res.status(500).json({ ok: false, error: error.message, details: error });
         }
 
         return res.status(200).json({ ok: true, config: data });
       } else {
         // Создаем новую запись
+        console.log('Creating new record with data:', JSON.stringify(configData, null, 2));
+        
         const { data, error } = await supabase
           .from('calculator_config')
           .insert([configData])
@@ -150,7 +155,8 @@ export default async function handler(req: any, res: any) {
 
         if (error) {
           console.error('Error creating calculator config:', error);
-          return res.status(500).json({ ok: false, error: error.message });
+          console.error('Config data was:', JSON.stringify(configData, null, 2));
+          return res.status(500).json({ ok: false, error: error.message, details: error });
         }
 
         return res.status(201).json({ ok: true, config: data });
