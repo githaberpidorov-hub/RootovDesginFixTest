@@ -192,21 +192,25 @@ const Admin = () => {
         const normalizeGroup = (group: any, defaultPriceType: 'fixed' | 'multiplier' = 'fixed') => {
           if (!group) return [] as Array<{ id: string; name: string; price: number; multiplier: number; priceType: 'fixed' | 'multiplier' }>;
           
-          let entries: Array<[string, any]>;
           if (Array.isArray(group)) {
             // Если это массив, сохраняем порядок как есть
-            entries = group.map((val, idx) => [String(val?.id ?? idx), val] as const);
+            return group.map((item: any) => ({ 
+              id: String(item?.id || ''),
+              name: item?.label || item?.name || String(item?.id || ''),
+              price: Number(item?.price || 0),
+              multiplier: Number(item?.multiplier || 1),
+              priceType: item?.priceType || defaultPriceType
+            }));
           } else {
-            entries = Object.entries(group as Record<string, any>);
+            // Если это объект, конвертируем в массив
+            return Object.entries(group as Record<string, any>).map(([id, value]) => ({ 
+              id, 
+              name: value?.label || value?.name || id, 
+              price: Number(value?.price || 0),
+              multiplier: Number(value?.multiplier || 1),
+              priceType: value?.priceType || defaultPriceType
+            }));
           }
-        
-          return entries.map(([id, value]) => ({ 
-            id, 
-            name: value?.label || value?.name || id, 
-            price: Number(value?.price || 0),
-            multiplier: Number(value?.multiplier || 1),
-            priceType: value?.priceType || defaultPriceType
-          }));
         };
 
         // Загружаем данные для всех разделов

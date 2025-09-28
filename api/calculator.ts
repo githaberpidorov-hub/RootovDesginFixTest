@@ -33,9 +33,6 @@ export default async function handler(req: any, res: any) {
     if (req.method === 'POST' || req.method === 'PUT') {
       const body = typeof req.body === 'string' ? JSON.parse(req.body) : req.body;
       const { language = 'RU' } = body;
-      
-      
-
 
       // Создаем конфигурацию с правильной структурой
       const configData: any = {
@@ -44,17 +41,30 @@ export default async function handler(req: any, res: any) {
         updated_at: new Date().toISOString(),
       };
       
-        // Заполняем данные для всех разделов
-        if (body.sections && Array.isArray(body.sections)) {
-          body.sections.forEach((section: any) => {
-            // Исправляем регистр для websiteType -> websitetype
-            const sectionKey = section.key === 'websiteType' 
-              ? `websitetype_${String(language).toLowerCase()}`
-              : `${section.key}_${String(language).toLowerCase()}`;
-            // Берем данные из body[section.key], а не из body[sectionKey]
-            configData[sectionKey] = body[section.key] || [];
-          });
-        }
+      // Заполняем данные для всех разделов как МАССИВЫ
+      if (body.sections && Array.isArray(body.sections)) {
+        body.sections.forEach((section: any) => {
+          // Исправляем регистр для websiteType -> websitetype
+          const sectionKey = section.key === 'websiteType' 
+            ? `websitetype_${String(language).toLowerCase()}`
+            : `${section.key}_${String(language).toLowerCase()}`;
+          
+          // Убеждаемся, что данные приходят как массив
+          const sectionData = body[section.key];
+          if (Array.isArray(sectionData)) {
+            configData[sectionKey] = sectionData;
+          } else {
+            // Если пришел объект, конвертируем в массив
+            configData[sectionKey] = Object.entries(sectionData || {}).map(([id, value]: [string, any]) => ({
+              id,
+              label: value?.label || '',
+              price: Number(value?.price || 0),
+              multiplier: Number(value?.multiplier || 1),
+              priceType: value?.priceType || 'fixed'
+            }));
+          }
+        });
+      }
 
       // Сначала проверим структуру таблицы
       const { data: tableInfo, error: tableError } = await supabase
@@ -83,16 +93,28 @@ export default async function handler(req: any, res: any) {
           updated_at: new Date().toISOString(),
         };
         
-        // Заполняем данные для всех разделов
+        // Заполняем данные для всех разделов как МАССИВЫ
         if (body.sections && Array.isArray(body.sections)) {
           body.sections.forEach((section: any) => {
             // Исправляем регистр для websiteType -> websitetype
             const sectionKey = section.key === 'websiteType' 
               ? `websitetype_${String(language).toLowerCase()}`
               : `${section.key}_${String(language).toLowerCase()}`;
-            // Берем данные из body[section.key], а не из body[sectionKey]
-            updateData[sectionKey] = body[section.key] || [];
             
+            // Убеждаемся, что данные приходят как массив
+            const sectionData = body[section.key];
+            if (Array.isArray(sectionData)) {
+              updateData[sectionKey] = sectionData;
+            } else {
+              // Если пришел объект, конвертируем в массив
+              updateData[sectionKey] = Object.entries(sectionData || {}).map(([id, value]: [string, any]) => ({
+                id,
+                label: value?.label || '',
+                price: Number(value?.price || 0),
+                multiplier: Number(value?.multiplier || 1),
+                priceType: value?.priceType || 'fixed'
+              }));
+            }
           });
         }
 
