@@ -1,7 +1,7 @@
 import { getSupabase } from "./_supabase.js";
 
 // API для работы с многоязычными шаблонами
-// Таблица: templates (id, title_ru, title_eng, title_uk, description_ru, description_eng, description_uk, category, image, technologies, demo_url, price, created_at, updated_at)
+// Таблица: templates (id, title_ru, title_eng, title_uk, description_ru, description_eng, description_uk, category, image, technologies, site_url, price, created_at, updated_at)
 
 function setCors(res: any) {
   res.setHeader("Access-Control-Allow-Origin", "*");
@@ -34,7 +34,7 @@ export default async function handler(req: any, res: any) {
         category: template.category,
         image: template.image,
         technologies: template.technologies || [],
-        demoUrl: template.demo_url,
+        siteUrl: template.site_url,
         price: template.price,
       })) || [];
 
@@ -81,7 +81,7 @@ export default async function handler(req: any, res: any) {
         category: body.category,
         image: body.image || "/api/placeholder/600/400",
         technologies: body.technologies || [],
-        demo_url: body.demoUrl || body.demo_url,
+        site_url: body.siteUrl || body.site_url,
         price: body.price,
       };
 
@@ -129,7 +129,7 @@ export default async function handler(req: any, res: any) {
       if (body.category) updateData.category = body.category;
       if (body.image) updateData.image = body.image;
       if (body.technologies) updateData.technologies = body.technologies;
-      if (body.demoUrl) updateData.demo_url = body.demoUrl;
+      if (body.siteUrl) updateData.site_url = body.siteUrl;
       if (body.price) updateData.price = body.price;
 
       const { data, error } = await supabase

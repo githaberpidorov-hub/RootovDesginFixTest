@@ -1,4 +1,3 @@
-// Обновлено: изменена надпись с "Демо" на "Сайт" в шаблонах
 export type LanguageCode = "RU" | "ENG" | "UK";
 
 export interface Translations {
@@ -164,7 +163,7 @@ export interface Translations {
         category: string;
         description: string;
         price: string;
-        demoUrl: string;
+        siteUrl: string;
         technologies: string;
         addTech: string;
         save: string;
@@ -243,7 +242,7 @@ const translations: Record<LanguageCode, Translations> = {
       next: "Далее",
       submit: "Отправить",
       order: "Заказать",
-      demo: "Демо",
+      demo: "Сайт",
       more: "Подробнее",
       contact: "Связаться с нами",
     },
@@ -376,7 +375,7 @@ const translations: Record<LanguageCode, Translations> = {
           category: "Категория",
           description: "Описание *",
           price: "Цена *",
-          demoUrl: "Demo URL",
+          siteUrl: "Site URL",
           technologies: "Технологии",
           addTech: "Добавить технологию",
           save: "Сохранить",
@@ -450,7 +449,7 @@ const translations: Record<LanguageCode, Translations> = {
       next: "Next",
       submit: "Submit",
       order: "Order",
-      demo: "Demo",
+      demo: "Site",
       more: "More",
       contact: "Contact Us",
     },
@@ -583,7 +582,7 @@ const translations: Record<LanguageCode, Translations> = {
           category: "Category",
           description: "Description *",
           price: "Price *",
-          demoUrl: "Demo URL",
+          siteUrl: "Site URL",
           technologies: "Technologies",
           addTech: "Add Technology",
           save: "Save",
@@ -657,7 +656,7 @@ const translations: Record<LanguageCode, Translations> = {
       next: "Далі",
       submit: "Відправити",
       order: "Замовити",
-      demo: "Демо",
+      demo: "Сайт",
       more: "Детальніше",
       contact: "Зв'язатися з нами",
     },
@@ -790,7 +789,7 @@ const translations: Record<LanguageCode, Translations> = {
           category: "Категорія",
           description: "Опис *",
           price: "Ціна *",
-          demoUrl: "Demo URL",
+          siteUrl: "Site URL",
           technologies: "Технології",
           addTech: "Додати технологію",
           save: "Зберегти",

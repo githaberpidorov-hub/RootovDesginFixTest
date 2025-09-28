@@ -15,7 +15,7 @@ interface Template {
   category: string;
   image: string;
   technologies: string[];
-  demoUrl?: string;
+  siteUrl?: string;
   price: string;
 }
 
@@ -39,7 +39,7 @@ const Admin = () => {
     category: "landing",
     image: "",
     technologies: [],
-    demoUrl: "",
+    siteUrl: "",
     price: "",
   });
   const [techInput, setTechInput] = useState("");
@@ -253,7 +253,7 @@ const Admin = () => {
           category: template.category,
           image: template.image,
           technologies: template.technologies,
-          demoUrl: template.demoUrl,
+          siteUrl: template.siteUrl,
           price: template.price,
         };
 
@@ -453,7 +453,7 @@ const Admin = () => {
         category: templateData.category!,
         image: templateData.image || "/api/placeholder/600/400",
         technologies: templateData.technologies || [],
-        demoUrl: templateData.demoUrl,
+        siteUrl: templateData.siteUrl,
         price: templateData.price!,
       };
 
@@ -504,7 +504,7 @@ const Admin = () => {
             category: "landing",
             image: "",
             technologies: [],
-            demoUrl: "",
+            siteUrl: "",
             price: "",
           });
           setIsAddingTemplate(false);
@@ -559,7 +559,7 @@ const Admin = () => {
       category: "landing",
       image: "",
       technologies: [],
-      demoUrl: "",
+      siteUrl: "",
       price: "",
     });
     setTechInput("");
@@ -787,15 +787,15 @@ const Admin = () => {
                   </div>
                   
                   <div>
-                    <label className="block text-foreground/80 mb-2 font-medium">{t.admin.templates.form.demoUrl}</label>
+                    <label className="block text-foreground/80 mb-2 font-medium">{t.admin.templates.form.siteUrl}</label>
                     <input
                       type="url"
-                      value={editingTemplate ? editingTemplate.demoUrl || "" : newTemplate.demoUrl}
+                      value={editingTemplate ? editingTemplate.siteUrl || "" : newTemplate.siteUrl}
                       onChange={(e) => {
                         if (editingTemplate) {
-                          setEditingTemplate({ ...editingTemplate, demoUrl: e.target.value });
+                          setEditingTemplate({ ...editingTemplate, siteUrl: e.target.value });
                         } else {
-                          setNewTemplate({ ...newTemplate, demoUrl: e.target.value });
+                          setNewTemplate({ ...newTemplate, siteUrl: e.target.value });
                         }
                       }}
                       className="w-full px-4 py-3 rounded-xl bg-white/5 border border-white/10 text-foreground focus:outline-none focus:border-white/30"

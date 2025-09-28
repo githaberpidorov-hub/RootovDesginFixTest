@@ -10,7 +10,7 @@ CREATE TABLE IF NOT EXISTS templates (
   category TEXT NOT NULL CHECK (category IN ('landing', 'corporate', 'ecommerce', 'portfolio')),
   image TEXT,
   technologies TEXT[] DEFAULT '{}',
-  demo_url TEXT,
+  site_url TEXT,
   price TEXT NOT NULL,
   created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
   updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
@@ -36,7 +36,7 @@ CREATE TRIGGER update_templates_updated_at
     EXECUTE FUNCTION update_updated_at_column();
 
 -- Вставка примеров данных
-INSERT INTO templates (title_ru, title_eng, title_uk, description_ru, description_eng, description_uk, category, image, technologies, demo_url, price) VALUES
+INSERT INTO templates (title_ru, title_eng, title_uk, description_ru, description_eng, description_uk, category, image, technologies, site_url, price) VALUES
 (
   'Криптовалютная биржа',
   'Cryptocurrency Exchange',
@@ -47,7 +47,7 @@ INSERT INTO templates (title_ru, title_eng, title_uk, description_ru, descriptio
   'landing',
   '/api/placeholder/600/400',
   ARRAY['React', 'TypeScript', 'Tailwind CSS'],
-  'https://example.com/demo1',
+  'https://example.com/site1',
   '$1,200'
 ),
 (
@@ -60,7 +60,7 @@ INSERT INTO templates (title_ru, title_eng, title_uk, description_ru, descriptio
   'corporate',
   '/api/placeholder/600/400',
   ARRAY['Next.js', 'Prisma', 'PostgreSQL'],
-  'https://example.com/demo2',
+  'https://example.com/site2',
   '$2,500'
 ),
 (
@@ -73,7 +73,7 @@ INSERT INTO templates (title_ru, title_eng, title_uk, description_ru, descriptio
   'ecommerce',
   '/api/placeholder/600/400',
   ARRAY['React', 'Stripe', 'Node.js'],
-  'https://example.com/demo3',
+  'https://example.com/site3',
   '$3,200'
 ),
 (
@@ -86,7 +86,7 @@ INSERT INTO templates (title_ru, title_eng, title_uk, description_ru, descriptio
   'portfolio',
   '/api/placeholder/600/400',
   ARRAY['Gatsby', 'GraphQL', 'Styled Components'],
-  'https://example.com/demo4',
+  'https://example.com/site4',
   '$800'
 ),
 (
@@ -99,7 +99,7 @@ INSERT INTO templates (title_ru, title_eng, title_uk, description_ru, descriptio
   'landing',
   '/api/placeholder/600/400',
   ARRAY['Vue.js', 'Nuxt.js', 'Tailwind CSS'],
-  'https://example.com/demo5',
+  'https://example.com/site5',
   '$1,500'
 ),
 (
@@ -112,6 +112,6 @@ INSERT INTO templates (title_ru, title_eng, title_uk, description_ru, descriptio
   'corporate',
   '/api/placeholder/600/400',
   ARRAY['React', 'Firebase', 'Material-UI'],
-  'https://example.com/demo6',
+  'https://example.com/site6',
   '$2,100'
 );

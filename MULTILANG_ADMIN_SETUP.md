@@ -36,7 +36,7 @@ CREATE TABLE templates (
   category TEXT NOT NULL,
   image TEXT,
   technologies TEXT[],
-  demo_url TEXT,
+  site_url TEXT,
   price TEXT NOT NULL,
   created_at TIMESTAMP,
   updated_at TIMESTAMP

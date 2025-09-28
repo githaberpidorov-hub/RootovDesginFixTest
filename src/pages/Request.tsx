@@ -12,7 +12,7 @@ import { normalizeUrl, addCacheBusting } from "@/lib/utils";
 type Template = {
   id: string;
   title: string;
-  demoUrl?: string;
+  siteUrl?: string;
   price?: string;
   image?: string;
 };
@@ -28,7 +28,7 @@ const readTemplates = (): Template[] => {
     const raw = localStorage.getItem('portfolio-templates');
     if (!raw) return [];
     const arr = JSON.parse(raw) as any[];
-    return arr.map(t => ({ id: t.id, title: t.title, demoUrl: t.demoUrl, price: t.price, image: t.image }));
+    return arr.map(t => ({ id: t.id, title: t.title, siteUrl: t.siteUrl, price: t.price, image: t.image }));
   } catch {
     return [];
   }
@@ -36,9 +36,9 @@ const readTemplates = (): Template[] => {
 
 // Safe fallback for empty storage (helps on first mobile loads)
 const defaultTemplates: Template[] = [
-  { id: '1', title: 'Криптобиржа', demoUrl: 'https://example.com/demo1', price: '$1,200', image: '/placeholder.svg' },
-  { id: '2', title: 'Корпоративный сайт', demoUrl: 'https://example.com/demo2', price: '$2,500', image: '/placeholder.svg' },
-  { id: '3', title: 'Интернет-магазин', demoUrl: 'https://example.com/demo3', price: '$3,200', image: '/placeholder.svg' },
+  { id: '1', title: 'Криптобиржа', siteUrl: 'https://example.com/site1', price: '$1,200', image: '/placeholder.svg' },
+  { id: '2', title: 'Корпоративный сайт', siteUrl: 'https://example.com/site2', price: '$2,500', image: '/placeholder.svg' },
+  { id: '3', title: 'Интернет-магазин', siteUrl: 'https://example.com/site3', price: '$3,200', image: '/placeholder.svg' },
 ];
 
 const readTelegramConfig = (): TelegramConfig => {
@@ -128,7 +128,7 @@ const Request = () => {
 
   useEffect(() => {
     const controller = new AbortController();
-    const urls = Array.from(new Set(templates.map(t => t.demoUrl).filter(Boolean) as string[]));
+    const urls = Array.from(new Set(templates.map(t => t.siteUrl).filter(Boolean) as string[]));
     
     // восстановить кэш из localStorage с проверкой времени
     const cachedRaw = localStorage.getItem('portfolio-preview-cache');
@@ -152,8 +152,8 @@ const Request = () => {
       setPreviewByUrl(prev => ({ ...validCached, ...prev }));
     }
 
-    const fetchPreview = async (demoUrl: string) => {
-      const norm = normalizeUrl(demoUrl);
+    const fetchPreview = async (siteUrl: string) => {
+      const norm = normalizeUrl(siteUrl);
       if (validCached[norm]) return validCached[norm];
       
       // Используем microlink API для получения OG-изображения
@@ -215,7 +215,7 @@ const Request = () => {
 
     const selectedTemplate = templates.find(t => t.id === form.templateId);
     const templateLink = selectedTemplate
-      ? (selectedTemplate.demoUrl || `${window.location.origin}/portfolio?templateId=${encodeURIComponent(selectedTemplate.id)}`)
+      ? (selectedTemplate.siteUrl || `${window.location.origin}/portfolio?templateId=${encodeURIComponent(selectedTemplate.id)}`)
       : undefined;
     const messageLines = [
       'Новая заявка на сайт',
@@ -291,7 +291,7 @@ const Request = () => {
                     >
                       <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 max-h-[42vh] overflow-auto pr-1 custom-scroll">
                         {templates.map((t) => {
-                          const preview = previewByUrl[normalizeUrl(t.demoUrl)] || getPreviewImageUrl(t.demoUrl) || t.image || '/placeholder.svg';
+                          const preview = previewByUrl[normalizeUrl(t.siteUrl)] || getPreviewImageUrl(t.siteUrl) || t.image || '/placeholder.svg';
                           return (
                             <motion.button
                               key={t.id}
