@@ -174,6 +174,10 @@ const Admin = () => {
 
   const loadCalculatorConfig = async () => {
     console.log('=== LOAD FUNCTION CALLED ===');
+    toast({
+      title: "Отладка",
+      description: "Загружаем данные из базы...",
+    });
     try {
       const response = await fetch(`/api/calculator?language=${adminEditingLanguage}`);
       const data = await response.json();
@@ -236,14 +240,28 @@ const Admin = () => {
         });
 
         setCalcOptions(newCalcOptions);
+        
+        toast({
+          title: "Отладка",
+          description: "Данные успешно загружены из базы!",
+        });
       }
     } catch (error) {
       console.warn('Failed to load calculator config from API:', error);
+      toast({
+        title: "Отладка",
+        description: "Ошибка при загрузке данных!",
+        variant: "destructive",
+      });
     }
   };
 
   const saveCalculatorConfig = async () => {
     console.log('=== SAVE FUNCTION CALLED ===');
+    toast({
+      title: "Отладка",
+      description: "Функция сохранения вызвана!",
+    });
     try {
       const configData: any = {
         language: adminEditingLanguage,
@@ -269,6 +287,11 @@ const Admin = () => {
       console.log('=== DEBUG: Sending to API ===');
       console.log('configData:', JSON.stringify(configData, null, 2));
       
+      toast({
+        title: "Отладка",
+        description: `Отправляем данные: ${JSON.stringify(configData, null, 2).substring(0, 100)}...`,
+      });
+      
       const response = await fetch('/api/calculator', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -279,6 +302,11 @@ const Admin = () => {
         toast({
           title: t.common.success,
           description: "Конфигурация калькулятора сохранена",
+        });
+        
+        toast({
+          title: "Отладка",
+          description: "Данные успешно сохранены в базу!",
         });
         // Перезагружаем конфигурацию после сохранения
         await loadCalculatorConfig();
