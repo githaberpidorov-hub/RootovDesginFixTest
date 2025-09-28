@@ -1600,4 +1600,46 @@ div.theme-island {
   -webkit-backdrop-filter: blur(8px) !important;
   backdrop-filter: blur(8px) !important;
 }
+
+/* Simple fix for light themes - make text visible */
+.theme-white .text-foreground\/80,
+.theme-pink .text-foreground\/80,
+.theme-mint .text-foreground\/80,
+.theme-lavender .text-foreground\/80,
+.theme-peach .text-foreground\/80 {
+  color: hsl(var(--foreground)) !important;
+}
+
+.theme-white .text-foreground\/60,
+.theme-pink .text-foreground\/60,
+.theme-mint .text-foreground\/60,
+.theme-lavender .text-foreground\/60,
+.theme-peach .text-foreground\/60 {
+  color: hsl(var(--foreground-muted)) !important;
+}
+
+.theme-white .text-foreground\/90,
+.theme-pink .text-foreground\/90,
+.theme-mint .text-foreground\/90,
+.theme-lavender .text-foreground\/90,
+.theme-peach .text-foreground\/90 {
+  color: hsl(var(--foreground)) !important;
+}
+
+/* Make backgrounds more visible on light themes */
+.theme-white .bg-white\/5,
+.theme-pink .bg-white\/5,
+.theme-mint .bg-white\/5,
+.theme-lavender .bg-white\/5,
+.theme-peach .bg-white\/5 {
+  background: hsl(var(--accent-secondary) / 0.15) !important;
+}
+
+.theme-white .border-white\/10,
+.theme-pink .border-white\/10,
+.theme-mint .border-white\/10,
+.theme-lavender .border-white\/10,
+.theme-peach .border-white\/10 {
+  border-color: hsl(var(--accent-secondary) / 0.3) !important;
+}
 }
