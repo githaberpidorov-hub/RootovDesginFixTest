@@ -34,9 +34,6 @@ export default async function handler(req: any, res: any) {
       const body = typeof req.body === 'string' ? JSON.parse(req.body) : req.body;
       const { language = 'RU' } = body;
       
-      // Временное логирование для отладки
-      console.log('=== DEBUG: API received ===');
-      console.log('Body:', JSON.stringify(body, null, 2));
 
 
       // Создаем конфигурацию с правильной структурой
@@ -95,8 +92,6 @@ export default async function handler(req: any, res: any) {
           });
         }
 
-        console.log('=== DEBUG: Updating database ===');
-        console.log('Update data:', JSON.stringify(updateData, null, 2));
         
         const { data, error } = await supabase
           .from('calculator_config')

@@ -173,11 +173,6 @@ const Admin = () => {
   }, [adminEditingLanguage, isAuthenticated]);
 
   const loadCalculatorConfig = async () => {
-    console.log('=== LOAD FUNCTION CALLED ===');
-    toast({
-      title: "Отладка",
-      description: "Загружаем данные из базы...",
-    });
     try {
       const response = await fetch(`/api/calculator?language=${adminEditingLanguage}`);
       const data = await response.json();
@@ -195,36 +190,23 @@ const Admin = () => {
         }
 
         const normalizeGroup = (group: any, defaultPriceType: 'fixed' | 'multiplier' = 'fixed') => {
-          console.log('=== DEBUG: normalizeGroup ===');
-          console.log('Input group:', group);
-          console.log('Is array:', Array.isArray(group));
-          
           if (!group) return [] as Array<{ id: string; name: string; price: number; multiplier: number; priceType: 'fixed' | 'multiplier' }>;
           
           let entries: Array<[string, any]>;
           if (Array.isArray(group)) {
-            // Если это массив, сортируем по полю order если оно есть
-            const sortedGroup = [...group].sort((a, b) => {
-              const orderA = a?.order ?? 0;
-              const orderB = b?.order ?? 0;
-              return orderA - orderB;
-            });
-            console.log('Sorted group:', sortedGroup);
-            entries = sortedGroup.map((val, idx) => [String(val?.id ?? idx), val] as const);
+            // Если это массив, сохраняем порядок как есть
+            entries = group.map((val, idx) => [String(val?.id ?? idx), val] as const);
           } else {
             entries = Object.entries(group as Record<string, any>);
           }
         
-          const result = entries.map(([id, value]) => ({ 
+          return entries.map(([id, value]) => ({ 
             id, 
             name: value?.label || value?.name || id, 
             price: Number(value?.price || 0),
             multiplier: Number(value?.multiplier || 1),
             priceType: value?.priceType || defaultPriceType
           }));
-          
-          console.log('Normalize result:', result);
-          return result;
         };
 
         // Загружаем данные для всех разделов
@@ -240,28 +222,13 @@ const Admin = () => {
         });
 
         setCalcOptions(newCalcOptions);
-        
-        toast({
-          title: "Отладка",
-          description: "Данные успешно загружены из базы!",
-        });
       }
     } catch (error) {
       console.warn('Failed to load calculator config from API:', error);
-      toast({
-        title: "Отладка",
-        description: "Ошибка при загрузке данных!",
-        variant: "destructive",
-      });
     }
   };
 
   const saveCalculatorConfig = async () => {
-    console.log('=== SAVE FUNCTION CALLED ===');
-    toast({
-      title: "Отладка",
-      description: "Функция сохранения вызвана!",
-    });
     try {
       const configData: any = {
         language: adminEditingLanguage,
@@ -273,24 +240,15 @@ const Admin = () => {
         const sectionKey = section.key;
         const sectionData = (calcOptions as any)[sectionKey] || [];
         // Сохраняем как массив, чтобы сохранить порядок
-        configData[sectionKey] = sectionData.map((opt: any, index: number) => ({ 
+        configData[sectionKey] = sectionData.map((opt: any) => ({ 
           id: String(opt.id),
           label: opt.name, 
           price: Number(opt.price || 0),
           multiplier: Number(opt.multiplier || 1),
-          priceType: opt.priceType || 'fixed',
-          order: index // Добавляем поле порядка
+          priceType: opt.priceType || 'fixed'
         }));
       });
 
-      // Временное логирование для отладки
-      console.log('=== DEBUG: Sending to API ===');
-      console.log('configData:', JSON.stringify(configData, null, 2));
-      
-      toast({
-        title: "Отладка",
-        description: `Отправляем данные: ${JSON.stringify(configData, null, 2).substring(0, 100)}...`,
-      });
       
       const response = await fetch('/api/calculator', {
         method: 'POST',
@@ -302,11 +260,6 @@ const Admin = () => {
         toast({
           title: t.common.success,
           description: "Конфигурация калькулятора сохранена",
-        });
-        
-        toast({
-          title: "Отладка",
-          description: "Данные успешно сохранены в базу!",
         });
         // Перезагружаем конфигурацию после сохранения
         await loadCalculatorConfig();
