@@ -38,6 +38,12 @@ export default async function handler(req: any, res: any) {
       console.log('Calculator API - Body:', JSON.stringify(body, null, 2));
       console.log('Calculator API - Method:', req.method);
       console.log('Calculator API - Headers:', req.headers);
+      console.log('Calculator API - Sections:', body.sections);
+      if (body.sections) {
+        body.sections.forEach((section: any) => {
+          console.log(`Calculator API - Section ${section.key}:`, body[section.key]);
+        });
+      }
 
       // Создаем конфигурацию с правильной структурой
       const configData: any = {

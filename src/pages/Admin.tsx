@@ -174,11 +174,17 @@ const Admin = () => {
 
   const loadCalculatorConfig = async () => {
     try {
+      console.log('=== LOADING CALCULATOR CONFIG ===');
+      console.log('Loading for language:', adminEditingLanguage);
+      
       const response = await fetch(`/api/calculator?language=${adminEditingLanguage}`);
       const data = await response.json();
+      
+      console.log('API response:', data);
 
       if (data.ok && data.config) {
         const config = data.config;
+        console.log('Loaded config:', config);
         
         // Загружаем разделы, если они есть в конфиге
         let sectionsToUse = calculatorSections;
@@ -188,18 +194,21 @@ const Admin = () => {
         }
 
         const normalizeGroup = (group: any, defaultPriceType: 'fixed' | 'multiplier' = 'fixed') => {
+          console.log('normalizeGroup input:', group, 'isArray:', Array.isArray(group));
           if (!group) return [] as Array<{ id: string; name: string; price: number; multiplier: number; priceType: 'fixed' | 'multiplier' }>;
           const entries = Array.isArray(group)
             ? (group as any[]).map((val, idx) => [String(val?.id ?? idx), val] as const)
             : Object.entries(group as Record<string, any>);
         
-          return entries.map(([id, value]) => ({ 
+          const result = entries.map(([id, value]) => ({ 
             id, 
             name: value?.label || value?.name || id, 
             price: Number(value?.price || 0),
             multiplier: Number(value?.multiplier || 1),
             priceType: value?.priceType || defaultPriceType
           }));
+          console.log('normalizeGroup output:', result);
+          return result;
         };
 
         // Загружаем данные для всех разделов
@@ -223,6 +232,10 @@ const Admin = () => {
 
   const saveCalculatorConfig = async () => {
     try {
+      console.log('=== SAVING CALCULATOR CONFIG ===');
+      console.log('Current calcOptions:', calcOptions);
+      console.log('Current calculatorSections:', calculatorSections);
+      
       const configData: any = {
         language: adminEditingLanguage,
         sections: calculatorSections
@@ -232,6 +245,7 @@ const Admin = () => {
       calculatorSections.forEach(section => {
         const sectionKey = section.key;
         const sectionData = (calcOptions as any)[sectionKey] || [];
+        console.log(`Section ${sectionKey} data:`, sectionData);
         // Сохраняем как массив, чтобы сохранить порядок
         configData[sectionKey] = sectionData.map((opt: any) => ({ 
           id: String(opt.id),
@@ -241,6 +255,8 @@ const Admin = () => {
           priceType: opt.priceType || 'fixed'
         }));
       });
+      
+      console.log('Final configData to save:', configData);
 
       const response = await fetch('/api/calculator', {
         method: 'POST',
