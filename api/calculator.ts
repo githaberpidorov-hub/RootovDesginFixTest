@@ -34,6 +34,7 @@ export default async function handler(req: any, res: any) {
       const body = typeof req.body === 'string' ? JSON.parse(req.body) : req.body;
       const { language = 'RU' } = body;
       
+      
 
 
       // Создаем конфигурацию с правильной структурой
@@ -89,6 +90,7 @@ export default async function handler(req: any, res: any) {
               ? `websitetype_${String(language).toLowerCase()}`
               : `${section.key}_${String(language).toLowerCase()}`;
             updateData[sectionKey] = body[section.key] || [];
+            
           });
         }
 

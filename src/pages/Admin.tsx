@@ -50,6 +50,8 @@ const Admin = () => {
   // Language selector for admin editing
   const [adminEditingLanguage, setAdminEditingLanguage] = useState<LanguageCode>('RU');
   const availableLanguages = getAvailableLanguages();
+  const [debugInfo, setDebugInfo] = useState<any>(null);
+  const [showDebugModal, setShowDebugModal] = useState(false);
 
   // Calculator config (editable)
   type CalcOptions = {
@@ -248,6 +250,17 @@ const Admin = () => {
           priceType: opt.priceType || 'fixed'
         }));
       });
+
+      // Собираем отладочную информацию
+      const debugData = {
+        timestamp: new Date().toISOString(),
+        language: adminEditingLanguage,
+        sections: calculatorSections,
+        configData: configData,
+        calcOptions: calcOptions
+      };
+      setDebugInfo(debugData);
+      setShowDebugModal(true);
 
       
       const response = await fetch('/api/calculator', {
@@ -1266,6 +1279,72 @@ const Admin = () => {
           )}
         </div>
       </div>
+
+      {/* Debug Modal */}
+      {showDebugModal && debugInfo && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <div className="bg-background border border-white/10 rounded-xl max-w-4xl w-full max-h-[80vh] overflow-hidden">
+            <div className="p-6 border-b border-white/10">
+              <div className="flex justify-between items-center">
+                <h3 className="text-xl font-bold text-foreground">Отладочная информация</h3>
+                <button 
+                  onClick={() => setShowDebugModal(false)}
+                  className="text-foreground/60 hover:text-foreground transition-colors"
+                >
+                  ✕
+                </button>
+              </div>
+            </div>
+            <div className="p-6 overflow-auto max-h-[60vh]">
+              <div className="space-y-4">
+                <div>
+                  <h4 className="font-semibold text-foreground mb-2">Время:</h4>
+                  <p className="text-sm text-foreground/80 font-mono">{debugInfo.timestamp}</p>
+                </div>
+                
+                <div>
+                  <h4 className="font-semibold text-foreground mb-2">Язык:</h4>
+                  <p className="text-sm text-foreground/80">{debugInfo.language}</p>
+                </div>
+
+                <div>
+                  <h4 className="font-semibold text-foreground mb-2">Разделы калькулятора:</h4>
+                  <pre className="text-xs text-foreground/80 bg-white/5 p-3 rounded overflow-auto">
+                    {JSON.stringify(debugInfo.sections, null, 2)}
+                  </pre>
+                </div>
+
+                <div>
+                  <h4 className="font-semibold text-foreground mb-2">Данные calcOptions (текущее состояние):</h4>
+                  <pre className="text-xs text-foreground/80 bg-white/5 p-3 rounded overflow-auto">
+                    {JSON.stringify(debugInfo.calcOptions, null, 2)}
+                  </pre>
+                </div>
+
+                <div>
+                  <h4 className="font-semibold text-foreground mb-2">Данные configData (отправляемые в API):</h4>
+                  <pre className="text-xs text-foreground/80 bg-white/5 p-3 rounded overflow-auto">
+                    {JSON.stringify(debugInfo.configData, null, 2)}
+                  </pre>
+                </div>
+              </div>
+            </div>
+            <div className="p-6 border-t border-white/10">
+              <div className="flex gap-3">
+                <GlassButton onClick={() => setShowDebugModal(false)}>
+                  Закрыть
+                </GlassButton>
+                <GlassButton variant="secondary" onClick={() => {
+                  navigator.clipboard.writeText(JSON.stringify(debugInfo, null, 2));
+                  toast({ title: 'Скопировано', description: 'Отладочная информация скопирована в буфер обмена' });
+                }}>
+                  Копировать JSON
+                </GlassButton>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
