@@ -26,6 +26,17 @@ export default async function handler(req: any, res: any) {
         return res.status(500).json({ ok: false, error: 'Failed to fetch calculator config' });
       }
 
+      // Если sections не существует, создаем дефолтные
+      if (data && !data.sections) {
+        data.sections = [
+          { key: 'websiteType', label: 'Тип сайта', icon: '' },
+          { key: 'complexity', label: 'Сложность', icon: '' },
+          { key: 'timeline', label: 'Сроки', icon: '' },
+          { key: 'features', label: 'Дополнительные функции', icon: '' },
+          { key: 'design', label: 'Дизайн', icon: '' },
+        ];
+      }
+
       return res.status(200).json({ ok: true, config: data });
     }
 
@@ -57,11 +68,26 @@ export default async function handler(req: any, res: any) {
         design_uk: {},
         updated_at: new Date().toISOString(),
       };
-      configData[`website_type_${String(language).toLowerCase()}`] = body.websiteType || {};
-      configData[`complexity_${String(language).toLowerCase()}`] = body.complexity || {};
-      configData[`timeline_${String(language).toLowerCase()}`] = body.timeline || {};
-      configData[`features_${String(language).toLowerCase()}`] = body.features || {};
-      configData[`design_${String(language).toLowerCase()}`] = body.design || {};
+      
+      // Добавляем sections если поле существует в базе данных
+      if (body.sections) {
+        configData.sections = body.sections;
+      }
+      
+      // Динамически заполняем данные для всех разделов
+      if (body.sections && Array.isArray(body.sections)) {
+        body.sections.forEach((section: any) => {
+          const sectionKey = `${section.key}_${String(language).toLowerCase()}`;
+          configData[sectionKey] = body[section.key] || {};
+        });
+      } else {
+        // Fallback для старых разделов
+        configData[`website_type_${String(language).toLowerCase()}`] = body.websiteType || {};
+        configData[`complexity_${String(language).toLowerCase()}`] = body.complexity || {};
+        configData[`timeline_${String(language).toLowerCase()}`] = body.timeline || {};
+        configData[`features_${String(language).toLowerCase()}`] = body.features || {};
+        configData[`design_${String(language).toLowerCase()}`] = body.design || {};
+      }
 
       // Проверяем, существует ли запись для этого языка
       const { data: existingData, error: fetchError } = await supabase
@@ -77,14 +103,29 @@ export default async function handler(req: any, res: any) {
 
       if (existingData) {
         // Обновляем существующую запись
-        const updateData = {
-          [`website_type_${language.toLowerCase()}`]: body.websiteType || {},
-          [`complexity_${language.toLowerCase()}`]: body.complexity || {},
-          [`timeline_${language.toLowerCase()}`]: body.timeline || {},
-          [`features_${language.toLowerCase()}`]: body.features || {},
-          [`design_${language.toLowerCase()}`]: body.design || {},
+        const updateData: any = {
           updated_at: new Date().toISOString(),
         };
+        
+        // Добавляем sections если поле существует в базе данных
+        if (body.sections) {
+          updateData.sections = body.sections;
+        }
+        
+        // Динамически заполняем данные для всех разделов
+        if (body.sections && Array.isArray(body.sections)) {
+          body.sections.forEach((section: any) => {
+            const sectionKey = `${section.key}_${String(language).toLowerCase()}`;
+            updateData[sectionKey] = body[section.key] || {};
+          });
+        } else {
+          // Fallback для старых разделов
+          updateData[`website_type_${language.toLowerCase()}`] = body.websiteType || {};
+          updateData[`complexity_${language.toLowerCase()}`] = body.complexity || {};
+          updateData[`timeline_${language.toLowerCase()}`] = body.timeline || {};
+          updateData[`features_${language.toLowerCase()}`] = body.features || {};
+          updateData[`design_${language.toLowerCase()}`] = body.design || {};
+        }
 
         const { data, error } = await supabase
           .from('calculator_config')

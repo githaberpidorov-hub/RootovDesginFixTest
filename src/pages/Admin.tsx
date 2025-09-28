@@ -94,11 +94,11 @@ const Admin = () => {
 
   // Состояние для управления разделами калькулятора
   const [calculatorSections, setCalculatorSections] = useState([
-    { key: 'websiteType', label: 'Тип сайта', icon: '⚡' },
-    { key: 'complexity', label: 'Сложность', icon: '🤓' },
-    { key: 'timeline', label: 'Сроки', icon: '📆' },
-    { key: 'features', label: 'Дополнительные функции', icon: '🔗' },
-    { key: 'design', label: 'Дизайн', icon: '🧩' },
+    { key: 'websiteType', label: 'Тип сайта', icon: '' },
+    { key: 'complexity', label: 'Сложность', icon: '' },
+    { key: 'timeline', label: 'Сроки', icon: '' },
+    { key: 'features', label: 'Дополнительные функции', icon: '' },
+    { key: 'design', label: 'Дизайн', icon: '' },
   ]);
 
   const categories = [
@@ -181,8 +181,10 @@ const Admin = () => {
         const config = data.config;
         
         // Загружаем разделы, если они есть в конфиге
+        let sectionsToUse = calculatorSections;
         if (config.sections) {
           setCalculatorSections(config.sections);
+          sectionsToUse = config.sections;
         }
 
         const normalizeGroup = (group: any, defaultPriceType: 'fixed' | 'multiplier' = 'fixed') => {
@@ -202,7 +204,7 @@ const Admin = () => {
 
         // Загружаем данные для всех разделов
         const newCalcOptions: any = {};
-        calculatorSections.forEach(section => {
+        sectionsToUse.forEach(section => {
           const sectionKey = section.key;
           const sectionData = config[`${sectionKey}_${adminEditingLanguage.toLowerCase()}`];
           newCalcOptions[sectionKey] = normalizeGroup(sectionData, 'fixed');
@@ -933,7 +935,7 @@ const Admin = () => {
                         </button>
                       </div>
 
-                      <span className="text-lg">{section.icon}</span>
+                      {section.icon && <span className="text-lg">{section.icon}</span>}
                       <input 
                         className="flex-1 px-3 py-2 rounded-lg bg-white/5 border border-white/10 text-foreground" 
                         value={section.label} 

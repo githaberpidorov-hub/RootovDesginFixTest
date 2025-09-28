@@ -80,11 +80,11 @@ const PriceCalculator = () => {
 
   // Состояние для разделов калькулятора
   const [calculatorSections, setCalculatorSections] = useState([
-    { key: 'websiteType', label: 'Тип сайта', icon: '⚡' },
-    { key: 'complexity', label: 'Сложность', icon: '🤓' },
-    { key: 'timeline', label: 'Сроки', icon: '📆' },
-    { key: 'features', label: 'Дополнительные функции', icon: '🔗' },
-    { key: 'design', label: 'Дизайн', icon: '🧩' },
+    { key: 'websiteType', label: 'Тип сайта', icon: '' },
+    { key: 'complexity', label: 'Сложность', icon: '' },
+    { key: 'timeline', label: 'Сроки', icon: '' },
+    { key: 'features', label: 'Дополнительные функции', icon: '' },
+    { key: 'design', label: 'Дизайн', icon: '' },
   ]);
 
   type CalculatorOptions = typeof defaultOptions;
@@ -102,8 +102,10 @@ const PriceCalculator = () => {
           const cfg = j.config as Record<string, any>;
 
           // Загружаем разделы, если они есть в конфиге
+          let sectionsToUse = calculatorSections;
           if (cfg.sections) {
             setCalculatorSections(cfg.sections);
+            sectionsToUse = cfg.sections;
           }
 
           const normalizeGroup = (group: any, defaultPriceType: 'fixed' | 'multiplier' = 'fixed') => {
@@ -122,7 +124,7 @@ const PriceCalculator = () => {
 
           // Загружаем данные для всех разделов
           const next: any = {};
-          calculatorSections.forEach(section => {
+          sectionsToUse.forEach(section => {
             const sectionKey = section.key;
             const sectionData = cfg[`${sectionKey}_${String(language).toLowerCase()}`];
             next[sectionKey] = normalizeGroup(sectionData, 'fixed').map(o => ({ ...o, icon: section.icon })) as any;
@@ -235,27 +237,41 @@ const PriceCalculator = () => {
     }
   };
 
-  const totalSteps = 5;
-  const completedSteps = [
-    calculator.websiteType,
-    calculator.complexity,
-    calculator.timeline,
-    calculator.design,
-    (calculator.features.length ? "features" : "")
-  ].filter(Boolean).length;
+  const totalSteps = calculatorSections.length;
+  const completedSteps = calculatorSections.filter(section => {
+    const sectionKey = section.key as keyof CalculatorState;
+    if (sectionKey === 'features') {
+      return calculator.features.length > 0;
+    } else {
+      return !!(calculator as any)[sectionKey];
+    }
+  }).length;
   const progress = Math.round((completedSteps / totalSteps) * 100);
 
   // Build link to request page with encoded calculator summary
   const buildRequestHref = () => {
     try {
-      const selected = {
-        websiteType: options.websiteType.find(o => o.id === calculator.websiteType)?.name,
-        complexity: options.complexity.find(o => o.id === calculator.complexity)?.name,
-        timeline: options.timeline.find(o => o.id === calculator.timeline)?.name,
-        design: options.design.find(o => o.id === calculator.design)?.name,
-        features: calculator.features.map(fid => options.features.find(o => o.id === fid)?.name).filter(Boolean),
+      const selected: Record<string, any> = {
         totalPrice,
-      } as Record<string, any>;
+      };
+      
+      // Динамически собираем данные из всех разделов
+      calculatorSections.forEach(section => {
+        const sectionKey = section.key as keyof CalculatorState;
+        const sectionOptions = (options as any)[sectionKey] || [];
+        
+        if (sectionKey === 'features') {
+          selected[sectionKey] = calculator.features.map(fid => 
+            sectionOptions.find((o: any) => o.id === fid)?.name
+          ).filter(Boolean);
+        } else {
+          const selectedValue = (calculator as any)[sectionKey];
+          if (selectedValue) {
+            selected[sectionKey] = sectionOptions.find((o: any) => o.id === selectedValue)?.name;
+          }
+        }
+      });
+      
       const json = JSON.stringify(selected);
       const encoded = encodeURIComponent(json);
       return `/request?calc=${encoded}`;
@@ -333,7 +349,7 @@ const PriceCalculator = () => {
               return (
                 <div key={sectionKey}>
                   <h3 className="text-2xl font-semibold mb-6 text-foreground flex items-center gap-2">
-                    <span>{section.icon}</span>
+                    {section.icon && <span>{section.icon}</span>}
                     {section.label}
                   </h3>
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
@@ -379,81 +395,57 @@ const PriceCalculator = () => {
                 transition={{ duration: 0.24, ease: [0.22, 1, 0.36, 1] }}
                 style={{ transformOrigin: 'top', overflow: 'visible' }}
               >
-                {/* One AnimatePresence per chip group to ensure exit/enter on replacement */}
-                <AnimatePresence mode="popLayout">
-                  {calculator.websiteType && (
-                    <motion.div
-                      key={`websiteType-${calculator.websiteType}`}
-                      layout
-                      initial={{ opacity: 0, scale: 0.8, y: 10 }}
-                      animate={{ opacity: 1, scale: 1, y: 0 }}
-                      exit={{ opacity: 0, scale: 0.85, y: 10 }}
-                      transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
-                    >
-                      <SummaryChip label={(options.websiteType.find(o=>o.id===calculator.websiteType)?.name as string) || ''} onRemove={() => handleOptionSelect('websiteType', calculator.websiteType)} />
-                    </motion.div>
-                  )}
-                </AnimatePresence>
-
-                <AnimatePresence mode="popLayout">
-                  {calculator.complexity && (
-                    <motion.div
-                      key={`complexity-${calculator.complexity}`}
-                      layout
-                      initial={{ opacity: 0, scale: 0.8, y: 10 }}
-                      animate={{ opacity: 1, scale: 1, y: 0 }}
-                      exit={{ opacity: 0, scale: 0.85, y: 10 }}
-                      transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
-                    >
-                      <SummaryChip label={(options.complexity.find(o=>o.id===calculator.complexity)?.name as string) || ''} onRemove={() => handleOptionSelect('complexity', calculator.complexity)} />
-                    </motion.div>
-                  )}
-                </AnimatePresence>
-
-                <AnimatePresence mode="popLayout">
-                  {calculator.timeline && (
-                    <motion.div
-                      key={`timeline-${calculator.timeline}`}
-                      layout
-                      initial={{ opacity: 0, scale: 0.8, y: 10 }}
-                      animate={{ opacity: 1, scale: 1, y: 0 }}
-                      exit={{ opacity: 0, scale: 0.85, y: 10 }}
-                      transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
-                    >
-                      <SummaryChip label={(options.timeline.find(o=>o.id===calculator.timeline)?.name as string) || ''} onRemove={() => handleOptionSelect('timeline', calculator.timeline)} />
-                    </motion.div>
-                  )}
-                </AnimatePresence>
-
-                <AnimatePresence mode="popLayout">
-                  {calculator.design && (
-                    <motion.div
-                      key={`design-${calculator.design}`}
-                      layout
-                      initial={{ opacity: 0, scale: 0.8, y: 10 }}
-                      animate={{ opacity: 1, scale: 1, y: 0 }}
-                      exit={{ opacity: 0, scale: 0.85, y: 10 }}
-                      transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
-                    >
-                      <SummaryChip label={(options.design.find(o=>o.id===calculator.design)?.name as string) || ''} onRemove={() => handleOptionSelect('design', calculator.design)} />
-                    </motion.div>
-                  )}
-                </AnimatePresence>
-
-                <AnimatePresence mode="popLayout">
-                  {calculator.features.map((fid) => (
-                    <motion.div
-                      key={`feature-${fid}`}
-                      layout
-                      initial={{ opacity: 0, scale: 0.8, y: 10 }}
-                      animate={{ opacity: 1, scale: 1, y: 0 }}
-                      exit={{ opacity: 0, scale: 0.85, y: 10 }}
-                      transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
-                    >
-                      <SummaryChip label={(options.features.find(o=>o.id===fid)?.name as string) || ''} onRemove={() => handleOptionSelect('features', fid)} />
-                    </motion.div>
-                  ))}
-                </AnimatePresence>
+                {/* Динамические чипы для всех разделов */}
+                {calculatorSections.map((section) => {
+                  const sectionKey = section.key as keyof CalculatorState;
+                  const sectionOptions = (options as any)[sectionKey] || [];
+                  
+                  if (sectionKey === 'features') {
+                    // Для features показываем все выбранные пункты
+                    return (
+                      <AnimatePresence mode="popLayout" key={sectionKey}>
+                        {calculator.features.map((fid) => (
+                          <motion.div
+                            key={`feature-${fid}`}
+                            layout
+                            initial={{ opacity: 0, scale: 0.8, y: 10 }}
+                            animate={{ opacity: 1, scale: 1, y: 0 }}
+                            exit={{ opacity: 0, scale: 0.85, y: 10 }}
+                            transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
+                          >
+                            <SummaryChip 
+                              label={(sectionOptions.find((o: any) => o.id === fid)?.name as string) || ''} 
+                              onRemove={() => handleOptionSelect('features', fid)} 
+                            />
+                          </motion.div>
+                        ))}
+                      </AnimatePresence>
+                    );
+                  } else {
+                    // Для остальных разделов показываем выбранный пункт
+                    const selectedValue = (calculator as any)[sectionKey];
+                    if (selectedValue) {
+                      return (
+                        <AnimatePresence mode="popLayout" key={sectionKey}>
+                          <motion.div
+                            key={`${sectionKey}-${selectedValue}`}
+                            layout
+                            initial={{ opacity: 0, scale: 0.8, y: 10 }}
+                            animate={{ opacity: 1, scale: 1, y: 0 }}
+                            exit={{ opacity: 0, scale: 0.85, y: 10 }}
+                            transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
+                          >
+                            <SummaryChip 
+                              label={(sectionOptions.find((o: any) => o.id === selectedValue)?.name as string) || ''} 
+                              onRemove={() => handleOptionSelect(sectionKey, selectedValue)} 
+                            />
+                          </motion.div>
+                        </AnimatePresence>
+                      );
+                    }
+                  }
+                  return null;
+                })}
               </motion.div>
             </div>
           </div>
