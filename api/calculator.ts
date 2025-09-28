@@ -26,8 +26,8 @@ export default async function handler(req: any, res: any) {
         return res.status(500).json({ ok: false, error: 'Failed to fetch calculator config' });
       }
 
-      // Временно добавляем sections в ответ, пока поле не добавлено в базу
-      if (data) {
+      // Добавляем sections в ответ, если их нет
+      if (data && !data.sections) {
         data.sections = [
           { key: 'websiteType', label: 'Тип сайта', icon: '' },
           { key: 'complexity', label: 'Сложность', icon: '' },
@@ -51,28 +51,25 @@ export default async function handler(req: any, res: any) {
       // остальные оставляем значениями по умолчанию
       const configData: any = {
         language,
-        website_type_ru: {},
+        websiteType_ru: {},
         complexity_ru: {},
         timeline_ru: {},
         features_ru: {},
         design_ru: {},
-        website_type_eng: {},
+        websiteType_eng: {},
         complexity_eng: {},
         timeline_eng: {},
         features_eng: {},
         design_eng: {},
-        website_type_uk: {},
+        websiteType_uk: {},
         complexity_uk: {},
         timeline_uk: {},
         features_uk: {},
         design_uk: {},
+        sections: body.sections || [],
         updated_at: new Date().toISOString(),
       };
       
-      // Временно убираем sections до добавления поля в базу данных
-      // if (body.sections) {
-      //   configData.sections = body.sections;
-      // }
       
       // Динамически заполняем данные для всех разделов
       if (body.sections && Array.isArray(body.sections)) {
@@ -82,7 +79,7 @@ export default async function handler(req: any, res: any) {
         });
       } else {
         // Fallback для старых разделов
-        configData[`website_type_${String(language).toLowerCase()}`] = body.websiteType || {};
+        configData[`websiteType_${String(language).toLowerCase()}`] = body.websiteType || {};
         configData[`complexity_${String(language).toLowerCase()}`] = body.complexity || {};
         configData[`timeline_${String(language).toLowerCase()}`] = body.timeline || {};
         configData[`features_${String(language).toLowerCase()}`] = body.features || {};
@@ -104,13 +101,9 @@ export default async function handler(req: any, res: any) {
       if (existingData) {
         // Обновляем существующую запись
         const updateData: any = {
+          sections: body.sections || [],
           updated_at: new Date().toISOString(),
         };
-        
-        // Временно убираем sections до добавления поля в базу данных
-        // if (body.sections) {
-        //   updateData.sections = body.sections;
-        // }
         
         // Динамически заполняем данные для всех разделов
         if (body.sections && Array.isArray(body.sections)) {
@@ -120,7 +113,7 @@ export default async function handler(req: any, res: any) {
           });
         } else {
           // Fallback для старых разделов
-          updateData[`website_type_${language.toLowerCase()}`] = body.websiteType || {};
+          updateData[`websiteType_${language.toLowerCase()}`] = body.websiteType || {};
           updateData[`complexity_${language.toLowerCase()}`] = body.complexity || {};
           updateData[`timeline_${language.toLowerCase()}`] = body.timeline || {};
           updateData[`features_${language.toLowerCase()}`] = body.features || {};
