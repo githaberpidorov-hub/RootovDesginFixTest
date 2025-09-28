@@ -126,7 +126,11 @@ const PriceCalculator = () => {
           const next: any = {};
           sectionsToUse.forEach(section => {
             const sectionKey = section.key;
-            const sectionData = cfg[`${sectionKey}_${String(language).toLowerCase()}`];
+            // Исправляем регистр для websiteType -> websitetype
+            const dbKey = sectionKey === 'websiteType' 
+              ? `websitetype_${String(language).toLowerCase()}`
+              : `${sectionKey}_${String(language).toLowerCase()}`;
+            const sectionData = cfg[dbKey];
             next[sectionKey] = normalizeGroup(sectionData, 'fixed').map(o => ({ ...o, icon: section.icon })) as any;
           });
 

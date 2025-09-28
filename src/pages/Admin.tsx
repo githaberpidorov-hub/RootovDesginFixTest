@@ -206,7 +206,11 @@ const Admin = () => {
         const newCalcOptions: any = {};
         sectionsToUse.forEach(section => {
           const sectionKey = section.key;
-          const sectionData = config[`${sectionKey}_${adminEditingLanguage.toLowerCase()}`];
+          // Исправляем регистр для websiteType -> websitetype
+          const dbKey = sectionKey === 'websiteType' 
+            ? `websitetype_${adminEditingLanguage.toLowerCase()}`
+            : `${sectionKey}_${adminEditingLanguage.toLowerCase()}`;
+          const sectionData = config[dbKey];
           newCalcOptions[sectionKey] = normalizeGroup(sectionData, 'fixed');
         });
 

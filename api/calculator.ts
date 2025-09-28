@@ -36,6 +36,8 @@ export default async function handler(req: any, res: any) {
 
       console.log('Calculator API - Language:', language);
       console.log('Calculator API - Body:', JSON.stringify(body, null, 2));
+      console.log('Calculator API - Method:', req.method);
+      console.log('Calculator API - Headers:', req.headers);
 
       // Создаем конфигурацию с правильной структурой
       const configData: any = {
@@ -47,11 +49,22 @@ export default async function handler(req: any, res: any) {
       // Заполняем данные для всех разделов
       if (body.sections && Array.isArray(body.sections)) {
         body.sections.forEach((section: any) => {
-          const sectionKey = `${section.key}_${String(language).toLowerCase()}`;
+          // Исправляем регистр для websiteType -> websitetype
+          const sectionKey = section.key === 'websiteType' 
+            ? `websitetype_${String(language).toLowerCase()}`
+            : `${section.key}_${String(language).toLowerCase()}`;
           configData[sectionKey] = body[section.key] || {};
         });
       }
 
+      // Сначала проверим структуру таблицы
+      const { data: tableInfo, error: tableError } = await supabase
+        .from('calculator_config')
+        .select('*')
+        .limit(1);
+      
+      console.log('Table structure check:', { tableInfo, tableError });
+      
       // Проверяем, существует ли запись для этого языка
       const { data: existingData, error: fetchError } = await supabase
         .from('calculator_config')
@@ -74,7 +87,10 @@ export default async function handler(req: any, res: any) {
         // Заполняем данные для всех разделов
         if (body.sections && Array.isArray(body.sections)) {
           body.sections.forEach((section: any) => {
-            const sectionKey = `${section.key}_${String(language).toLowerCase()}`;
+            // Исправляем регистр для websiteType -> websitetype
+            const sectionKey = section.key === 'websiteType' 
+              ? `websitetype_${String(language).toLowerCase()}`
+              : `${section.key}_${String(language).toLowerCase()}`;
             updateData[sectionKey] = body[section.key] || {};
           });
         }
