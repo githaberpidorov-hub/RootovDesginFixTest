@@ -173,6 +173,7 @@ const Admin = () => {
   }, [adminEditingLanguage, isAuthenticated]);
 
   const loadCalculatorConfig = async () => {
+    console.log('=== LOAD FUNCTION CALLED ===');
     try {
       const response = await fetch(`/api/calculator?language=${adminEditingLanguage}`);
       const data = await response.json();
@@ -242,6 +243,7 @@ const Admin = () => {
   };
 
   const saveCalculatorConfig = async () => {
+    console.log('=== SAVE FUNCTION CALLED ===');
     try {
       const configData: any = {
         language: adminEditingLanguage,
