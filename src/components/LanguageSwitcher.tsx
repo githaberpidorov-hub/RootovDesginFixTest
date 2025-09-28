@@ -25,6 +25,8 @@ export default function LanguageSwitcher() {
           background: "linear-gradient(135deg, hsla(0, 0%, 100%, 0.06) 0%, hsla(220, 20%, 12%, 0.08) 100%)",
           boxShadow: "0 12px 28px hsla(220, 50%, 2%, 0.45), inset 0 1px 0 hsla(0, 0%, 100%, 0.08)",
           cursor: isOpen ? "default" : "pointer",
+          backdropFilter: "blur(16px)",
+          WebkitBackdropFilter: "blur(16px)",
           // desktop structure kept; mobile remains a circle when closed via animate below
         }}
         initial={false}
@@ -87,7 +89,11 @@ export default function LanguageSwitcher() {
                         key={lang.code}
                         type="button"
                         onClick={(e) => { e.stopPropagation(); setLanguage(lang.code); setIsOpen(false); }}
-                        className={`h-8 px-2 rounded-xl border text-sm transition-colors ${active ? "bg-foreground/10 border-foreground/20" : "border-white/10 hover:bg-white/10"}`}
+                        className={`h-8 px-2 rounded-xl border text-sm transition-colors backdrop-blur-sm ${active ? "bg-foreground/10 border-foreground/20" : "border-white/10 hover:bg-white/10"}`}
+                        style={{
+                          backdropFilter: "blur(8px)",
+                          WebkitBackdropFilter: "blur(8px)"
+                        }}
                         initial={{ opacity: 0, x: 12, y: 4, scale: 0.96 }}
                         animate={{ opacity: 1, x: 0, y: 0, scale: 1 }}
                         exit={{ opacity: 0, x: 12, y: 4, scale: 0.96 }}

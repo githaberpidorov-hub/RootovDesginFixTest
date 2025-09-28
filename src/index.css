@@ -1572,4 +1572,32 @@ html, body {
       inset 0 1px 0 hsla(0, 0%, 100%, 0.15);
     border: 1px solid hsla(0, 0%, 100%, 0.2);
   }
+
+/* CRITICAL: Force backdrop-filter for switchers - highest priority */
+.language-switcher,
+.theme-island {
+  -webkit-backdrop-filter: blur(16px) !important;
+  backdrop-filter: blur(16px) !important;
+}
+
+/* Even higher specificity to override any blocking rules */
+div.language-switcher,
+div.theme-island {
+  -webkit-backdrop-filter: blur(16px) !important;
+  backdrop-filter: blur(16px) !important;
+}
+
+/* Maximum specificity override */
+.language-switcher.backdrop-blur-2xl,
+.theme-island.backdrop-blur-2xl {
+  -webkit-backdrop-filter: blur(16px) !important;
+  backdrop-filter: blur(16px) !important;
+}
+
+/* Force backdrop-filter for buttons inside switchers */
+.language-switcher button,
+.theme-island button {
+  -webkit-backdrop-filter: blur(8px) !important;
+  backdrop-filter: blur(8px) !important;
+}
 }

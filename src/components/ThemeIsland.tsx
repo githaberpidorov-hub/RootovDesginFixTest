@@ -95,10 +95,12 @@ const ThemeIsland = () => {
           role="group"
           aria-label="Color theme switcher"
           onClick={() => !open && setOpen(true)}
-          className="relative rounded-2xl border border-white/10 px-2.5 py-2 sm:px-3 sm:py-2.5 backdrop-blur-2xl text-foreground/90 overflow-hidden"
+          className="theme-island relative rounded-2xl border border-white/10 px-2.5 py-2 sm:px-3 sm:py-2.5 backdrop-blur-2xl text-foreground/90 overflow-hidden"
           style={{
             background: "var(--gradient-glass)",
             boxShadow: "var(--shadow-glass)",
+            backdropFilter: "blur(16px)",
+            WebkitBackdropFilter: "blur(16px)"
           }}
           initial={false}
           animate={isMobile ? { width: 60, height: open ? 252 : 60, opacity: 1, y: 0 } : { width: open ? 280 : 64, opacity: 1, y: 0 }}
@@ -117,13 +119,17 @@ const ThemeIsland = () => {
               aria-label={open ? "Свернуть палитру" : "Показать палитру"}
               aria-expanded={open}
               onClick={(e) => { if (open) { e.stopPropagation(); setOpen(false); } else { setOpen(true); } }}
-              className="relative h-10 w-10 shrink-0 grid place-items-center rounded-xl border border-white/10 hover:bg-white/10 transition-colors"
-              style={{ transform: `translateX(${isMobile ? "-0.5px" : "-1px"}) translateY(${isMobile ? "-1px" : "-1px"})` }}
+              className="relative h-10 w-10 shrink-0 grid place-items-center rounded-full border border-white/10 backdrop-blur-sm hover:bg-white/10 transition-colors"
+              style={{ 
+                transform: `translateX(${isMobile ? "-0.5px" : "-1px"}) translateY(${isMobile ? "-1px" : "-1px"})`,
+                backdropFilter: "blur(8px)",
+                WebkitBackdropFilter: "blur(8px)"
+              }}
             >
               {/* Inner ring */}
               <div
                 aria-hidden
-                className="pointer-events-none absolute inset-px rounded-[inherit]"
+                className="pointer-events-none absolute inset-px rounded-full"
                 style={{ boxShadow: "inset 0 0 0 1px hsl(var(--border) / 0.9)" }}
               />
               <AnimatePresence mode="wait">{icon}</AnimatePresence>
@@ -144,8 +150,13 @@ const ThemeIsland = () => {
                       type="button"
                       onClick={(e) => { e.stopPropagation(); applyTheme(t.id); setOpen(false); }}
                       aria-label={`Выбрать тему: ${t.label}`}
-                      className={`h-6 w-6 rounded-full border transition-colors ${current === t.id ? "ring-2 ring-ring" : "hover:opacity-90"}`}
-                      style={{ backgroundColor: t.color, borderColor: "hsl(var(--border))" }}
+                      className={`h-6 w-6 rounded-full border transition-colors backdrop-blur-sm ${current === t.id ? "ring-2 ring-ring" : "hover:opacity-90"}`}
+                      style={{ 
+                        backgroundColor: t.color, 
+                        borderColor: "hsl(var(--border))",
+                        backdropFilter: "blur(8px)",
+                        WebkitBackdropFilter: "blur(8px)"
+                      }}
                       initial={{ opacity: 0, x: isMobile ? 0 : 12, y: isMobile ? -8 : 4, scale: 0.96 }}
                       animate={{ opacity: 1, x: 0, y: 0, scale: 1 }}
                       exit={{ opacity: 0, x: isMobile ? 0 : 12, y: isMobile ? -8 : 4, scale: 0.96 }}
