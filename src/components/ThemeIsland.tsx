@@ -148,7 +148,7 @@ const ThemeIsland = () => {
                     <motion.button
                       key={t.id}
                       type="button"
-                      onClick={(e) => { e.stopPropagation(); applyTheme(t.id); setOpen(false); }}
+                      onClick={(e) => { e.stopPropagation(); applyTheme(t.id); }}
                       aria-label={`Выбрать тему: ${t.label}`}
                       className={`h-6 w-6 rounded-full border transition-colors backdrop-blur-sm ${current === t.id ? "ring-2 ring-ring" : "hover:opacity-90"}`}
                       style={{ 
