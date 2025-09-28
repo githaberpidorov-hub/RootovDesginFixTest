@@ -53,42 +53,42 @@ const Admin = () => {
 
   // Calculator config (editable)
   type CalcOptions = {
-    websiteType: { id: string; name: string; price: number }[];
-    complexity: { id: string; name: string; multiplier: number }[];
-    timeline: { id: string; name: string; multiplier: number }[];
-    features: { id: string; name: string; price: number }[];
-    design: { id: string; name: string; multiplier: number }[];
+    websiteType: { id: string; name: string; price: number; priceType: 'fixed' | 'multiplier' }[];
+    complexity: { id: string; name: string; multiplier: number; priceType: 'fixed' | 'multiplier' }[];
+    timeline: { id: string; name: string; multiplier: number; priceType: 'fixed' | 'multiplier' }[];
+    features: { id: string; name: string; price: number; priceType: 'fixed' | 'multiplier' }[];
+    design: { id: string; name: string; multiplier: number; priceType: 'fixed' | 'multiplier' }[];
   };
   const [calcOptions, setCalcOptions] = useState<CalcOptions>({
     websiteType: [
-      { id: "landing", name: "Лендинг", price: 500 },
-      { id: "corporate", name: "Корпоративный сайт", price: 1200 },
-      { id: "ecommerce", name: "Интернет-магазин", price: 2500 },
-      { id: "portfolio", name: "Портфолио", price: 800 },
-      { id: "blog", name: "Блог/СМИ", price: 1000 },
+      { id: "landing", name: "Лендинг", price: 500, priceType: 'fixed' },
+      { id: "corporate", name: "Корпоративный сайт", price: 1200, priceType: 'fixed' },
+      { id: "ecommerce", name: "Интернет-магазин", price: 2500, priceType: 'fixed' },
+      { id: "portfolio", name: "Портфолио", price: 800, priceType: 'fixed' },
+      { id: "blog", name: "Блог/СМИ", price: 1000, priceType: 'fixed' },
     ],
     complexity: [
-      { id: "simple", name: "Простой", multiplier: 1 },
-      { id: "medium", name: "Средний", multiplier: 1.5 },
-      { id: "complex", name: "Сложный", multiplier: 2.2 },
+      { id: "simple", name: "Простой", multiplier: 1, priceType: 'multiplier' },
+      { id: "medium", name: "Средний", multiplier: 1.5, priceType: 'multiplier' },
+      { id: "complex", name: "Сложный", multiplier: 2.2, priceType: 'multiplier' },
     ],
     timeline: [
-      { id: "urgent", name: "Срочно (1-2 недели)", multiplier: 1.8 },
-      { id: "normal", name: "Обычно (3-4 недели)", multiplier: 1 },
-      { id: "flexible", name: "Не горит (1-2 месяца)", multiplier: 0.8 },
+      { id: "urgent", name: "Срочно (1-2 недели)", multiplier: 1.8, priceType: 'multiplier' },
+      { id: "normal", name: "Обычно (3-4 недели)", multiplier: 1, priceType: 'multiplier' },
+      { id: "flexible", name: "Не горит (1-2 месяца)", multiplier: 0.8, priceType: 'multiplier' },
     ],
     features: [
-      { id: "cms", name: "Система управления", price: 300 },
-      { id: "seo", name: "SEO оптимизация", price: 400 },
-      { id: "analytics", name: "Аналитика", price: 200 },
-      { id: "mobile", name: "Мобильная версия", price: 500 },
-      { id: "multilang", name: "Многоязычность", price: 600 },
-      { id: "integration", name: "Интеграции", price: 800 },
+      { id: "cms", name: "Система управления", price: 300, priceType: 'fixed' },
+      { id: "seo", name: "SEO оптимизация", price: 400, priceType: 'fixed' },
+      { id: "analytics", name: "Аналитика", price: 200, priceType: 'fixed' },
+      { id: "mobile", name: "Мобильная версия", price: 500, priceType: 'fixed' },
+      { id: "multilang", name: "Многоязычность", price: 600, priceType: 'fixed' },
+      { id: "integration", name: "Интеграции", price: 800, priceType: 'fixed' },
     ],
     design: [
-      { id: "template", name: "На основе шаблона", multiplier: 0.7 },
-      { id: "custom", name: "Индивидуальный дизайн", multiplier: 1 },
-      { id: "premium", name: "Premium дизайн", multiplier: 1.4 },
+      { id: "template", name: "На основе шаблона", multiplier: 0.7, priceType: 'multiplier' },
+      { id: "custom", name: "Индивидуальный дизайн", multiplier: 1, priceType: 'multiplier' },
+      { id: "premium", name: "Premium дизайн", multiplier: 1.4, priceType: 'multiplier' },
     ],
   });
 
@@ -167,19 +167,29 @@ const Admin = () => {
       if (data.ok && data.config) {
         const config = data.config;
         const normalizePriceGroup = (group: any) => {
-          if (!group) return [] as Array<{ id: string; name: string; price: number }>;
+          if (!group) return [] as Array<{ id: string; name: string; price: number; priceType: 'fixed' | 'multiplier' }>;
           const entries = Array.isArray(group)
             ? (group as any[]).map((val, idx) => [String(val?.id ?? idx), val] as const)
             : Object.entries(group as Record<string, any>);
         
-          return entries.map(([id, value]) => ({ id, name: value?.label || value?.name || id, price: Number(value?.price || 0) }));
+          return entries.map(([id, value]) => ({ 
+            id, 
+            name: value?.label || value?.name || id, 
+            price: Number(value?.price || 0),
+            priceType: value?.priceType || 'fixed'
+          }));
         };
         const normalizeMultGroup = (group: any) => {
-          if (!group) return [] as Array<{ id: string; name: string; multiplier: number }>;
+          if (!group) return [] as Array<{ id: string; name: string; multiplier: number; priceType: 'fixed' | 'multiplier' }>;
           const entries = Array.isArray(group)
             ? (group as any[]).map((val, idx) => [String(val?.id ?? idx), val] as const)
             : Object.entries(group as Record<string, any>);
-          return entries.map(([id, value]) => ({ id, name: value?.label || value?.name || id, multiplier: Number(value?.multiplier || 1) }));
+          return entries.map(([id, value]) => ({ 
+            id, 
+            name: value?.label || value?.name || id, 
+            multiplier: Number(value?.multiplier || value?.price || 1),
+            priceType: value?.priceType || 'multiplier'
+          }));
         };
 
         setCalcOptions({
@@ -200,19 +210,39 @@ const Admin = () => {
       const configData = {
         language: adminEditingLanguage,
         websiteType: Object.fromEntries(
-          calcOptions.websiteType.map(opt => [String(opt.id), { label: opt.name, price: Number(opt.price || 0) }])
+          calcOptions.websiteType.map(opt => [String(opt.id), { 
+            label: opt.name, 
+            price: Number(opt.price || 0),
+            priceType: opt.priceType || 'fixed'
+          }])
         ),
         complexity: Object.fromEntries(
-          calcOptions.complexity.map(opt => [String(opt.id), { label: opt.name, multiplier: Number(opt.multiplier || 1) }])
+          calcOptions.complexity.map(opt => [String(opt.id), { 
+            label: opt.name, 
+            multiplier: Number(opt.multiplier || 1),
+            priceType: opt.priceType || 'multiplier'
+          }])
         ),
         timeline: Object.fromEntries(
-          calcOptions.timeline.map(opt => [String(opt.id), { label: opt.name, multiplier: Number(opt.multiplier || 1) }])
+          calcOptions.timeline.map(opt => [String(opt.id), { 
+            label: opt.name, 
+            multiplier: Number(opt.multiplier || 1),
+            priceType: opt.priceType || 'multiplier'
+          }])
         ),
         features: Object.fromEntries(
-          calcOptions.features.map(opt => [String(opt.id), { label: opt.name, price: Number(opt.price || 0) }])
+          calcOptions.features.map(opt => [String(opt.id), { 
+            label: opt.name, 
+            price: Number(opt.price || 0),
+            priceType: opt.priceType || 'fixed'
+          }])
         ),
         design: Object.fromEntries(
-          calcOptions.design.map(opt => [String(opt.id), { label: opt.name, price: Number(opt.price || 0) }])
+          calcOptions.design.map(opt => [String(opt.id), { 
+            label: opt.name, 
+            multiplier: Number(opt.multiplier || 1),
+            priceType: opt.priceType || 'multiplier'
+          }])
         )
       };
 
@@ -227,6 +257,8 @@ const Admin = () => {
           title: t.common.success,
           description: "Конфигурация калькулятора сохранена",
         });
+        // Перезагружаем конфигурацию после сохранения
+        await loadCalculatorConfig();
       } else {
         throw new Error('Failed to save calculator config');
       }
@@ -900,43 +932,122 @@ const Admin = () => {
                     <div className="flex gap-2">
                       <input id={`new-${groupKey}-id`} placeholder="id" className="w-28 px-3 py-2 rounded-lg bg-white/5 border border-white/10" />
                       <input id={`new-${groupKey}-name`} placeholder="Название" className="w-44 px-3 py-2 rounded-lg bg-white/5 border border-white/10" />
-                      {(['websiteType','features'] as const).includes(groupKey) ? (
-                        <input id={`new-${groupKey}-price`} type="number" placeholder="Цена" className="w-28 px-3 py-2 rounded-lg bg-white/5 border border-white/10" />
-                      ) : (
-                        <input id={`new-${groupKey}-mult`} type="number" step="0.1" placeholder="×" className="w-20 px-3 py-2 rounded-lg bg-white/5 border border-white/10" />
-                      )}
+                      <select id={`new-${groupKey}-type`} className="w-32 px-3 py-2 rounded-lg bg-white/5 border border-white/10">
+                        <option value="fixed">Фиксированная</option>
+                        <option value="multiplier">Множитель</option>
+                      </select>
+                      <input id={`new-${groupKey}-value`} type="number" step="0.1" placeholder="Значение" className="w-28 px-3 py-2 rounded-lg bg-white/5 border border-white/10" />
                       <GlassButton variant="ghost" size="sm" onClick={() => {
                         const idEl = document.getElementById(`new-${groupKey}-id`) as HTMLInputElement;
                         const nameEl = document.getElementById(`new-${groupKey}-name`) as HTMLInputElement;
-                        const priceEl = document.getElementById(`new-${groupKey}-price`) as HTMLInputElement | null;
-                        const multEl = document.getElementById(`new-${groupKey}-mult`) as HTMLInputElement | null;
-                        if (!idEl.value || !nameEl.value) return;
+                        const typeEl = document.getElementById(`new-${groupKey}-type`) as HTMLSelectElement;
+                        const valueEl = document.getElementById(`new-${groupKey}-value`) as HTMLInputElement;
+                        if (!idEl.value || !nameEl.value || !valueEl.value) return;
+                        
+                        const priceType = typeEl.value as 'fixed' | 'multiplier';
+                        const value = Number(valueEl.value);
+                        
                         setCalcOptions(prev => {
                           const next = { ...prev } as any;
-                          if (groupKey === 'websiteType' || groupKey === 'features') {
-                            next[groupKey] = [...next[groupKey], { id: idEl.value, name: nameEl.value, price: Number(priceEl?.value || '0') }];
+                          if (priceType === 'fixed') {
+                            next[groupKey] = [...next[groupKey], { 
+                              id: idEl.value, 
+                              name: nameEl.value, 
+                              price: value,
+                              priceType: 'fixed',
+                              multiplier: 1
+                            }];
                           } else {
-                            next[groupKey] = [...next[groupKey], { id: idEl.value, name: nameEl.value, multiplier: Number(multEl?.value || '1') }];
+                            next[groupKey] = [...next[groupKey], { 
+                              id: idEl.value, 
+                              name: nameEl.value, 
+                              multiplier: value,
+                              priceType: 'multiplier',
+                              price: 0
+                            }];
                           }
                           return next;
                         });
                         idEl.value = '';
                         nameEl.value = '';
-                        if (priceEl) priceEl.value = '';
-                        if (multEl) multEl.value = '';
+                        valueEl.value = '';
                       }}>Добавить</GlassButton>
                     </div>
                   </div>
                   <div className="space-y-2">
                     {(calcOptions as any)[groupKey].map((item: any, idx: number) => (
-                      <div key={item.id} className="flex items-center gap-3 p-3 rounded-xl bg-white/5 border border-white/10">
+                      <div key={item.id} className="flex items-center gap-3 p-3 rounded-xl bg-white/5 border border-white/10 group">
+                        {/* Drag handle */}
+                        <div className="cursor-move text-foreground/40 hover:text-foreground/70 transition-colors" title="Перетащите для изменения порядка">
+                          <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                            <path d="M8 6h8v2H8V6zm0 4h8v2H8v-2zm0 4h8v2H8v-2z"/>
+                          </svg>
+                        </div>
+                        
+                        {/* Order controls */}
+                        <div className="flex flex-col gap-1">
+                          <button 
+                            onClick={() => {
+                              if (idx > 0) {
+                                setCalcOptions(prev => {
+                                  const next = { ...prev } as any;
+                                  const items = [...next[groupKey]];
+                                  [items[idx], items[idx - 1]] = [items[idx - 1], items[idx]];
+                                  next[groupKey] = items;
+                                  return next;
+                                });
+                              }
+                            }}
+                            disabled={idx === 0}
+                            className="w-6 h-4 text-xs bg-white/10 hover:bg-white/20 disabled:opacity-30 disabled:cursor-not-allowed rounded flex items-center justify-center"
+                            title="Переместить вверх"
+                          >
+                            ↑
+                          </button>
+                          <button 
+                            onClick={() => {
+                              if (idx < (calcOptions as any)[groupKey].length - 1) {
+                                setCalcOptions(prev => {
+                                  const next = { ...prev } as any;
+                                  const items = [...next[groupKey]];
+                                  [items[idx], items[idx + 1]] = [items[idx + 1], items[idx]];
+                                  next[groupKey] = items;
+                                  return next;
+                                });
+                              }
+                            }}
+                            disabled={idx === (calcOptions as any)[groupKey].length - 1}
+                            className="w-6 h-4 text-xs bg-white/10 hover:bg-white/20 disabled:opacity-30 disabled:cursor-not-allowed rounded flex items-center justify-center"
+                            title="Переместить вниз"
+                          >
+                            ↓
+                          </button>
+                        </div>
+
                         <input className="w-36 px-3 py-2 rounded-lg bg-white/5 border border-white/10" value={item.id} onChange={(e)=>{
                           setCalcOptions(prev=>{ const next = { ...prev } as any; next[groupKey][idx].id = e.target.value; return next; });
                         }} />
                         <input className="flex-1 px-3 py-2 rounded-lg bg-white/5 border border-white/10" value={item.name} onChange={(e)=>{
                           setCalcOptions(prev=>{ const next = { ...prev } as any; next[groupKey][idx].name = e.target.value; return next; });
                         }} />
-                        {('price' in item) ? (
+                        <select className="w-32 px-3 py-2 rounded-lg bg-white/5 border border-white/10" value={item.priceType || 'fixed'} onChange={(e)=>{
+                          const newPriceType = e.target.value as 'fixed' | 'multiplier';
+                          setCalcOptions(prev=>{ 
+                            const next = { ...prev } as any; 
+                            next[groupKey][idx].priceType = newPriceType;
+                            // Сбрасываем значения при смене типа
+                            if (newPriceType === 'fixed') {
+                              next[groupKey][idx].multiplier = 1;
+                            } else {
+                              next[groupKey][idx].price = 0;
+                            }
+                            return next; 
+                          });
+                        }}>
+                          <option value="fixed">Фиксированная</option>
+                          <option value="multiplier">Множитель</option>
+                        </select>
+                        {item.priceType === 'fixed' ? (
                           <input type="number" className="w-32 px-3 py-2 rounded-lg bg-white/5 border border-white/10" value={item.price} onChange={(e)=>{
                             setCalcOptions(prev=>{ const next = { ...prev } as any; next[groupKey][idx].price = Number(e.target.value); return next; });
                           }} />

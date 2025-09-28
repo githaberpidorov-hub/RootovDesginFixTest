@@ -47,34 +47,34 @@ const PriceCalculator = () => {
 
   const defaultOptions = {
     websiteType: [
-      { id: "landing", name: "Лендинг", price: 500 },
-      { id: "corporate", name: "Корпоративный сайт", price: 1200 },
-      { id: "ecommerce", name: "Интернет-магазин", price: 2500 },
-      { id: "portfolio", name: "Портфолио", price: 800 },
-      { id: "blog", name: "Блог/СМИ", price: 1000 },
+      { id: "landing", name: "Лендинг", price: 500, priceType: 'fixed' as const },
+      { id: "corporate", name: "Корпоративный сайт", price: 1200, priceType: 'fixed' as const },
+      { id: "ecommerce", name: "Интернет-магазин", price: 2500, priceType: 'fixed' as const },
+      { id: "portfolio", name: "Портфолио", price: 800, priceType: 'fixed' as const },
+      { id: "blog", name: "Блог/СМИ", price: 1000, priceType: 'fixed' as const },
     ],
     complexity: [
-      { id: "simple", name: "Простой", multiplier: 1 },
-      { id: "medium", name: "Средний", multiplier: 1.5 },
-      { id: "complex", name: "Сложный", multiplier: 2.2 },
+      { id: "simple", name: "Простой", multiplier: 1, priceType: 'multiplier' as const },
+      { id: "medium", name: "Средний", multiplier: 1.5, priceType: 'multiplier' as const },
+      { id: "complex", name: "Сложный", multiplier: 2.2, priceType: 'multiplier' as const },
     ],
     timeline: [
-      { id: "urgent", name: "Срочно (1-2 недели)", multiplier: 1.8 },
-      { id: "normal", name: "Обычно (3-4 недели)", multiplier: 1 },
-      { id: "flexible", name: "Не горит (1-2 месяца)", multiplier: 0.8 },
+      { id: "urgent", name: "Срочно (1-2 недели)", multiplier: 1.8, priceType: 'multiplier' as const },
+      { id: "normal", name: "Обычно (3-4 недели)", multiplier: 1, priceType: 'multiplier' as const },
+      { id: "flexible", name: "Не горит (1-2 месяца)", multiplier: 0.8, priceType: 'multiplier' as const },
     ],
     features: [
-      { id: "cms", name: "Система управления", price: 300 },
-      { id: "seo", name: "SEO оптимизация", price: 400 },
-      { id: "analytics", name: "Аналитика", price: 200 },
-      { id: "mobile", name: "Мобильная версия", price: 500 },
-      { id: "multilang", name: "Многоязычность", price: 600 },
-      { id: "integration", name: "Интеграции", price: 800 },
+      { id: "cms", name: "Система управления", price: 300, priceType: 'fixed' as const },
+      { id: "seo", name: "SEO оптимизация", price: 400, priceType: 'fixed' as const },
+      { id: "analytics", name: "Аналитика", price: 200, priceType: 'fixed' as const },
+      { id: "mobile", name: "Мобильная версия", price: 500, priceType: 'fixed' as const },
+      { id: "multilang", name: "Многоязычность", price: 600, priceType: 'fixed' as const },
+      { id: "integration", name: "Интеграции", price: 800, priceType: 'fixed' as const },
     ],
     design: [
-      { id: "template", name: "На основе шаблона", multiplier: 0.7 },
-      { id: "custom", name: "Индивидуальный дизайн", multiplier: 1 },
-      { id: "premium", name: "Premium дизайн", multiplier: 1.4 },
+      { id: "template", name: "На основе шаблона", multiplier: 0.7, priceType: 'multiplier' as const },
+      { id: "custom", name: "Индивидуальный дизайн", multiplier: 1, priceType: 'multiplier' as const },
+      { id: "premium", name: "Premium дизайн", multiplier: 1.4, priceType: 'multiplier' as const },
     ],
   } as const;
 
@@ -93,18 +93,28 @@ const PriceCalculator = () => {
           const cfg = j.config as Record<string, any>;
 
           const normalizePrice = (group: any) => {
-            if (!group) return [] as Array<{ id: string; name: string; price: number }>;
+            if (!group) return [] as Array<{ id: string; name: string; price: number; priceType: 'fixed' | 'multiplier' }>;
             const entries = Array.isArray(group)
               ? (group as any[]).map((val, idx) => [String(val?.id ?? idx), val] as const)
               : Object.entries(group as Record<string, any>);
-            return entries.map(([id, value]) => ({ id, name: value?.label || value?.name || id, price: Number(value?.price || 0) }));
+            return entries.map(([id, value]) => ({ 
+              id, 
+              name: value?.label || value?.name || id, 
+              price: Number(value?.price || 0),
+              priceType: value?.priceType || 'fixed'
+            }));
           };
           const normalizeMult = (group: any) => {
-            if (!group) return [] as Array<{ id: string; name: string; multiplier: number }>;
+            if (!group) return [] as Array<{ id: string; name: string; multiplier: number; priceType: 'fixed' | 'multiplier' }>;
             const entries = Array.isArray(group)
               ? (group as any[]).map((val, idx) => [String(val?.id ?? idx), val] as const)
               : Object.entries(group as Record<string, any>);
-            return entries.map(([id, value]) => ({ id, name: value?.label || value?.name || id, multiplier: Number(value?.multiplier || 1) }));
+            return entries.map(([id, value]) => ({ 
+              id, 
+              name: value?.label || value?.name || id, 
+              multiplier: Number(value?.multiplier || value?.price || 1),
+              priceType: value?.priceType || 'multiplier'
+            }));
           };
 
           const next: CalculatorOptions = {
@@ -151,26 +161,54 @@ const PriceCalculator = () => {
     // Base price from website type
     const websiteTypeOption = options.websiteType.find(opt => opt.id === calculator.websiteType);
     if (websiteTypeOption) {
-      basePrice = websiteTypeOption.price as number;
+      if (websiteTypeOption.priceType === 'fixed') {
+        basePrice = websiteTypeOption.price as number;
+      } else {
+        // Если website type - множитель, то он влияет на общий множитель
+        multiplier *= Number((websiteTypeOption as any)?.multiplier ?? 1);
+      }
     }
 
-    // Complexity multiplier
+    // Complexity
     const complexityOption = options.complexity.find(opt => opt.id === calculator.complexity);
-    multiplier *= Number((complexityOption as any)?.multiplier ?? 1);
+    if (complexityOption) {
+      if (complexityOption.priceType === 'fixed') {
+        additionalFeatures += Number((complexityOption as any)?.price ?? 0);
+      } else {
+        multiplier *= Number((complexityOption as any)?.multiplier ?? 1);
+      }
+    }
 
-    // Timeline multiplier
+    // Timeline
     const timelineOption = options.timeline.find(opt => opt.id === calculator.timeline);
-    multiplier *= Number((timelineOption as any)?.multiplier ?? 1);
+    if (timelineOption) {
+      if (timelineOption.priceType === 'fixed') {
+        additionalFeatures += Number((timelineOption as any)?.price ?? 0);
+      } else {
+        multiplier *= Number((timelineOption as any)?.multiplier ?? 1);
+      }
+    }
 
-    // Design multiplier
+    // Design
     const designOption = options.design.find(opt => opt.id === calculator.design);
-    multiplier *= Number((designOption as any)?.multiplier ?? 1);
+    if (designOption) {
+      if (designOption.priceType === 'fixed') {
+        additionalFeatures += Number((designOption as any)?.price ?? 0);
+      } else {
+        multiplier *= Number((designOption as any)?.multiplier ?? 1);
+      }
+    }
 
     // Additional features
     calculator.features.forEach(featureId => {
       const feature = options.features.find(opt => opt.id === featureId);
       if (feature) {
-        additionalFeatures += Number((feature as any).price ?? 0);
+        if (feature.priceType === 'fixed') {
+          additionalFeatures += Number((feature as any).price ?? 0);
+        } else {
+          // Если feature - множитель, то он влияет на общий множитель
+          multiplier *= Number((feature as any)?.multiplier ?? 1);
+        }
       }
     });
 
@@ -288,7 +326,7 @@ const PriceCalculator = () => {
             {/* Website Type */}
             <div>
               <h3 className="text-2xl font-semibold mb-6 text-foreground">{t.calculatorUi.websiteType}</h3>
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
                 {options.websiteType.map((option) => (
                   <OptionCard
                     key={`websiteType-${option.id}`}
@@ -297,7 +335,10 @@ const PriceCalculator = () => {
                     isActive={calculator.websiteType === option.id}
                     onClick={() => handleOptionSelect('websiteType', option.id)}
                     headline={option.name as string}
-                    subline={`${t.calculatorUi.fromPrefix}${(option as any).price}`}
+                    subline={option.priceType === 'fixed' 
+                      ? `${t.calculatorUi.fromPrefix}${(option as any).price}` 
+                      : `${t.calculatorUi.multiplyPrefix}${(option as any).multiplier}`
+                    }
                   />
                 ))}
               </div>
@@ -306,7 +347,7 @@ const PriceCalculator = () => {
             {/* Complexity */}
             <div>
               <h3 className="text-2xl font-semibold mb-6 text-foreground">{t.calculatorUi.complexity}</h3>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
                 {options.complexity.map((option) => (
                   <OptionCard
                     key={`complexity-${option.id}`}
@@ -315,7 +356,10 @@ const PriceCalculator = () => {
                     isActive={calculator.complexity === option.id}
                     onClick={() => handleOptionSelect('complexity', option.id)}
                     headline={option.name as string}
-                    subline={`${t.calculatorUi.multiplyPrefix}${(option as any).multiplier}`}
+                    subline={option.priceType === 'fixed' 
+                      ? `${t.calculatorUi.plusPrefix}${(option as any).price}` 
+                      : `${t.calculatorUi.multiplyPrefix}${(option as any).multiplier}`
+                    }
                   />
                 ))}
               </div>
@@ -324,7 +368,7 @@ const PriceCalculator = () => {
             {/* Timeline */}
             <div>
               <h3 className="text-2xl font-semibold mb-6 text-foreground">{t.calculatorUi.timeline}</h3>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
                 {options.timeline.map((option) => (
                   <OptionCard
                     key={`timeline-${option.id}`}
@@ -333,7 +377,10 @@ const PriceCalculator = () => {
                     isActive={calculator.timeline === option.id}
                     onClick={() => handleOptionSelect('timeline', option.id)}
                     headline={option.name as string}
-                    subline={`${t.calculatorUi.multiplyPrefix}${(option as any).multiplier}`}
+                    subline={option.priceType === 'fixed' 
+                      ? `${t.calculatorUi.plusPrefix}${(option as any).price}` 
+                      : `${t.calculatorUi.multiplyPrefix}${(option as any).multiplier}`
+                    }
                   />
                 ))}
               </div>
@@ -342,7 +389,7 @@ const PriceCalculator = () => {
             {/* Features */}
             <div>
               <h3 className="text-2xl font-semibold mb-6 text-foreground">{t.calculatorUi.features}</h3>
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
                 {options.features.map((option) => (
                   <OptionCard
                     key={`features-${option.id}`}
@@ -351,7 +398,10 @@ const PriceCalculator = () => {
                     isActive={calculator.features.includes(option.id)}
                     onClick={() => handleOptionSelect('features', option.id)}
                     headline={option.name as string}
-                    subline={`${t.calculatorUi.plusPrefix}${(option as any).price}`}
+                    subline={option.priceType === 'fixed' 
+                      ? `${t.calculatorUi.plusPrefix}${(option as any).price}` 
+                      : `${t.calculatorUi.multiplyPrefix}${(option as any).multiplier}`
+                    }
                   />
                 ))}
               </div>
@@ -360,7 +410,7 @@ const PriceCalculator = () => {
             {/* Design */}
             <div>
               <h3 className="text-2xl font-semibold mb-6 text-foreground">{t.calculatorUi.design}</h3>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
                 {options.design.map((option) => (
                   <OptionCard
                     key={`design-${option.id}`}
@@ -369,7 +419,10 @@ const PriceCalculator = () => {
                     isActive={calculator.design === option.id}
                     onClick={() => handleOptionSelect('design', option.id)}
                     headline={option.name as string}
-                    subline={`${t.calculatorUi.multiplyPrefix}${(option as any).multiplier}`}
+                    subline={option.priceType === 'fixed' 
+                      ? `${t.calculatorUi.plusPrefix}${(option as any).price}` 
+                      : `${t.calculatorUi.multiplyPrefix}${(option as any).multiplier}`
+                    }
                   />
                 ))}
               </div>
