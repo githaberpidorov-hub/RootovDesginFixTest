@@ -95,6 +95,9 @@ export default async function handler(req: any, res: any) {
         }
 
         
+        console.log('=== DEBUG: Saving to database ===');
+        console.log('Update data:', JSON.stringify(updateData, null, 2));
+        
         const { data, error } = await supabase
           .from('calculator_config')
           .update(updateData)
@@ -107,6 +110,9 @@ export default async function handler(req: any, res: any) {
           console.error('Update data was:', JSON.stringify(updateData, null, 2));
           return res.status(500).json({ ok: false, error: error.message, details: error });
         }
+
+        console.log('=== DEBUG: Saved to database ===');
+        console.log('Saved data:', JSON.stringify(data, null, 2));
 
         return res.status(200).json({ ok: true, config: data });
       } else {
