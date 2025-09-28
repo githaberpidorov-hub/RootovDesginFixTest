@@ -5,6 +5,7 @@ import LiquidBackground from "@/components/LiquidBackground";
 import GlassButton from "@/components/GlassButton";
 import OptimizedMotion from "@/components/OptimizedMotion";
 import LazyImage from "@/components/LazyImage";
+// Обновлено: кнопка "Демо" заменена на "Сайт" для всех языков
 import { useLanguage } from "@/hooks/use-language";
 import { normalizeUrl, addCacheBusting } from "@/lib/utils";
 

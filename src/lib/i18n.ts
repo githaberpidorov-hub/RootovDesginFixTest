@@ -1,3 +1,4 @@
+// Обновлено: изменена надпись с "Демо" на "Сайт" в шаблонах
 export type LanguageCode = "RU" | "ENG" | "UK";
 
 export interface Translations {
