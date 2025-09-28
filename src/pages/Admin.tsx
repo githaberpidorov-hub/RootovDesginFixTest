@@ -92,6 +92,15 @@ const Admin = () => {
     ],
   });
 
+  // Состояние для управления разделами калькулятора
+  const [calculatorSections, setCalculatorSections] = useState([
+    { key: 'websiteType', label: 'Тип сайта', icon: '⚡' },
+    { key: 'complexity', label: 'Сложность', icon: '🤓' },
+    { key: 'timeline', label: 'Сроки', icon: '📆' },
+    { key: 'features', label: 'Дополнительные функции', icon: '🔗' },
+    { key: 'design', label: 'Дизайн', icon: '🧩' },
+  ]);
+
   const categories = [
     { id: "landing", name: t.admin.templates.categories.landing },
     { id: "corporate", name: t.admin.templates.categories.corporate },
@@ -128,16 +137,16 @@ const Admin = () => {
       const settingsResponse = await fetch('/api/settings');
       const settingsData = await settingsResponse.json();
       
-      if (settingsData?.telegram) {
-        setTgConfig({ 
-          botToken: settingsData.telegram.botToken || '', 
-          username: settingsData.telegram.username || '', 
-          chatId: settingsData.telegram.chatId || '' 
-        });
-      }
-      if (settingsData?.admin) {
-        setAdminCreds(c => ({ ...c, username: settingsData.admin.username || c.username }));
-      }
+          if (settingsData?.telegram) {
+            setTgConfig({ 
+              botToken: settingsData.telegram.botToken || '', 
+              username: settingsData.telegram.username || '', 
+              chatId: settingsData.telegram.chatId || '' 
+            });
+          }
+          if (settingsData?.admin) {
+            setAdminCreds(c => ({ ...c, username: settingsData.admin.username || c.username }));
+          }
     } catch (error) {
       console.warn('Failed to load data from API:', error);
     }
@@ -170,6 +179,12 @@ const Admin = () => {
 
       if (data.ok && data.config) {
         const config = data.config;
+        
+        // Загружаем разделы, если они есть в конфиге
+        if (config.sections) {
+          setCalculatorSections(config.sections);
+        }
+
         const normalizeGroup = (group: any, defaultPriceType: 'fixed' | 'multiplier' = 'fixed') => {
           if (!group) return [] as Array<{ id: string; name: string; price: number; multiplier: number; priceType: 'fixed' | 'multiplier' }>;
           const entries = Array.isArray(group)
@@ -185,13 +200,15 @@ const Admin = () => {
           }));
         };
 
-        setCalcOptions({
-          websiteType: normalizeGroup(config[`website_type_${adminEditingLanguage.toLowerCase()}`], 'fixed'),
-          complexity: normalizeGroup(config[`complexity_${adminEditingLanguage.toLowerCase()}`], 'multiplier'),
-          timeline: normalizeGroup(config[`timeline_${adminEditingLanguage.toLowerCase()}`], 'multiplier'),
-          features: normalizeGroup(config[`features_${adminEditingLanguage.toLowerCase()}`], 'fixed'),
-          design: normalizeGroup(config[`design_${adminEditingLanguage.toLowerCase()}`], 'multiplier'),
+        // Загружаем данные для всех разделов
+        const newCalcOptions: any = {};
+        calculatorSections.forEach(section => {
+          const sectionKey = section.key;
+          const sectionData = config[`${sectionKey}_${adminEditingLanguage.toLowerCase()}`];
+          newCalcOptions[sectionKey] = normalizeGroup(sectionData, 'fixed');
         });
+
+        setCalcOptions(newCalcOptions);
       }
     } catch (error) {
       console.warn('Failed to load calculator config from API:', error);
@@ -200,49 +217,24 @@ const Admin = () => {
 
   const saveCalculatorConfig = async () => {
     try {
-      const configData = {
+      const configData: any = {
         language: adminEditingLanguage,
-        websiteType: Object.fromEntries(
-          calcOptions.websiteType.map(opt => [String(opt.id), { 
-            label: opt.name, 
-            price: Number(opt.price || 0),
-            multiplier: Number(opt.multiplier || 1),
-            priceType: opt.priceType || 'fixed'
-          }])
-        ),
-        complexity: Object.fromEntries(
-          calcOptions.complexity.map(opt => [String(opt.id), { 
-            label: opt.name, 
-            price: Number(opt.price || 0),
-            multiplier: Number(opt.multiplier || 1),
-            priceType: opt.priceType || 'multiplier'
-          }])
-        ),
-        timeline: Object.fromEntries(
-          calcOptions.timeline.map(opt => [String(opt.id), { 
-            label: opt.name, 
-            price: Number(opt.price || 0),
-            multiplier: Number(opt.multiplier || 1),
-            priceType: opt.priceType || 'multiplier'
-          }])
-        ),
-        features: Object.fromEntries(
-          calcOptions.features.map(opt => [String(opt.id), { 
-            label: opt.name, 
-            price: Number(opt.price || 0),
-            multiplier: Number(opt.multiplier || 1),
-            priceType: opt.priceType || 'fixed'
-          }])
-        ),
-        design: Object.fromEntries(
-          calcOptions.design.map(opt => [String(opt.id), { 
-            label: opt.name, 
-            price: Number(opt.price || 0),
-            multiplier: Number(opt.multiplier || 1),
-            priceType: opt.priceType || 'multiplier'
-          }])
-        )
+        sections: calculatorSections
       };
+
+      // Динамически создаем конфигурацию для каждого раздела
+      calculatorSections.forEach(section => {
+        const sectionKey = section.key;
+        const sectionData = (calcOptions as any)[sectionKey] || [];
+        configData[sectionKey] = Object.fromEntries(
+          sectionData.map((opt: any) => [String(opt.id), { 
+            label: opt.name, 
+            price: Number(opt.price || 0),
+            multiplier: Number(opt.multiplier || 1),
+            priceType: opt.priceType || 'fixed'
+          }])
+        );
+      });
 
       const response = await fetch('/api/calculator', {
         method: 'POST',
@@ -349,52 +341,29 @@ const Admin = () => {
     if (!isAuthenticated) return;
     const timer = setTimeout(async () => {
       try {
+        const autoSaveData: any = {
+          language: adminEditingLanguage,
+          sections: calculatorSections
+        };
+
+        // Динамически создаем конфигурацию для каждого раздела
+        calculatorSections.forEach(section => {
+          const sectionKey = section.key;
+          const sectionData = (calcOptions as any)[sectionKey] || [];
+          autoSaveData[sectionKey] = Object.fromEntries(
+            sectionData.map((opt: any) => [String(opt.id), { 
+              label: opt.name, 
+              price: Number(opt.price || 0),
+              multiplier: Number(opt.multiplier || 1),
+              priceType: opt.priceType || 'fixed'
+            }])
+          );
+        });
+
         const r = await fetch('/api/calculator', { 
           method: 'POST', 
           headers: { 'Content-Type': 'application/json' }, 
-          body: JSON.stringify({ 
-            language: adminEditingLanguage,
-            websiteType: Object.fromEntries(
-              calcOptions.websiteType.map(opt => [String(opt.id), { 
-                label: opt.name, 
-                price: Number(opt.price || 0),
-                multiplier: Number(opt.multiplier || 1),
-                priceType: opt.priceType || 'fixed'
-              }])
-            ),
-            complexity: Object.fromEntries(
-              calcOptions.complexity.map(opt => [String(opt.id), { 
-                label: opt.name, 
-                price: Number(opt.price || 0),
-                multiplier: Number(opt.multiplier || 1),
-                priceType: opt.priceType || 'multiplier'
-              }])
-            ),
-            timeline: Object.fromEntries(
-              calcOptions.timeline.map(opt => [String(opt.id), { 
-                label: opt.name, 
-                price: Number(opt.price || 0),
-                multiplier: Number(opt.multiplier || 1),
-                priceType: opt.priceType || 'multiplier'
-              }])
-            ),
-            features: Object.fromEntries(
-              calcOptions.features.map(opt => [String(opt.id), { 
-                label: opt.name, 
-                price: Number(opt.price || 0),
-                multiplier: Number(opt.multiplier || 1),
-                priceType: opt.priceType || 'fixed'
-              }])
-            ),
-            design: Object.fromEntries(
-              calcOptions.design.map(opt => [String(opt.id), { 
-                label: opt.name, 
-                price: Number(opt.price || 0),
-                multiplier: Number(opt.multiplier || 1),
-                priceType: opt.priceType || 'multiplier'
-              }])
-            ),
-          }) 
+          body: JSON.stringify(autoSaveData) 
         });
         if (!r.ok) {
           const j = await r.json().catch(()=>({}));
@@ -912,13 +881,169 @@ const Admin = () => {
                   {t.admin.calculator.currentLanguage}: {getLanguageLabel(adminEditingLanguage)}
                 </div>
               </div>
-              {([
-                ['websiteType', t.admin.calculator.websiteType],
-                ['complexity', t.admin.calculator.complexity],
-                ['timeline', t.admin.calculator.timeline],
-                ['features', t.admin.calculator.features],
-                ['design', t.admin.calculator.design],
-              ] as const).map(([groupKey, groupLabel]) => (
+
+              {/* Управление разделами калькулятора */}
+              <div className="mb-8 p-6 bg-white/5 rounded-xl border border-white/10">
+                <h3 className="text-xl font-semibold text-foreground mb-4">Управление разделами калькулятора</h3>
+                
+                {/* Список существующих разделов */}
+                <div className="space-y-3 mb-6">
+                  {calculatorSections.map((section, idx) => (
+                    <div key={section.key} className="flex items-center gap-3 p-3 rounded-lg bg-white/5 border border-white/10 group">
+                      {/* Drag handle */}
+                      <div className="cursor-move text-foreground/40 hover:text-foreground/70 transition-colors" title="Перетащите для изменения порядка">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                          <path d="M8 6h8v2H8V6zm0 4h8v2H8v-2zm0 4h8v2H8v-2z"/>
+                        </svg>
+                      </div>
+                      
+                      {/* Order controls */}
+                      <div className="flex flex-col gap-1">
+                        <button 
+                          onClick={() => {
+                            if (idx > 0) {
+                              setCalculatorSections(prev => {
+                                const newSections = [...prev];
+                                [newSections[idx], newSections[idx - 1]] = [newSections[idx - 1], newSections[idx]];
+                                return newSections;
+                              });
+                            }
+                          }}
+                          disabled={idx === 0}
+                          className="w-6 h-4 text-xs bg-white/10 hover:bg-white/20 disabled:opacity-30 disabled:cursor-not-allowed rounded flex items-center justify-center"
+                          title="Переместить вверх"
+                        >
+                          ↑
+                        </button>
+                        <button 
+                          onClick={() => {
+                            if (idx < calculatorSections.length - 1) {
+                              setCalculatorSections(prev => {
+                                const newSections = [...prev];
+                                [newSections[idx], newSections[idx + 1]] = [newSections[idx + 1], newSections[idx]];
+                                return newSections;
+                              });
+                            }
+                          }}
+                          disabled={idx === calculatorSections.length - 1}
+                          className="w-6 h-4 text-xs bg-white/10 hover:bg-white/20 disabled:opacity-30 disabled:cursor-not-allowed rounded flex items-center justify-center"
+                          title="Переместить вниз"
+                        >
+                          ↓
+                        </button>
+                      </div>
+
+                      <span className="text-lg">{section.icon}</span>
+                      <input 
+                        className="flex-1 px-3 py-2 rounded-lg bg-white/5 border border-white/10 text-foreground" 
+                        value={section.label} 
+                        onChange={(e) => {
+                          setCalculatorSections(prev => prev.map((s, i) => 
+                            i === idx ? { ...s, label: e.target.value } : s
+                          ));
+                        }}
+                      />
+                      <input 
+                        className="w-20 px-3 py-2 rounded-lg bg-white/5 border border-white/10 text-foreground" 
+                        value={section.icon} 
+                        onChange={(e) => {
+                          setCalculatorSections(prev => prev.map((s, i) => 
+                            i === idx ? { ...s, icon: e.target.value } : s
+                          ));
+                        }}
+                        placeholder="🎯"
+                      />
+                      <button 
+                        onClick={() => {
+                          if (calculatorSections.length > 1) {
+                            setCalculatorSections(prev => prev.filter((_, i) => i !== idx));
+                            // Удаляем раздел из calcOptions
+                            setCalcOptions(prev => {
+                              const next = { ...prev } as any;
+                              delete next[section.key];
+                              return next;
+                            });
+                          }
+                        }}
+                        disabled={calculatorSections.length <= 1}
+                        className="w-8 h-8 text-xs bg-red-500/20 hover:bg-red-500/30 disabled:opacity-30 disabled:cursor-not-allowed rounded flex items-center justify-center text-red-400"
+                        title="Удалить раздел"
+                      >
+                        ×
+                      </button>
+                    </div>
+                  ))}
+                </div>
+
+                {/* Добавление нового раздела */}
+                <div className="flex gap-2">
+                  <input 
+                    id="new-section-key" 
+                    placeholder="Ключ раздела (например: customSection)" 
+                    className="flex-1 px-3 py-2 rounded-lg bg-white/5 border border-white/10 text-foreground" 
+                  />
+                  <input 
+                    id="new-section-label" 
+                    placeholder="Название раздела" 
+                    className="flex-1 px-3 py-2 rounded-lg bg-white/5 border border-white/10 text-foreground" 
+                  />
+                  <input 
+                    id="new-section-icon" 
+                    placeholder="🎯" 
+                    className="w-20 px-3 py-2 rounded-lg bg-white/5 border border-white/10 text-foreground" 
+                  />
+                  <GlassButton 
+                    variant="ghost" 
+                    size="sm" 
+                    onClick={() => {
+                      const keyEl = document.getElementById('new-section-key') as HTMLInputElement;
+                      const labelEl = document.getElementById('new-section-label') as HTMLInputElement;
+                      const iconEl = document.getElementById('new-section-icon') as HTMLInputElement;
+                      
+                      if (!keyEl.value || !labelEl.value) return;
+                      
+                      const newKey = keyEl.value;
+                      const newLabel = labelEl.value;
+                      const newIcon = iconEl.value || '🎯';
+                      
+                      // Проверяем, что ключ уникален
+                      if (calculatorSections.some(s => s.key === newKey)) {
+                        toast({
+                          title: 'Ошибка',
+                          description: 'Раздел с таким ключом уже существует',
+                          variant: 'destructive'
+                        });
+                        return;
+                      }
+                      
+                      // Добавляем новый раздел
+                      setCalculatorSections(prev => [...prev, { key: newKey, label: newLabel, icon: newIcon }]);
+                      
+                      // Добавляем пустой массив в calcOptions
+                      setCalcOptions(prev => ({
+                        ...prev,
+                        [newKey]: []
+                      }));
+                      
+                      // Очищаем поля
+                      keyEl.value = '';
+                      labelEl.value = '';
+                      iconEl.value = '';
+                      
+                      toast({
+                        title: 'Успех',
+                        description: 'Новый раздел добавлен'
+                      });
+                    }}
+                  >
+                    Добавить раздел
+                  </GlassButton>
+                </div>
+              </div>
+              {calculatorSections.map((section) => {
+                const groupKey = section.key as keyof CalcOptions;
+                const groupLabel = section.label;
+                return (
                 <div key={groupKey} className="mb-8">
                   <div className="flex items-center justify-between mb-3">
                     <h3 className="text-xl font-semibold text-foreground">{groupLabel}</h3>
@@ -1056,7 +1181,8 @@ const Admin = () => {
                     ))}
                   </div>
                 </div>
-              ))}
+                );
+              })}
               <div className="flex gap-3">
                       <GlassButton glow onClick={saveCalculatorConfig}>{t.admin.calculator.save}</GlassButton>
                       <GlassButton variant="secondary" onClick={()=>{ localStorage.removeItem('calculator-options'); toast({ title: 'Сброшено', description: 'Возвращены настройки по умолчанию' }); }}>{t.admin.calculator.reset}</GlassButton>

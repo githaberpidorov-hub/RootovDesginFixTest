@@ -78,6 +78,15 @@ const PriceCalculator = () => {
     ],
   } as const;
 
+  // Состояние для разделов калькулятора
+  const [calculatorSections, setCalculatorSections] = useState([
+    { key: 'websiteType', label: 'Тип сайта', icon: '⚡' },
+    { key: 'complexity', label: 'Сложность', icon: '🤓' },
+    { key: 'timeline', label: 'Сроки', icon: '📆' },
+    { key: 'features', label: 'Дополнительные функции', icon: '🔗' },
+    { key: 'design', label: 'Дизайн', icon: '🧩' },
+  ]);
+
   type CalculatorOptions = typeof defaultOptions;
 
   const [options, setOptions] = useState<CalculatorOptions>(defaultOptions);
@@ -91,6 +100,11 @@ const PriceCalculator = () => {
         const j = await res.json();
         if (res.ok && j?.ok && j.config) {
           const cfg = j.config as Record<string, any>;
+
+          // Загружаем разделы, если они есть в конфиге
+          if (cfg.sections) {
+            setCalculatorSections(cfg.sections);
+          }
 
           const normalizeGroup = (group: any, defaultPriceType: 'fixed' | 'multiplier' = 'fixed') => {
             if (!group) return [] as Array<{ id: string; name: string; price: number; multiplier: number; priceType: 'fixed' | 'multiplier' }>;
@@ -106,13 +120,13 @@ const PriceCalculator = () => {
             }));
           };
 
-          const next: CalculatorOptions = {
-            websiteType: normalizeGroup(cfg[`website_type_${String(language).toLowerCase()}`], 'fixed').map(o => ({ ...o, icon: '⚡' })) as any,
-            complexity: normalizeGroup(cfg[`complexity_${String(language).toLowerCase()}`], 'multiplier').map(o => ({ ...o, icon: '🤓' })) as any,
-            timeline: normalizeGroup(cfg[`timeline_${String(language).toLowerCase()}`], 'multiplier').map(o => ({ ...o, icon: '📆' })) as any,
-            features: normalizeGroup(cfg[`features_${String(language).toLowerCase()}`], 'fixed').map(o => ({ ...o, icon: '🔗' })) as any,
-            design: normalizeGroup(cfg[`design_${String(language).toLowerCase()}`], 'multiplier').map(o => ({ ...o, icon: '🧩' })) as any,
-          };
+          // Загружаем данные для всех разделов
+          const next: any = {};
+          calculatorSections.forEach(section => {
+            const sectionKey = section.key;
+            const sectionData = cfg[`${sectionKey}_${String(language).toLowerCase()}`];
+            next[sectionKey] = normalizeGroup(sectionData, 'fixed').map(o => ({ ...o, icon: section.icon })) as any;
+          });
 
           setOptions(next);
           try { localStorage.setItem('calculator-options', JSON.stringify(next)); } catch {}
@@ -312,110 +326,38 @@ const PriceCalculator = () => {
 
         <div className="glass-card p-8 md:p-12">
           <div className="space-y-12">
-            {/* Website Type */}
-            <div>
-              <h3 className="text-2xl font-semibold mb-6 text-foreground">{t.calculatorUi.websiteType}</h3>
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-                {options.websiteType.map((option) => (
-                  <OptionCard
-                    key={`websiteType-${option.id}`}
-                    optionId={option.id}
-                    category="websiteType"
-                    isActive={calculator.websiteType === option.id}
-                    onClick={() => handleOptionSelect('websiteType', option.id)}
-                    headline={option.name as string}
-                    subline={option.priceType === 'fixed' 
-                      ? `${t.calculatorUi.fromPrefix}${(option as any).price}` 
-                      : `${t.calculatorUi.multiplyPrefix}${(option as any).multiplier}`
-                    }
-                  />
-                ))}
-              </div>
-            </div>
-
-            {/* Complexity */}
-            <div>
-              <h3 className="text-2xl font-semibold mb-6 text-foreground">{t.calculatorUi.complexity}</h3>
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-                {options.complexity.map((option) => (
-                  <OptionCard
-                    key={`complexity-${option.id}`}
-                    optionId={option.id}
-                    category="complexity"
-                    isActive={calculator.complexity === option.id}
-                    onClick={() => handleOptionSelect('complexity', option.id)}
-                    headline={option.name as string}
-                    subline={option.priceType === 'fixed' 
-                      ? `${t.calculatorUi.plusPrefix}${(option as any).price}` 
-                      : `${t.calculatorUi.multiplyPrefix}${(option as any).multiplier}`
-                    }
-                  />
-                ))}
-              </div>
-            </div>
-
-            {/* Timeline */}
-            <div>
-              <h3 className="text-2xl font-semibold mb-6 text-foreground">{t.calculatorUi.timeline}</h3>
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-                {options.timeline.map((option) => (
-                  <OptionCard
-                    key={`timeline-${option.id}`}
-                    optionId={option.id}
-                    category="timeline"
-                    isActive={calculator.timeline === option.id}
-                    onClick={() => handleOptionSelect('timeline', option.id)}
-                    headline={option.name as string}
-                    subline={option.priceType === 'fixed' 
-                      ? `${t.calculatorUi.plusPrefix}${(option as any).price}` 
-                      : `${t.calculatorUi.multiplyPrefix}${(option as any).multiplier}`
-                    }
-                  />
-                ))}
-              </div>
-            </div>
-
-            {/* Features */}
-            <div>
-              <h3 className="text-2xl font-semibold mb-6 text-foreground">{t.calculatorUi.features}</h3>
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-                {options.features.map((option) => (
-                  <OptionCard
-                    key={`features-${option.id}`}
-                    optionId={option.id}
-                    category="features"
-                    isActive={calculator.features.includes(option.id)}
-                    onClick={() => handleOptionSelect('features', option.id)}
-                    headline={option.name as string}
-                    subline={option.priceType === 'fixed' 
-                      ? `${t.calculatorUi.plusPrefix}${(option as any).price}` 
-                      : `${t.calculatorUi.multiplyPrefix}${(option as any).multiplier}`
-                    }
-                  />
-                ))}
-              </div>
-            </div>
-
-            {/* Design */}
-            <div>
-              <h3 className="text-2xl font-semibold mb-6 text-foreground">{t.calculatorUi.design}</h3>
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-                {options.design.map((option) => (
-                  <OptionCard
-                    key={`design-${option.id}`}
-                    optionId={option.id}
-                    category="design"
-                    isActive={calculator.design === option.id}
-                    onClick={() => handleOptionSelect('design', option.id)}
-                    headline={option.name as string}
-                    subline={option.priceType === 'fixed' 
-                      ? `${t.calculatorUi.plusPrefix}${(option as any).price}` 
-                      : `${t.calculatorUi.multiplyPrefix}${(option as any).multiplier}`
-                    }
-                  />
-                ))}
-              </div>
-            </div>
+            {calculatorSections.map((section) => {
+              const sectionKey = section.key as keyof CalculatorState;
+              const sectionOptions = (options as any)[sectionKey] || [];
+              
+              return (
+                <div key={sectionKey}>
+                  <h3 className="text-2xl font-semibold mb-6 text-foreground flex items-center gap-2">
+                    <span>{section.icon}</span>
+                    {section.label}
+                  </h3>
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+                    {sectionOptions.map((option: any) => (
+                      <OptionCard
+                        key={`${sectionKey}-${option.id}`}
+                        optionId={option.id}
+                        category={sectionKey}
+                        isActive={sectionKey === 'features' 
+                          ? calculator.features.includes(option.id)
+                          : (calculator as any)[sectionKey] === option.id
+                        }
+                        onClick={() => handleOptionSelect(sectionKey, option.id)}
+                        headline={option.name as string}
+                        subline={option.priceType === 'fixed' 
+                          ? `${t.calculatorUi.fromPrefix}${option.price}` 
+                          : `${t.calculatorUi.multiplyPrefix}${option.multiplier}`
+                        }
+                      />
+                    ))}
+                  </div>
+                </div>
+              );
+            })}
           </div>
 
           {/* Summary chips */}
