@@ -51,6 +51,7 @@ export default async function handler(req: any, res: any) {
             const sectionKey = section.key === 'websiteType' 
               ? `websitetype_${String(language).toLowerCase()}`
               : `${section.key}_${String(language).toLowerCase()}`;
+            // Берем данные из body[section.key], а не из body[sectionKey]
             configData[sectionKey] = body[section.key] || [];
           });
         }
@@ -89,14 +90,13 @@ export default async function handler(req: any, res: any) {
             const sectionKey = section.key === 'websiteType' 
               ? `websitetype_${String(language).toLowerCase()}`
               : `${section.key}_${String(language).toLowerCase()}`;
+            // Берем данные из body[section.key], а не из body[sectionKey]
             updateData[sectionKey] = body[section.key] || [];
             
           });
         }
 
         
-        console.log('=== DEBUG: Saving to database ===');
-        console.log('Update data:', JSON.stringify(updateData, null, 2));
         
         const { data, error } = await supabase
           .from('calculator_config')
@@ -111,8 +111,6 @@ export default async function handler(req: any, res: any) {
           return res.status(500).json({ ok: false, error: error.message, details: error });
         }
 
-        console.log('=== DEBUG: Saved to database ===');
-        console.log('Saved data:', JSON.stringify(data, null, 2));
 
         return res.status(200).json({ ok: true, config: data });
       } else {
