@@ -52,12 +52,13 @@ const Admin = () => {
   const availableLanguages = getAvailableLanguages();
 
   // Calculator config (editable)
+  type CalcValue = { id: string; name: string; price: number | ""; multiplier: number | ""; priceType: 'fixed' | 'multiplier' };
   type CalcOptions = {
-    websiteType: { id: string; name: string; price: number; multiplier: number; priceType: 'fixed' | 'multiplier' }[];
-    complexity: { id: string; name: string; price: number; multiplier: number; priceType: 'fixed' | 'multiplier' }[];
-    timeline: { id: string; name: string; price: number; multiplier: number; priceType: 'fixed' | 'multiplier' }[];
-    features: { id: string; name: string; price: number; multiplier: number; priceType: 'fixed' | 'multiplier' }[];
-    design: { id: string; name: string; price: number; multiplier: number; priceType: 'fixed' | 'multiplier' }[];
+    websiteType: CalcValue[];
+    complexity: CalcValue[];
+    timeline: CalcValue[];
+    features: CalcValue[];
+    design: CalcValue[];
   };
   const [calcOptions, setCalcOptions] = useState<CalcOptions>({
     websiteType: [
@@ -202,8 +203,8 @@ const Admin = () => {
             return group.map((item: any) => ({ 
               id: String(item?.id || ''),
               name: item?.label || item?.name || String(item?.id || ''),
-              price: Number(item?.price || 0),
-              multiplier: Number(item?.multiplier || 1),
+              price: item?.price === '' ? '' : Number(item?.price || 0),
+              multiplier: item?.multiplier === '' ? '' : Number(item?.multiplier || 1),
               priceType: item?.priceType || defaultPriceType
             }));
           } else {
@@ -211,8 +212,8 @@ const Admin = () => {
             return Object.entries(group as Record<string, any>).map(([id, value]) => ({ 
               id, 
               name: value?.label || value?.name || id, 
-              price: Number(value?.price || 0),
-              multiplier: Number(value?.multiplier || 1),
+              price: value?.price === '' ? '' : Number(value?.price || 0),
+              multiplier: value?.multiplier === '' ? '' : Number(value?.multiplier || 1),
               priceType: value?.priceType || defaultPriceType
             }));
           }
@@ -256,8 +257,8 @@ const Admin = () => {
         configData[sectionKey] = sectionData.map((opt: any) => ({ 
           id: String(opt.id),
           label: opt.name, 
-          price: Number(opt.price || 0),
-          multiplier: Number(opt.multiplier || 1),
+          price: opt.price === '' ? 0 : Number(opt.price || 0),
+          multiplier: opt.multiplier === '' ? 1 : Number(opt.multiplier || 1),
           priceType: opt.priceType || 'fixed'
         }));
       });
@@ -382,11 +383,15 @@ const Admin = () => {
         calculatorSections.forEach(section => {
           const sectionKey = section.key;
           const sectionData = (calcOptions as any)[sectionKey] || [];
+          // Пропускаем автоcохранение, если есть незаполненные значения — чтобы не подставлять 0 при вводе
+          if (sectionData.some((opt: any) => opt.price === '' || opt.multiplier === '')) {
+            return;
+          }
           autoSaveData[sectionKey] = Object.fromEntries(
             sectionData.map((opt: any) => [String(opt.id), { 
               label: opt.name, 
-              price: Number(opt.price || 0),
-              multiplier: Number(opt.multiplier || 1),
+              price: opt.price === '' ? 0 : Number(opt.price || 0),
+              multiplier: opt.multiplier === '' ? 1 : Number(opt.multiplier || 1),
               priceType: opt.priceType || 'fixed'
             }])
           );
@@ -1199,11 +1204,13 @@ const Admin = () => {
                         </select>
                         {item.priceType === 'fixed' ? (
                           <input type="number" className="w-32 px-3 py-2 rounded-lg bg-white/5 border border-white/10" value={item.price} onChange={(e)=>{
-                            setCalcOptions(prev=>{ const next = { ...prev } as any; next[groupKey][idx].price = Number(e.target.value); return next; });
+                            const val = e.target.value;
+                            setCalcOptions(prev=>{ const next = { ...prev } as any; next[groupKey][idx].price = val === '' ? '' : Number(val); return next; });
                           }} />
                         ) : (
                           <input type="number" step="0.1" className="w-32 px-3 py-2 rounded-lg bg-white/5 border border-white/10" value={item.multiplier} onChange={(e)=>{
-                            setCalcOptions(prev=>{ const next = { ...prev } as any; next[groupKey][idx].multiplier = Number(e.target.value); return next; });
+                            const val = e.target.value;
+                            setCalcOptions(prev=>{ const next = { ...prev } as any; next[groupKey][idx].multiplier = val === '' ? '' : Number(val); return next; });
                           }} />
                         )}
                         <GlassButton variant="secondary" size="sm" onClick={()=>{
