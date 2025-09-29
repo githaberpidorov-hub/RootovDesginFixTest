@@ -92,6 +92,9 @@ const Admin = () => {
     ],
   });
 
+  // Флаг, чтобы не триггерить автосохранение, пока не загрузим актуальные данные с сервера
+  const [calculatorLoaded, setCalculatorLoaded] = useState(false);
+
   // Состояние для управления разделами калькулятора
   const [calculatorSections, setCalculatorSections] = useState([
     { key: 'websiteType', label: 'Тип сайта', icon: '' },
@@ -174,6 +177,8 @@ const Admin = () => {
 
   const loadCalculatorConfig = async () => {
     try {
+      // При каждой загрузке конфигурации временно отключаем автосохранение
+      setCalculatorLoaded(false);
       const response = await fetch(`/api/calculator?language=${adminEditingLanguage}`);
       const data = await response.json();
 
@@ -226,9 +231,13 @@ const Admin = () => {
         });
 
         setCalcOptions(newCalcOptions);
+        // Разрешаем автосохранение только после того, как актуальные данные оказались в состоянии
+        setCalculatorLoaded(true);
       }
     } catch (error) {
       console.warn('Failed to load calculator config from API:', error);
+      // В случае ошибки тоже включим, чтобы не блокировать возможность ручного сохранения
+      setCalculatorLoaded(true);
     }
   };
 
@@ -361,7 +370,7 @@ const Admin = () => {
 
   // Автосохранение калькулятора с небольшой задержкой
   useEffect(() => {
-    if (!isAuthenticated) return;
+    if (!isAuthenticated || !calculatorLoaded) return;
     const timer = setTimeout(async () => {
       try {
         const autoSaveData: any = {
@@ -398,7 +407,7 @@ const Admin = () => {
       }
     }, 600);
     return () => clearTimeout(timer);
-  }, [calcOptions, isAuthenticated, adminEditingLanguage]);
+  }, [calcOptions, isAuthenticated, adminEditingLanguage, calculatorLoaded]);
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
