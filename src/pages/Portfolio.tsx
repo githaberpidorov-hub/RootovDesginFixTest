@@ -324,27 +324,60 @@ const Portfolio = () => {
                   className="glass-card overflow-hidden group cursor-pointer"
                   mobileOptimized={true}
                 >
-                  {/* Template Image */}
-                  <div className="relative h-48 bg-gradient-to-br from-white/10 to-white/5 overflow-hidden">
-                    <div className="absolute inset-0">
-                      <LazyImage
-                        src={
-                          previewByUrl[normalizeUrl(template.demoUrl)]
-                          || getPreviewImageUrl(template.demoUrl)
-                          || template.image
-                          || "/placeholder.svg"
-                        }
-                        alt={template.title}
-                        className="w-full h-full"
-                      />
+                  {/* Template Image (clickable -> opens demoUrl) */}
+                  {template.demoUrl ? (() => {
+                    const href = /^(https?:)?\/\//i.test(template.demoUrl) ? template.demoUrl : `https://${template.demoUrl}`;
+                    return (
+                      <a
+                        href={href}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="block"
+                        onClick={(e) => e.stopPropagation()}
+                      >
+                        <div className="relative h-48 bg-gradient-to-br from-white/10 to-white/5 overflow-hidden">
+                          <div className="absolute inset-0">
+                            <LazyImage
+                              src={
+                                previewByUrl[normalizeUrl(template.demoUrl)]
+                                || getPreviewImageUrl(template.demoUrl)
+                                || template.image
+                                || "/placeholder.svg"
+                              }
+                              alt={template.title}
+                              className="w-full h-full"
+                            />
+                          </div>
+                          <div className="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent" />
+                          <div className="absolute top-4 right-4 z-10">
+                            <span className="px-3 py-1 rounded-full bg-white/10 backdrop-blur-md text-xs font-medium text-foreground/80 border border-white/10">
+                              {categories.find(cat => cat.id === template.category)?.name}
+                            </span>
+                          </div>
+                        </div>
+                      </a>
+                    );
+                  })() : (
+                    <div className="relative h-48 bg-gradient-to-br from-white/10 to-white/5 overflow-hidden">
+                      <div className="absolute inset-0">
+                        <LazyImage
+                          src={
+                            (template.demoUrl && (previewByUrl[normalizeUrl(template.demoUrl)] || getPreviewImageUrl(template.demoUrl)))
+                            || template.image
+                            || "/placeholder.svg"
+                          }
+                          alt={template.title}
+                          className="w-full h-full"
+                        />
+                      </div>
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent" />
+                      <div className="absolute top-4 right-4 z-10">
+                        <span className="px-3 py-1 rounded-full bg-white/10 backdrop-blur-md text-xs font-medium text-foreground/80 border border-white/10">
+                          {categories.find(cat => cat.id === template.category)?.name}
+                        </span>
+                      </div>
                     </div>
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent" />
-                    <div className="absolute top-4 right-4 z-10">
-                      <span className="px-3 py-1 rounded-full bg-white/10 backdrop-blur-md text-xs font-medium text-foreground/80 border border-white/10">
-                        {categories.find(cat => cat.id === template.category)?.name}
-                      </span>
-                    </div>
-                  </div>
+                  )}
 
                   {/* Template Info */}
                   <div className="p-6">
