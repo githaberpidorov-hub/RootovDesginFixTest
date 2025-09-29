@@ -8,7 +8,7 @@ import OptimizedMotion from "@/components/OptimizedMotion";
 import { useLanguage } from "@/hooks/use-language";
 
 const Home = () => {
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
   
   const services = [
     {
@@ -50,6 +50,13 @@ const Home = () => {
     },
   ];
 
+  // Responsive typography adjustments: keep EN large on mobile, reduce RU/UA to avoid clipping
+  const isEnglish = language === "ENG";
+  const titleSize = isEnglish ? "text-7xl md:text-8xl" : "text-6xl md:text-8xl";
+  const subtitleSize = isEnglish ? "text-6xl md:text-7xl" : "text-5xl md:text-7xl";
+  const leading = isEnglish ? "leading-none" : "leading-tight";
+  const subtitleMarginTop = isEnglish ? "mt-2 md:mt-6" : "mt-1 md:mt-6";
+
   return (
     <div className="min-h-screen relative">
       <LiquidBackground />
@@ -63,10 +70,10 @@ const Home = () => {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 1, ease: [0.16, 1, 0.3, 1] }}
           >
-            <h1 className={`text-7xl md:text-8xl font-bold mb-12 text-gradient text-glow ${t.home.hero.title.includes('Website') ? 'leading-none' : 'leading-tight'}`}>
+            <h1 className={`${titleSize} font-bold mb-12 text-gradient text-glow ${leading} break-words`}>
               {t.home.hero.title}
               <br />
-              <span className={`text-6xl md:text-7xl block pb-2 ${t.home.hero.title.includes('Website') ? 'mt-2 md:mt-6' : 'mt-1 md:mt-6'}`}>{t.home.hero.subtitle}</span>
+              <span className={`${subtitleSize} block pb-2 ${subtitleMarginTop}`}>{t.home.hero.subtitle}</span>
             </h1>
             
             <p className="text-xl md:text-2xl text-foreground/70 mb-12 max-w-3xl mx-auto leading-relaxed">
