@@ -6,28 +6,30 @@ import GlassButton from "@/components/GlassButton";
 import PriceCalculator from "@/components/PriceCalculator";
 import OptimizedMotion from "@/components/OptimizedMotion";
 import { useLanguage } from "@/hooks/use-language";
+import { useCalculatorPrices } from "@/hooks/use-calculator-prices";
 
 const Home = () => {
   const { t, language } = useLanguage();
+  const { prices, loading, formatPrice } = useCalculatorPrices();
   
   const services = [
     {
       title: t.home.services.landing.title,
       description: t.home.services.landing.description,
       features: t.home.services.landing.features,
-      price: t.home.services.landing.price,
+      price: prices.landing ? formatPrice(prices.landing.price, t.calculatorUi.fromPrefix) : t.home.services.landing.price,
     },
     {
       title: t.home.services.corporate.title,
       description: t.home.services.corporate.description,
       features: t.home.services.corporate.features,
-      price: t.home.services.corporate.price,
+      price: prices.corporate ? formatPrice(prices.corporate.price, t.calculatorUi.fromPrefix) : t.home.services.corporate.price,
     },
     {
       title: t.home.services.ecommerce.title,
       description: t.home.services.ecommerce.description,
       features: t.home.services.ecommerce.features,
-      price: t.home.services.ecommerce.price,
+      price: prices.ecommerce ? formatPrice(prices.ecommerce.price, t.calculatorUi.fromPrefix) : t.home.services.ecommerce.price,
     },
   ];
 
